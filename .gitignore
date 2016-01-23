@@ -1,3 +1,6 @@
 .project
 .cproject
 .settings
+Bin
+Obj
+.DS_Store
