@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <time.h>
 
-
+#include "utils.h"
 
 #include "z3++.h"
 
@@ -22,39 +22,20 @@ using namespace z3;
 using namespace std;
 
 
-template<typename T1, typename T2>
-std::ostream &operator<<(std::ostream &stream, const std::map<T1, T2>& map)
-{
-  for (typename std::map<T1, T2>::const_iterator it = map.begin();
-       it != map.end();
-       ++it)
-    {
-      stream << (*it).first << " --> " << (*it).second << std::endl;
-    }
-  return stream;
-}
-
-template<typename T>
-std::ostream &operator<<(std::ostream &stream, const std::vector<T> & v)
-{
-	stream<<"["	;
-  for (typename std::vector<T> ::const_iterator it = v.begin();
-       it != v.end();
-       ++it)
-    {
-      stream << (*it)<<" , ";
-    }
-    stream<<"]";
-  return stream;
-}
+string rocketfuel_dir = "data_set/RocketFuel";
+string snapshot_dir = rocketfuel_dir + "/AS-1755";
+string selected_classes_dir = rocketfuel_dir + "/selected";
 
 
-template<typename T1,typename T2>
-std::ostream &operator<<(std::ostream &stream, const std::pair<T1,T2> & p)
-{
-	stream<<"("<<p.first<<","<<p.second<<")"; 
-  return stream;
-}
+int threshold = 3;
+
+class mystreambuf: public std::streambuf
+{};
+mystreambuf nostreambuf;
+std::ostream nocout(&nostreambuf);
+
+#define log(x) ((x >= threshold)? std::cout : nocout)
+
 
 
 
@@ -76,7 +57,6 @@ int getdir (string dir, vector<string> &files)
 
 
 
-
 set<tuple<string,string,string>> readClass(string file) //packet from to
 {
     
@@ -84,14 +64,17 @@ set<tuple<string,string,string>> readClass(string file) //packet from to
     
     string line;
     
-    std::ifstream infile(string(string("selected/" + file )));
+    std::ifstream infile(string(string(selected_classes_dir + file )));
     while (std::getline(infile, line))
     {
         
         std::istringstream iss(line);
         string fromstr, tostr,  packetstr;
         
-        if (!(iss >> packetstr >> fromstr >> tostr )) { break; } // error
+        if (!(iss >> packetstr >> fromstr >> tostr ))
+        {
+        	break;
+        } // error
         
         
         tuple<string,string,string> pair;
@@ -109,7 +92,7 @@ set<tuple<string,string,string>> readClass(string file) //packet from to
 set<tuple<string,string,string>> readAllClasses()
 {
     
-    string dir = string("selected/");
+    string dir = string(selected_classes_dir);
     vector<string> files = vector<string>();
     
     getdir(dir,files);
@@ -122,7 +105,7 @@ set<tuple<string,string,string>> readAllClasses()
         string temp = files[i];
       
         temp.erase ( temp.begin(), temp.end()-4);
-//cout<<temp<<"\n";
+        //cout<<temp<<"\n";
         
         if(temp.compare(string(".txt")) != 0 ) { continue; }
         
@@ -146,14 +129,10 @@ set<tuple<string,string,string>> readAllClasses()
 
 void constructTopo()
 {
-
-	//ofstream topofile;
-    //topofile.open ("topo", ios::out | ios::app );
   
     set<tuple<string,string> >allpairs; 
 
-
-    string dir = string("../AS-1755/");
+    string dir = string(snapshot_dir);
     vector<string> files = vector<string>();
 
     getdir(dir,files);
@@ -161,16 +140,13 @@ void constructTopo()
     vector<string> packet; 
 	vector<string> from; 
 
-
     for (unsigned int i = 0;i < files.size();i++) 
     {
-    	
     	string line;
 
-    	std::ifstream infile(string("../AS-1755/" + files[i]).c_str());
+    	std::ifstream infile(string(snapshot_dir + files[i]).c_str());
    		while (std::getline(infile, line))
 		{
-
     		std::istringstream iss(line);
     		string packetstr, tostr, fromstr; 
     		string t1, t2, t3, t4, t5, t6; 
@@ -178,7 +154,6 @@ void constructTopo()
     		//cout<<line; 
 			//0 I 10.0.2.92 255.255.255.252 10.0.0.1 10.0.0.2 124 1
     		if (!(iss >> t1 >> t2 >> t3 >> t4 >> fromstr >> tostr >> t5 >> t6 )) { break; } // error
-
    				
    				tuple<string,string> pair; 
    				pair= make_tuple (fromstr,tostr);
@@ -186,7 +161,6 @@ void constructTopo()
    				allpairs.insert(pair); 
    				
    		}   
-
 
     }
 
@@ -203,7 +177,7 @@ set<tuple<string,string>> readTopo() // from to
 
 		string line;
 
-    	std::ifstream infile(string("topo"));
+    	std::ifstream infile(string(rocketfuel_dir + "/Topology.txt"));
    		while (std::getline(infile, line))
 		{
 
@@ -225,8 +199,6 @@ set<tuple<string,string>> readTopo() // from to
 }
 
 
-
-
 map<string, int> readNodes()
 {
 
@@ -234,7 +206,7 @@ map<string, int> readNodes()
 
 	string line;
 
-    std::ifstream infile("../AS-1755/config.map" );
+    std::ifstream infile(snapshot_dir + "/config.map" );
    	
 
     int count = 1; 
@@ -400,19 +372,64 @@ int main()
 {
 
 
-    
+	/* total time*/
     long double totaltime = 0;
     
     
     
+    /*
+     * READ ABSTRACT DATA SET
+     */
     
-	//get nodes
-	map<string,int> routers; 
-	
-	routers = readNodes(); //starts at 1
 
+	/*  process nodes  */
+	map<string,int> routers; 
+	routers = readNodes(); //starts at 1
+	log(3) << "\nRouters Entries\n";
+	log(3) << routers;
     
-    
+
+
+    /*  process topology*/
+	set<tuple<string,string>> topo;  //commutative
+
+	// ideally to be constructed using
+	//constructTopo();
+
+	topo = readTopo();
+	log(3) << "\nTopology\n";
+	log(3) << topo;
+
+
+
+
+	/*
+	 * CONSTRUCT ABSTRACT TOPOLOGY
+	 */
+
+
+	vector<pair<int,int>> abs_topo;  //commutative
+
+	for( auto it = topo.begin(); it != topo.end() ; ++it )
+	{
+		if( routers.find(get<0>(*it) ) == routers.end() ||  routers.find(get<1>(*it) ) == routers.end() )
+		{
+			continue;
+		}
+
+		abs_topo.push_back(make_pair(routers[get<0>(*it)],routers[ get<1>(*it)]));
+
+	}
+
+	log(3) << "\nAbstract Topology\n";
+	log(3) << abs_topo;
+
+
+
+	/*
+	 *  CONSTRUCT ABSTRACT
+	 */
+
     
     //    int through = 35;
     //    int to = 51;
@@ -437,23 +454,21 @@ int main()
     int to = 166;
     string file = "3157";
 
- 
 
-  	//constructTopo();
-	vector<pair<int,int>> abs_topo;  //commutative
 
-	set<tuple<string,string>> topo;  //commutative
-	topo = readTopo(); 
 
-	for( auto it = topo.begin(); it != topo.end() ; ++it )
-	{
 
-		if( routers.find(get<0>(*it) ) == routers.end() ||  routers.find(get<1>(*it) ) == routers.end() ) { continue; }
 
-		abs_topo.push_back(make_pair(routers[get<0>(*it)],routers[ get<1>(*it)])); 
 
-	}
+
+
+
+
+
+
+
 	
+
 
     map<string,int> abs_p;
     
@@ -502,7 +517,10 @@ int main()
         
     	for( auto it = link.begin(); it!= link.end(); ++it ) // rules I P -> I  // packet fixed to 1
     	{
-    		if( routers.find(get<1>(*it) ) == routers.end() ||  routers.find(get<2>(*it) ) == routers.end() ) { continue; }
+    		if( routers.find(get<1>(*it) ) == routers.end() ||  routers.find(get<2>(*it) ) == routers.end() )
+    		{
+    			continue;
+    		}
     
     		abs_R[make_pair(routers[get<1>(*it)], abs_p[get<0>(*it)] )] = routers[get<2>(*it)] ;
     		
@@ -536,7 +554,7 @@ int main()
     
 
 
-	//construct firewall
+	construct firewall
     
     
 
@@ -551,6 +569,8 @@ int main()
         incomming[i] =  false;
     }
     
+
+
     for( auto it = abs_R.begin(); it != abs_R.end() ; ++it )
     {
         
