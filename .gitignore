@@ -4,3 +4,6 @@
 Bin
 Obj
 .DS_Store
+*.o
+*.pyc
+
