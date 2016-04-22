@@ -17,14 +17,14 @@ Z3_INC_DIR=$(Z3_DIR)/include
 
 
 
-CC=g++-5
+CC=g++
 #/usr/local/gcc-4.8.1-for-linux64/bin/x86_64-pc-linux-g++
 STD=c++11
 LTYPE=static
 ARCHITECTURE=-m64
 OPTFLAGS=-O3
 PROFILE=false
-DEBUG=false
+DEBUG=true
 
 
 INCLUDES= \
@@ -36,6 +36,12 @@ INCLUDES= \
 INCLUDE_PARAMS=$(foreach d, $(INCLUDES), -I$d)
 
 SOURCES=$(SOLVER_DIR)/new_solver.cpp
+
+OTHER_DEP_FILES=$(SOLVER_DIR)/automata.h \
+				$(SOLVER_DIR)/network.h \
+				$(SOLVER_DIR)/solver.h \
+				$(SOLVER_DIR)/utils.h \
+				$(SOLVER_DIR)/recursive_definitions.h
 
 OBJECTS=$(OBJ_DIR)/$(PROJECT_NAME).o
 BINARY=$(BIN_DIR)/$(PROJECT_NAME)
@@ -89,11 +95,11 @@ ${OBJ_DIR}:
 
 
 
-$(OBJECTS) : $(SOURCES)
+$(OBJECTS) : $(SOURCES) $(OTHER_DEP_FILES)
 	$(CC) $(CFLAGS) -o $(OBJECTS) $(INCLUDE_PARAMS) $(SOURCES) 
 
 $(PROJECT_NAME): $(OBJECTS)
-	$(CC)  $(LFLAGS) -o $(BINARY) $(OBJECTS) $(Z3_FLAGS) $(PARSER_FLAGS) $(BOOST_LINKER_FALGS)
+	$(CC)  $(LFLAGS) -o $(BINARY) $(OBJECTS) $(Z3_FLAGS) $(PARSER_FLAGS) $(BOOST_LINKER_FALGS) 
 
 clean :
 	rm -R $(OBJECTS) $(BINARY) 

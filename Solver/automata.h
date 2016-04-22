@@ -28,7 +28,7 @@ using namespace boost::algorithm;
 class Automata 
 {
 
-	private:	
+	public:	
 		set<int> states;
 		vector<string> states_string; 
 
@@ -38,15 +38,13 @@ class Automata
 		map<string,int> symbols; 
 		vector<string> symbols_string;
 		
-		set<tuple<int,int,int>> transitions;
+		map<pair<int,int>,int> transitions;
 		vector<string> transitions_string;
 		
 		set<int> final_states;
 		vector<string> final_state_string;
 
 		string source_file; 
-
-	public: 
 
 		Automata(string input): source_file{input} {};
 
@@ -136,6 +134,11 @@ void Automata::parse_automata()
 			continue;
 		if(symbols.find(symbols_string[i]) == symbols.end())
 		{
+            if(symbols_string[i] == "0" )
+            {
+                symbols[symbols_string[i]] = 0;
+                continue;
+            }
 			symbols[symbols_string[i]] = counter;
 			counter ++; 
 		}
@@ -186,10 +189,11 @@ void Automata::parse_automata()
 					throw "Invalid Transition";		
 			}
 		}
-		transitions.insert(make_tuple(from,symbols[alphabet],to));
+		transitions[make_pair(from,symbols[alphabet])] = to;
 	}
 		
-	log(3) << states << "\n" << start_state << "\n" << final_states << "\n" << symbols << "\n" << transitions;
+	cout << "\n\nStates\n" << states << "\n\nStartState\n" << start_state << "\n\nFinalState\n" 
+         << final_states << "\n\nSymbols" << symbols << "\n\nTransitions\n" << transitions<<"\n";
 }
 
 #endif 

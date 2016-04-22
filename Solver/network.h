@@ -19,51 +19,62 @@
 #include <time.h>
 
 #include "utils.h"
+#include "z3++.h"
 
 using namespace std;
-
+using namespace z3;
 
 
 class Network
-{
-    private:
+{	
+	friend class Solver;
+
+    public:
        	set<string> nodes;
     	set<string> read_nodes();
     	void display_nodes();
 
     	set<pair<string,string>> topology;
     	set<pair<string,string>> read_topology();
+    	void display_topology();
     	
-    	set<string> selected_classes;
-		set<string> read_selected_classes();
-		
+    	set<string> selected_class_files;
+    	set<string> selected_classes; 
+		set<tuple<string,string,string>> read_class(string);
+
     	set<tuple<string,string,string>> rules;
     	set<tuple<string,string,string>> read_rules(set<string>);
+    	void display_rules();
     	
-    	set<tuple<string,string,string>> read_class(string);
-
-    	map<string,int> abstract_nodes;
+    	
+    	map<string,int> abstract_nodes_map;
+    	set<int> abstract_nodes; 
     	set<pair<int,int>> abstract_topology;
-    	set<tuple<string,int,int>> abstract_rules; 
+        
+    	map<pair<int,int>,int> abstract_rules; 
+        map<string,int> abstract_pc_map;
+        
+
+    	//for later: add immutable nodes in/from sutomata specification... 
+    	map<int,set<int>> abstract_immutable_nodes;
+
+    	map<int,set<int>> abstract_egress_nodes; 
+    	map<int,set<int>> abstract_source_nodes; 
 
     	string selected_classes_dir;
-    	string rocketfuel_dir;
-    	string snapshot_dir;
-    
-    public:
-        void read_network();
+    	string config_map_file;
+    	string topology_file;
+
+        Network(string config_map_file_input, string topology_file_input, string selected_classes_input)
+        	:config_map_file{config_map_file_input},
+        	topology_file{topology_file_input},
+        	selected_classes_dir{selected_classes_input} {};
+
+    	void read_network();
         void create_abstract_network();
-        int get_nodes_count()
-        { return abstract_nodes.size();}
-
-        Network(string rocketfule_input, string snapshot_input, string selected_classes_input) 
-        : rocketfuel_dir{rocketfule_input},
-        snapshot_dir{snapshot_input},
-        selected_classes_dir{selected_classes_input} {};
-
-        void display_topology();
-    	void display_selected_classes();
-    	void display_rules();
+        
+        map<pair<int,int>,int> abstract_od; 
+        void Compute_OD();
 
 };
 
@@ -72,7 +83,7 @@ set<string> Network::read_nodes()
 {
     set<string> routers;
     string line;
-    std::ifstream infile(snapshot_dir + "/config.map" );
+    std::ifstream infile(config_map_file);
     int count = 1;
    	while (std::getline(infile, line))
     {
@@ -97,7 +108,7 @@ set<pair<string,string>> Network::read_topology()
 	set<pair<string,string>> from_to_pairs; 
 	string line;
 
-	std::ifstream infile(string(rocketfuel_dir + "/Topology.txt"));
+	std::ifstream infile(topology_file);
 	while (std::getline(infile, line))
 	{
 		std::istringstream iss(line);
@@ -119,18 +130,6 @@ void Network::display_topology()
 	cout << topology;
 }
 
-set<string> Network::read_selected_classes()
-{
-	set<string> classes;
-	classes = getdir(selected_classes_dir);
-	return classes;
-}
-
-void Network::display_selected_classes()
-{
-	cout << endl << endl << "***SELECTED CLASSES***" << endl;
-	cout << selected_classes;
-}
 
 set<tuple<string,string,string>> Network::read_class(string file) //packet from to
 {
@@ -148,6 +147,7 @@ set<tuple<string,string,string>> Network::read_class(string file) //packet from 
         tuple<string,string,string> pair;
         pair= make_tuple (packetstr,fromstr, tostr);
         link.insert(pair);
+        selected_classes.insert(packetstr);
     }   
     return link; 
 }
@@ -173,59 +173,190 @@ void Network::read_network()
 {
 	nodes = read_nodes();
 	topology = read_topology();
-	selected_classes = read_selected_classes();	
-	rules = read_rules(selected_classes);
+	selected_class_files = getdir(selected_classes_dir);
+	rules = read_rules(selected_class_files);
 }
 
 void Network::create_abstract_network()
 {
+    int pc_counter=1;
+    for (auto pc_it = selected_classes.begin(); pc_it != selected_classes.end(); pc_it ++)
+    {
+        abstract_pc_map[*pc_it] = pc_counter; 
+        pc_counter++;
+    }
+ 
 	int counter = 1;
 	for(auto nodes_it = nodes.begin(); nodes_it != nodes.end(); nodes_it++)
 	{
-		abstract_nodes[*nodes_it] = counter;
+		abstract_nodes_map[*nodes_it] = counter;
+		abstract_nodes.insert(counter);
 		counter = counter + 1;
+
 	}
+    
+    set<int> topo_incomming;
+    set<int> topo_outgoing; 
+     
+    
 	for(auto topology_it = topology.begin(); topology_it != topology.end(); ++topology_it)
 	{
-		if(abstract_nodes.find(topology_it->first) == abstract_nodes.end()) 
+		if(abstract_nodes_map.find(topology_it->first) == abstract_nodes_map.end()) 
 		{
-		  abstract_nodes[topology_it->first] = counter;
+		  abstract_nodes_map[topology_it->first] = counter;
+		  abstract_nodes.insert(counter);
 		  counter++;
 		} 
-		if(abstract_nodes.find(topology_it->second) == abstract_nodes.end()) 
+		if(abstract_nodes_map.find(topology_it->second) == abstract_nodes_map.end()) 
 		{
-		  abstract_nodes[topology_it->second] = counter;
+		  abstract_nodes_map[topology_it->second] = counter;
+		  abstract_nodes.insert(counter);
 		  counter++;
 		} 
-
-		abstract_topology.insert(make_pair(abstract_nodes[topology_it->first], abstract_nodes[topology_it->second]));
+        
+        topo_incomming.insert(abstract_nodes_map[topology_it->second]);
+        topo_outgoing.insert(abstract_nodes_map[topology_it->first]);   
+		
+		abstract_topology.insert(make_pair(abstract_nodes_map[topology_it->first], abstract_nodes_map[topology_it->second]));
 	}
+    
+	map<int,set<int>> outgoing, incomming; 
+
+
 	for(auto rules_it = rules.begin(); rules_it != rules.end(); ++rules_it)
 	{
 		string packet = std::get<0>(*rules_it);
 		string node_from = std::get<1>(*rules_it);
 		string node_to = std::get<2>(*rules_it);
 
-		if(abstract_nodes.find(node_from) == abstract_nodes.end()) 
+		if(abstract_nodes_map.find(node_from) == abstract_nodes_map.end()) 
 		{
-		  abstract_nodes[node_from] = counter;
+		  abstract_nodes_map[node_from] = counter;
+		  abstract_nodes.insert(counter);
 		  counter++;
 		} 
-		if(abstract_nodes.find(node_to) == abstract_nodes.end()) 
+		if(abstract_nodes_map.find(node_to) == abstract_nodes_map.end()) 
 		{
-		  abstract_nodes[node_to] = counter;
+		  abstract_nodes_map[node_to] = counter;
+		  abstract_nodes.insert(counter);
 		  counter++;
 		} 
-		abstract_rules.insert(make_tuple( packet, abstract_nodes[node_from], abstract_nodes[node_to]));
-		
-		log(3) << std::get<0>(*rules_it) << " " << abstract_nodes[ std::get<1>(*rules_it)] << " " << abstract_nodes[ std::get<2>(*rules_it)] << endl ; 
-	}
 
-	log(3) << abstract_nodes;
-	log(3) << abstract_topology; 
-	log(3) << abstract_rules; 
+        //if node was not part of topo insert it... else is redundant
+		abstract_topology.insert(make_pair(abstract_nodes_map[node_from],abstract_nodes_map[node_to]));
+        topo_incomming.insert(abstract_nodes_map[node_to]);
+        topo_outgoing.insert(abstract_nodes_map[node_from]); 
+        
+		abstract_rules[ make_pair( abstract_nodes_map[node_from], abstract_pc_map[packet]) ] = abstract_nodes_map[node_to];
+
+		outgoing[abstract_pc_map[packet]].insert(abstract_nodes_map[node_from]);
+		incomming[abstract_pc_map[packet]].insert(abstract_nodes_map[node_to]);
+
+		log(3) << std::get<0>(*rules_it) << " " << abstract_nodes_map[ std::get<1>(*rules_it)] << " " << abstract_nodes_map[ std::get<2>(*rules_it)] << endl ; 
+	}
+    
+    
+    log(3) << outgoing << "\n";
+    log(3) << incomming << "\n";
+    
+    //topology contains all links.. 
+    
+    // for( auto pc_it = abstract_pc_map.begin(); pc_it != abstract_pc_map.end(); pc_it++ )
+    // {	
+    //   int pc_int = pc_it->second;
+    //  
+    //   // is topo_incomming superset of incoming? similarly for outgoing..
+    //   outgoing[pc_int].insert(topo_outgoing.begin(),topo_outgoing.end()); 
+    //   incomming[pc_int].insert(topo_incomming.begin(),topo_incomming.end()); 
+    //  
+    //   std::set_difference(abstract_nodes.begin(), abstract_nodes.end(), outgoing[pc_int].begin(), outgoing[pc_int].end(),
+    //                       std::inserter(abstract_egress_nodes[pc_int], abstract_egress_nodes[pc_int].end()));
+    //
+    //   std::set_difference(abstract_nodes.begin(), abstract_nodes.end(), incomming[pc_int].begin(), incomming[pc_int].end(),
+    //                       std::inserter(abstract_source_nodes[pc_int], abstract_source_nodes[pc_int].end()));
+    //
+    //  
+    //     //cout << packet << "\n"; 
+    //     //cout <<"\n" << outgoing[packet];
+    // 	//cout <<"\n" << incomming[packet];
+    // }
+
+    
+    set<int> not_incomming;
+    set<int> not_outgoing; 
+   
+    std::set_difference(abstract_nodes.begin(), abstract_nodes.end(), topo_outgoing.begin(), topo_outgoing.end(),
+                           std::inserter(not_outgoing, not_outgoing.end()));
+    
+    std::set_difference(abstract_nodes.begin(), abstract_nodes.end(), topo_incomming.begin(), topo_incomming.end(),
+                      std::inserter(not_incomming, not_incomming.end()));
+
+    for( auto pc_it = abstract_pc_map.begin(); pc_it != abstract_pc_map.end(); pc_it++ )
+    {
+        int pc_int = pc_it->second;
+        abstract_source_nodes[pc_int] = not_incomming;
+        abstract_egress_nodes[pc_int] = not_outgoing; 
+        
+        set<int> not_pc_outgoing;
+        std::set_difference(abstract_nodes.begin(), abstract_nodes.end(), outgoing[pc_int].begin(), outgoing[pc_int].end(),
+                           std::inserter(not_pc_outgoing, not_pc_outgoing.end()));
+        
+        
+        set<int> null_nodes; 
+        std::set_difference(not_pc_outgoing.begin(), not_pc_outgoing.end(), not_outgoing.begin(), not_outgoing.end(),
+                           std::inserter(null_nodes, null_nodes.end()));        
+        
+        
+        for(auto null_nodes_it = null_nodes.begin(); null_nodes_it != null_nodes.end(); null_nodes_it++ )
+        {
+            abstract_rules[ make_pair( *null_nodes_it, pc_int) ] = 0;
+        }
+    }
+        
+    cout << "\n\nNodes\n" << abstract_nodes;
+    cout << "\n\nTopology\n" << abstract_topology; 
+    cout << "\n\nRules\n" << abstract_rules; 
+        
+        
+	cout << "\n\nSources\n" << abstract_source_nodes;
+	cout << "\n\nEgress\n" << abstract_egress_nodes;
+	
 }
 
+
+        
+
+void Network::Compute_OD()
+{
+    for( auto pc_it = abstract_pc_map.begin(); pc_it != abstract_pc_map.end(); pc_it++ )
+    { 
+        int pc_int = pc_it->second;
+        set<int> egress = abstract_egress_nodes[pc_int];
+        
+        //for( auto source_it = abstract_source_nodes[pc_int].begin(); source_it != abstract_source_nodes[pc_int].end(); source_it++ )
+        for( auto source_it = abstract_nodes.begin(); source_it != abstract_nodes.end(); source_it++ )
+        {
+            int src = *source_it;
+            int temp = src;  
+            
+            if( find( egress.begin(), egress.end(), temp) != egress.end()) 
+            {
+                abstract_od[make_pair(src,pc_int)] = src; 
+                continue;
+            }
+            
+            while( find( egress.begin(), egress.end(), temp) == egress.end()  && temp != 0)
+            {
+                temp =  abstract_rules[make_pair(temp,pc_int)];          
+            } 
+            
+            abstract_od[make_pair(src,pc_int)] = temp;     
+        }
+    }
+    
+    cout << "\n\nAbstract OD\n" << abstract_od; 
+}
+    
 
 
 #endif 

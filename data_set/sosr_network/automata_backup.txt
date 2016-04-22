@@ -1,0 +1,17 @@
+[INFO] states: 1 2 3 
+[INFO] start: 1
+[INFO] symbols: 1 2 3 4 5 6 7 8
+[INFO] transitions: 
+1 a 2
+1 b 3
+1 c 1
+1 d 1
+2 a 2
+2 b 2
+2 c 2
+2 d 2
+3 a 2
+3 b 3
+3 c 3
+3 d 3
+[INFO] final: 3
