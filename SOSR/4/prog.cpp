@@ -28,9 +28,9 @@ std::ostream &operator<<(std::ostream &stream, const std::map<T1, T2>& map)
   for (typename std::map<T1, T2>::const_iterator it = map.begin();
        it != map.end();
        ++it)
-    {
+  {
       stream << (*it).first << " --> " << (*it).second << std::endl;
-    }
+  }
   return stream;
 }
 
@@ -41,10 +41,10 @@ std::ostream &operator<<(std::ostream &stream, const std::vector<T> & v)
   for (typename std::vector<T> ::const_iterator it = v.begin();
        it != v.end();
        ++it)
-    {
+  {
       stream << (*it)<<" , ";
-    }
-    stream<<"]";
+  }
+  stream<<"]";
   return stream;
 }
 
@@ -120,7 +120,7 @@ set<tuple<string,string,string>> readAllClasses()
     for( int i = 0; i< files.size(); i++ )
     {
         string temp = files[i];
-      
+        
         temp.erase ( temp.begin(), temp.end()-4);
 //cout<<temp<<"\n";
         
@@ -132,7 +132,7 @@ set<tuple<string,string,string>> readAllClasses()
         links = readClass(files[i]);
         
         alllinks.insert(links.cbegin(), links.cend());
-    
+        
     }
     
     return alllinks;
@@ -159,7 +159,7 @@ void constructTopo()
     getdir(dir,files);
 
     vector<string> packet; 
-	vector<string> from; 
+    vector<string> from; 
 
 
     for (unsigned int i = 0;i < files.size();i++) 
@@ -168,30 +168,30 @@ void constructTopo()
     	string line;
 
     	std::ifstream infile(string("../AS-1755/" + files[i]).c_str());
-   		while (std::getline(infile, line))
-		{
+       while (std::getline(infile, line))
+       {
 
-    		std::istringstream iss(line);
-    		string packetstr, tostr, fromstr; 
-    		string t1, t2, t3, t4, t5, t6; 
+          std::istringstream iss(line);
+          string packetstr, tostr, fromstr; 
+          string t1, t2, t3, t4, t5, t6; 
 
     		//cout<<line; 
 			//0 I 10.0.2.92 255.255.255.252 10.0.0.1 10.0.0.2 124 1
     		if (!(iss >> t1 >> t2 >> t3 >> t4 >> fromstr >> tostr >> t5 >> t6 )) { break; } // error
 
-   				
-   				tuple<string,string> pair; 
-   				pair= make_tuple (fromstr,tostr);
+         
+         tuple<string,string> pair; 
+         pair= make_tuple (fromstr,tostr);
 
-   				allpairs.insert(pair); 
-   				
-   		}   
+         allpairs.insert(pair); 
+         
+     }   
 
 
-    }
+ }
 
-    for( auto it = allpairs.begin() ; it != allpairs.end() ; ++it)
-		cout<<"\n"<< get<0>(*it)<<"  "<<get<1>(*it) ;
+ for( auto it = allpairs.begin() ; it != allpairs.end() ; ++it)
+  cout<<"\n"<< get<0>(*it)<<"  "<<get<1>(*it) ;
 
 }
 
@@ -201,63 +201,63 @@ set<tuple<string,string>> readTopo() // from to
 
 	set<tuple<string,string>> allpairs; 
 
-		string line;
+  string line;
 
-    	std::ifstream infile(string("topo"));
-   		while (std::getline(infile, line))
-		{
+  std::ifstream infile(string("topo"));
+  while (std::getline(infile, line))
+  {
 
-    		std::istringstream iss(line);
-    		string fromstr, tostr;  
+      std::istringstream iss(line);
+      string fromstr, tostr;  
 
     		if (!(iss >> fromstr >> tostr )) { break; } // error
 
-   				
-   				tuple<string,string> pair; 
-   				pair= make_tuple (fromstr,tostr);
+         
+         tuple<string,string> pair; 
+         pair= make_tuple (fromstr,tostr);
 
-   				allpairs.insert(pair); 
-   				
-   		}   
+         allpairs.insert(pair); 
+         
+     }   
 
-   	 return allpairs; 
+     return allpairs; 
 
-}
-
-
+ }
 
 
-map<string, int> readNodes()
-{
 
-	map<string,int> routers; 
 
-	string line;
+ map<string, int> readNodes()
+ {
 
-    std::ifstream infile("../AS-1755/config.map" );
-   	
+   map<string,int> routers; 
 
-    int count = 1; 
+   string line;
 
-   	while (std::getline(infile, line))
-	{
+   std::ifstream infile("../AS-1755/config.map" );
+   
 
-    	std::istringstream iss(line);
-    	string t1, name; 
+   int count = 1; 
+
+   while (std::getline(infile, line))
+   {
+
+       std::istringstream iss(line);
+       string t1, name; 
 
     	if (!(iss >> t1 >> name  )) { break; } // error
 
     	if(t1.compare(string("R")) != 0) { break; }
 
-		name.erase (name.begin()); 
+      name.erase (name.begin()); 
 
-    	routers[ name ] = count; 
+      routers[ name ] = count; 
 
-    	count = count +1; 
+      count = count +1; 
 
-   	}   
+  }   
 
-   return routers; 
+  return routers; 
 
 }
 
@@ -274,7 +274,7 @@ expr  topo_expr (expr  p1, expr  p2, vector<pair<int,int>> points)
 		ret = ret || ( p2 ==  c.int_val(points[i].first) && ( p1 == c.int_val( points[i].second) ) ) || ( p1 ==  c.int_val(points[i].first) && ( p2 == c.int_val( points[i].second) ) )  ;
 	}
 
-return ret ;
+    return ret ;
 }
 
 
@@ -290,7 +290,7 @@ expr  is_egress (expr  p1, vector<int> terminal)
 		ret = ret ||  ( p1 ==  c.int_val(terminal[i]) )   ;
 	}
 
-return ret ;
+    return ret ;
 }
 
 
@@ -306,7 +306,7 @@ expr  rule_expr (expr  n, expr r, 	map < pair<int,int> , int > rules )
 		ret = ret || ( ( n ==  c.int_val(it->first.first) ) && ( r == c.int_val( it->first.first ) ) ) ;
 	}
 
-return ret ;
+    return ret ;
 }
 
 
@@ -322,7 +322,7 @@ expr  is_firewall (expr  p1, vector<int> firewall)
 		ret = ret ||  ( p1 ==  c.int_val(firewall[i]) )   ;
 	}
 
-return ret ;
+    return ret ;
 }
 
 
@@ -337,10 +337,10 @@ expr is_existing ( expr n, expr n1, map<pair<int,int>,int> abs_R)
 	for ( auto it = abs_R.begin() ; it != abs_R.end() ; ++it )
 	{
 		ret = ret ||  ( n ==  c.int_val( (it->first).first) && ( n1 == c.int_val(it->second)) )
-                  || ( n1 ==  c.int_val( (it->first).first) && ( n == c.int_val(it->second)))  ;
-	}
+      || ( n1 ==  c.int_val( (it->first).first) && ( n == c.int_val(it->second)))  ;
+  }
 
-return ret ;
+  return ret ;
 }
 
 
@@ -356,7 +356,7 @@ expr in_R(expr n, expr p ,map<pair<int,int>,int> abs_R)
 		ret = ret ||  ( n ==  c.int_val( (it->first).first) && ( p == c.int_val( (it->first).second) ))  ;
 	}
 
-return ret ;
+    return ret ;
 }
 
 map<string,int> enumerateClass()
@@ -389,7 +389,7 @@ map<string,int> enumerateClass()
         
         abs_p[ files[i] ] = count ;
         count = count +1;
-            
+        
     }
 
     return abs_p;
@@ -407,8 +407,8 @@ int main()
     
     
 	//get nodes
-	map<string,int> routers; 
-	
+    map<string,int> routers; 
+    
 	routers = readNodes(); //starts at 1
 
     
@@ -451,7 +451,7 @@ int main()
     
     vector<int> abs_fw;
     abs_fw.push_back(0);
- 
+    
 
   	//constructTopo();
 	vector<pair<int,int>> abs_topo;  //commutative
@@ -474,102 +474,102 @@ int main()
     
 
 	//construct R
-	map<pair<int,int>,int> abs_R; 
+    map<pair<int,int>,int> abs_R; 
 
     
     
 
-        
-        set<tuple<string,string,string>> link;
-  
-        link = readClass(file + string(".txt"));
+    
+    set<tuple<string,string,string>> link;
+    
+    link = readClass(file + string(".txt"));
     
     
-        abs_p[file] = 1;
+    abs_p[file] = 1;
     
-        
-        
+    
+    
     	for( auto it = link.begin(); it!= link.end(); ++it ) // rules I P -> I  // packet fixed to 1
     	{
     		if( routers.find(get<1>(*it) ) == routers.end() ||  routers.find(get<2>(*it) ) == routers.end() ) { continue; }
-    
+            
     		abs_R[make_pair(routers[get<1>(*it)], abs_p[get<0>(*it)] )] = routers[get<2>(*it)] ;
     		
     	}
-    
-    
-    
-    
+        
+        
+        
+        
 
 	//construct egresss
-	vector<int> abs_egress; 
-    vector<int> abs_src;
+       vector<int> abs_egress; 
+       vector<int> abs_src;
 
-    
-    bool outgoing[200], incomming[200];
-    for( int i = 1; i<= routers.size(); i ++)
-    {   outgoing[i] =  false;
-        incomming[i] =  false;
-    }
-    
-    for( auto it = abs_R.begin(); it != abs_R.end() ; ++it )
-    {
+       
+       bool outgoing[200], incomming[200];
+       for( int i = 1; i<= routers.size(); i ++)
+        {   outgoing[i] =  false;
+            incomming[i] =  false;
+        }
         
-        
-        if( it->first.first == it->second)
-            abs_egress.push_back(it->second);
-        
-        outgoing [ it->first.first ] = true;
-        incomming[ it-> second ] = true;
-        
-    }
-    
-    for( int i = 1; i < routers.size() ; i ++ )
-    {
-        
-        if( outgoing[i] == false)
-            abs_egress.push_back(i);
-        
-        if(incomming[i] == false)
-            abs_src.push_back(i);
-        
-    }
-    
-
-
-    
-    
-    map<int,int> abs_od;
-    
-    for( int i = 0; i< abs_src.size(); i ++ )
-    {
-        
-        int temp = abs_src[i];
-        
-        if( find(abs_egress.begin(), abs_egress.end(), temp ) != abs_egress.end() ) continue;
-        
-        while( find(abs_egress.begin(), abs_egress.end(), temp) == abs_egress.end() )
+        for( auto it = abs_R.begin(); it != abs_R.end() ; ++it )
         {
             
-            temp = abs_R[make_pair(temp,1)];
+            
+            if( it->first.first == it->second)
+                abs_egress.push_back(it->second);
+            
+            outgoing [ it->first.first ] = true;
+            incomming[ it-> second ] = true;
             
         }
-        abs_od[abs_src[i]] = temp;
+        
+        for( int i = 1; i < routers.size() ; i ++ )
+        {
+            
+            if( outgoing[i] == false)
+                abs_egress.push_back(i);
+            
+            if(incomming[i] == false)
+                abs_src.push_back(i);
+            
+        }
+        
+
+
         
         
-    }
-    
-    
-    
-    
-    int packet = 1;
+        map<int,int> abs_od;
+        
+        for( int i = 0; i< abs_src.size(); i ++ )
+        {
+            
+            int temp = abs_src[i];
+            
+            if( find(abs_egress.begin(), abs_egress.end(), temp ) != abs_egress.end() ) continue;
+            
+            while( find(abs_egress.begin(), abs_egress.end(), temp) == abs_egress.end() )
+            {
+                
+                temp = abs_R[make_pair(temp,1)];
+                
+            }
+            abs_od[abs_src[i]] = temp;
+            
+            
+        }
+        
+        
+        
+        
+        int packet = 1;
     unsigned no_packets = 1; 	//packet size set to 1
     unsigned no_nodes   = routers.size();
 
 
     clock_t tStart = clock();
 
- 
+    
     for( int loop =1; loop < 10000 ; )
     {
 
@@ -616,7 +616,7 @@ int main()
   //     b = b && f1(c.int_val(0),c.int_val(1)) == c.bool_val(false);
         b = b && f_od(c.int_val(0),c.int_val(1) ) ==c.int_val(0) ;
         b = b && cycle ( c.int_val(0) ) ==  c.int_val(0);
-
+        
         
         
         
@@ -666,23 +666,23 @@ int main()
                 // n[i] is mutable
 
                  // && topo_expr ( n[i],  n1[i], abs_topo) // topo ....  select ( T , mk_pair( n[i],  n1[i] ) ) ;
-                  
+            
                  // && ! is_existing ( n[i], n1[i], abs_R) // try w/o it
 
       //           && f1( n[i], p[i]  ) == ( f1( n1[i], p[i]) ||   is_firewall( n[i], abs_fw) )
-                  
-                  && cycle ( n[i]) > cycle( n1[i])
+            
+            && cycle ( n[i]) > cycle( n1[i])
 
-                  && f_od ( n[i], p[i] ) == f_od( n1[i] , p[i] )
+            && f_od ( n[i], p[i] ) == f_od( n1[i] , p[i] )
                   && f_od ( n[i], p[i] ) >= c.int_val(0) && f_od ( n[i], p[i] ) <= c.int_val(no_nodes) //0 would mean unlinking
                   
-            
+                  
                   && guess ( n[i], p[i]) == n1[i]  		 // pretty printing
                   
                   ; 
 
-                    
-        }
+                  
+              }
 
 
 
@@ -710,37 +710,37 @@ int main()
             
             if ( abs_R.find(make_pair(i,j)) != abs_R.end() )
             {
-            
-            
+                
+                
 
-            if (   (find(abs_egress.begin(), abs_egress.end(), (int)i ) == abs_egress.end() ))
+                if (   (find(abs_egress.begin(), abs_egress.end(), (int)i ) == abs_egress.end() ))
                 // (n,p) \in R and n !in Egress   abs_R.find(make_pair(i,1)) != abs_R.end() &&
-             {
+                {
 
-        
-                b = b &&  ite ( temp   ,
+                    
+                    b = b &&  ite ( temp   ,
                                //temp && in_R(citn,citp, abs_R)  ,
 
                                    //  f1(citn, citp) ==  (  f1(  R( c.int_val(i) ,c.int_val(j) ),citp ) ||  is_firewall(citn, abs_fw) ) // do in c++
         //                      f1(citn, citp) ==  (  f1(  R( c.int_val(i) ,c.int_val(j) ),citp ) ||  ( find( abs_fw.begin(), abs_fw.end(), (int) i ) != abs_fw.end() ) ) // do in c++
-                               
+                                   
           //                     &&  ( f1( citn, citp) == c.bool_val(true) || f1( citn, citp) == c.bool_val(false) )
-                
-                               
+                                   
+                                   
 
-                                  cycle ( citn ) >  cycle ( R( c.int_val(i) ,c.int_val(j) ) )
-                               
-                               
-                                
-                                &&  f_od (citn, citp ) == f_od ( R( c.int_val(i) ,c.int_val(j) ), citp )
+                                   cycle ( citn ) >  cycle ( R( c.int_val(i) ,c.int_val(j) ) )
+                                   
+                                   
+                                   
+                                   &&  f_od (citn, citp ) == f_od ( R( c.int_val(i) ,c.int_val(j) ), citp )
                                 &&  f_od ( citn, citp  ) >= c.int_val(0) && f_od ( citn, citp  ) <= c.int_val(no_nodes) // ???? test without it///
 
                                 , c.bool_val(true) ); 
 
+                }
+                
             }
             
-         }
-        
 
         }
 
@@ -753,10 +753,10 @@ int main()
         for(int i = 0; i< abs_src.size(); i++ )
         {
         //    b = b && f1( c.int_val(abs_src[i]), c.int_val(1))  == c.bool_val(true) ;
-       
+         
             if( abs_src[i] == src)
                 b = b && f_od( c.int_val(src) , c.int_val(1) )  == c.int_val(0); //c.int_val( abs_od[abs_src[i]] ); //119);
-        
+            
             else
                 b = b && f_od( c.int_val(abs_src[i]) , c.int_val(1) )  == c.int_val( abs_od[abs_src[i]] );
         }
@@ -766,12 +766,12 @@ int main()
         
         
         
-         expr ex =  exists( n,  exists( p,  exists( n1, b )));
+        expr ex =  exists( n,  exists( p,  exists( n1, b )));
 
 
 
        // cout<<"calling z3"<<"\n";
-         solver s (c); 
+        solver s (c); 
 
 
         
@@ -779,48 +779,48 @@ int main()
         
 
         
-         s.add(ex);
-     
+        s.add(ex);
+        
 
 
         if( s.check() == sat )
-         {
-             
+        {
+           
 
-             
-             
-             cout<<((double)(clock() - tStart)/CLOCKS_PER_SEC);
-             cout<< "\n"<<loop;
-             
-            model m = s.get_model();
+           
+           
+           cout<<((double)(clock() - tStart)/CLOCKS_PER_SEC);
+           cout<< "\n"<<loop;
+           
+           model m = s.get_model();
             // cout<<m;
-             
-             
-             exit(0);
-            
-         }
+           
+           
+           exit(0);
+           
+       }
 
-         else {
-             
+       else {
+           
            //  cout<<"unsat"<<"\n";
-            
-             loop  = loop + 1 ;
-             
-         }
-            
         
-        
-    }
-    
-    
+           loop  = loop + 1 ;
+           
+       }
+       
+       
+       
+   }
+   
+   
     //sanity checks
     //od in range
     //cycle inr ange
-    
+   
    // cout<<totaltime;
 
-    return 0;
-    
+   return 0;
+   
 }
 
 
