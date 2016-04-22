@@ -1,8 +1,6 @@
-.project
-.cproject
-.settings
-Bin
-Obj
+*.project
+*.cproject
+*.settings
 .DS_Store
 *.o
 *.pyc
