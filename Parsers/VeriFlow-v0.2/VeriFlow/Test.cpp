@@ -97,8 +97,8 @@ void testRocketfuelRouteViewsDataset()
 			rule.fieldMask[DL_DST] = "0:0:0:0:0:0";
 			rule.fieldValue[NW_SRC] = "0.0.0.0";
 			rule.fieldMask[NW_SRC] = "0.0.0.0";
-            st.nextToken();
-            st.nextToken();
+			st.nextToken();
+			st.nextToken();
 			rule.fieldValue[NW_DST] = st.nextToken();
 			if(rule.fieldValue[NW_DST].find('/') != string::npos)
 			{
