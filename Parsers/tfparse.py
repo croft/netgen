@@ -109,12 +109,34 @@ def make_rocketfile(tf, ntf, router_type, portmap, dest):
     ofg = OpenFlow_Rule_Generator(tf, router_type.HS_FORMAT())
     rules = ofg.generate_of_rules()
     lines = []
+
+    # print dir(tf.rules[120]['action'])
+    # for k in ['rewrite', 'out_ports', 'match', 'mask', 'action']:
+    #     print tf.rules[120][k]
+    # print rules[120]
+    # return
+
+    goza = []
+    gozb = []
+
     for rule in rules:
         dst = int2ip(rule['ip_dst_match'])
         wc = wc2ip(rule['ip_dst_wc'])
         outports = rule['out_ports']
         location = tf.prefix_id
         priority = 1
+
+        # print rule['transport_src_new'], \
+        #     rule['transport_dst_new'], \
+        #     rule['ip_src_new'], \
+        #     rule['ip_dst_new'], \
+        #     rule['ip_proto_new'], \
+        #     rule['vlan_match'], \
+        #     rule['vlan_new']
+        for k in rule.keys():
+            if 'new' in k:
+                if k != 'vlan_new' and rule[k] is not None:
+                    print k, rule[k]
 
         nexthops = []
         for port in outports:
@@ -132,10 +154,29 @@ def make_rocketfile(tf, ntf, router_type, portmap, dest):
                         # TODO
                         pass
 
-        for nexthop in nexthops:
-            line = "- - {0} {1} {2} {3} - {4}\n".format(dst, wc, location,
-                                                        nexthop, priority)
-            lines.append(line)
+        line = "- - {0} {1} {2} {3} - {4}\n".format(dst, wc, location,
+                                                    ",".join(nexthops), priority)
+
+        lines.append(line)
+
+        if len(nexthops) == 1:
+            line = "{0} {1} {2}".format(line.strip(), rule['vlan_match'], rule['vlan_new'])
+            if nexthops[0] == 'gozb_rtr':
+                gozb.append(line.strip())
+            elif nexthops[0] == 'goza_rtr':
+                goza.append(line.strip())
+
+        # for nexthop in nexthops:
+        #     line = "- - {0} {1} {2} {3} - {4}\n".format(dst, wc, location,
+        #                                                 nexthop, priority)
+        #     lines.append(line)
+
+    if len(goza) > 1:
+        print "\n---------------------------------------\n"
+        print "\n".join(sorted(goza))
+    if len(gozb) > 1:
+        print "\n---------------------------------------\n"
+        print "\n".join(sorted(gozb))
 
     with open(os.path.join(dest, "R_" + tf.prefix_id), 'w') as f:
         f.writelines(lines)
