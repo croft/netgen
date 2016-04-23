@@ -4,5 +4,8 @@
 .DS_Store
 *.o
 *.pyc
-bin/netgen
-
+Bin/netgen
+Parsers/VeriFlow-v0.2/VeriFlow/VeriFlow
+Parsers/VeriFlow-v0.2/VeriFlow/class
+Parsers/VeriFlow-v0.2/VeriFlow/data
+Parsers/data
