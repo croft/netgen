@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import abc
 import igraph
 import itertools
 import math
@@ -24,8 +25,8 @@ def int2mac(addr):
     h = "{0:#0{1}x}".format(addr, 12)[2:]
     return ':'.join(s.encode('hex') for s in h.decode('hex'))
 
-def generate_ip(idx):
-    ipbase = ip2int("10.0.0.1")
+def generate_ip(idx, base="10.0.0.1"):
+    ipbase = ip2int(base)
     return int2ip(ipbase + idx)
 
 def generate_mac(idx):
@@ -51,26 +52,53 @@ class Topology(object):
         self.edges = {}
         self.paths = {}
 
-    def make_topofile(self, dest):
+    def make_topofile(self, dest_dir):
         out = []
         for src, dsts in self.edges.iteritems():
             for d in dsts:
                 out.append("{0} {1}\n".format(src, d))
 
         print len(out)
-        # with open(os.path.join(dest, "topo.txt"), 'w') as f:
+        # with open(os.path.join(dest_dir, "topo.txt"), 'w') as f:
         #     f.writelines(out)
+
+    @abc.abstractmethod
+    def make_rocketfile(self, dest_dir):
+        return
 
 class FattreeTopo(Topology):
     def __init__(self, k):
         super(FattreeTopo, self).__init__()
         self.size = k
-        self.host_agg = {}
-        self.host_edge = {}
-        self.edge_types = {}
         self.distances = {}
+        self.pods = {}
+        self.pods_rev = {}
+        self.paths = {}
         self._make_topo()
-        # self._make_hints()
+
+    def make_rocketfile(self, destfile):
+        ft = {}
+        for sw in self.switches.keys():
+            ft[sw] = []
+
+        # make forwarding tables
+        for src in self.paths.keys():
+            for dst in self.paths[src].keys():
+                path = self.paths[src][dst]
+                src_ip = self.hosts[src].ip
+                dst_ip = self.hosts[dst].ip
+                wc = "255.255.255.255"
+                for location, nexthop in pairwise(path[1:]):
+                    line = "- - {0} {1} {2} {3} - {4}".format(dst_ip,
+                                                              wc,
+                                                              location,
+                                                              nexthop,
+                                                              1)
+                    ft[location].append(line)
+
+        # for sw in ft:
+        #     with open(os.path.join(dest, "R_" + sw), 'w') as f:
+        #         f.writelines(ft[sw])
 
     def make_connections(self, density):
         f = math.factorial
@@ -91,9 +119,9 @@ class FattreeTopo(Topology):
         # assume paths are bidirectional
         if dst not in self.paths.keys():
             self.paths[dst] = {}
-            
+
         self.paths[dst][src] = path
-       
+
     def path(self, src, dst):
         path = dijkstra.shortestPath(self.distances, src, dst)
         self.add_path(src, dst, path)
@@ -123,8 +151,6 @@ class FattreeTopo(Topology):
             name = "h%d" % i
             nodes[i] = name
             self.hosts[name] = Node(generate_ip(i), generate_mac(i), name)
-            self.host_edge[name] = None
-            self.host_agg[name] = []
 
         for e in edges:
             e0 = nodes[e[0]]
@@ -138,14 +164,23 @@ class FattreeTopo(Topology):
 
             self.edges[e0].append(e1)
             self.edges[e1].append(e0)
-            
+
             if e0 not in self.distances.keys():
                 self.distances[e0] = {}
+
             self.distances[e0][e1] = 2
 
             if e1 not in self.distances.keys():
                 self.distances[e1] = {}
+
             self.distances[e1][e0] = 2
+
+        count = 1
+        for h in self.hosts:
+            podnum, idx = self.pods_rev[h]
+            self.hosts[h].ip = "10.0.{0}.{1}".format(podnum, idx)
+            self.hosts[h].mac = int2mac(count)
+            count += 1
 
     def _generate_graph(self):
         cores = (self.size/2)**2
@@ -180,11 +215,18 @@ class FattreeTopo(Topology):
                     g.add_edge(edge_offset + edge,
                                host_offset + self.size/2 * edge + h)
 
+                    if pod not in self.pods:
+                        self.pods[pod] = []
+
+                    hnum = host_offset + self.size/2 * edge + h
+                    self.pods[pod].append("h%d"%hnum)
+                    self.pods_rev["h%d"%hnum] = (pod, len(self.pods[pod]))
+
         return g
 
 f = FattreeTopo(4)
 f.make_connections(0.1)
-
+f.make_rocketfile("dest")
 # print f.path("h30", "h31")
 # print f.path("h32", "h35")
 # print f.path("h26", "h31")
