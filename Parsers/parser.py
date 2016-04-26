@@ -304,14 +304,19 @@ class FattreeTopo(Topology):
                     self.switches[location].ft.append(flow)
 
     def make_connections(self, density):
-        f = math.factorial
-        n = len(self.hosts.keys())
-        r = 2
-        combinations = f(n) / (f(r) * f(n-r))
-        count = int(density * combinations)
-        pairs = list(itertools.combinations(self.hosts.keys(), 2))
-        for p in random.sample(pairs, count):
-            self.path(p[0], p[1])
+        # f = math.factorial
+        # n = len(self.hosts.keys())
+        # r = 2
+        # combinations = f(n) / (f(r) * f(n-r))
+        # count = int(density * combinations)
+        # pairs = list(itertools.combinations(self.hosts.keys(), 2))
+        # for p in random.sample(pairs, count):
+        #     print p[0], p[1]
+        #     self.path(p[0], p[1])
+        count = int(density * len(self.hosts.keys()))
+        for p,v in pairwise(random.sample(self.hosts.keys(), count)):
+            print p,v
+            self.path(p,v)
 
     def add_path(self, src, dst, path):
         if src not in self.paths.keys():
@@ -436,7 +441,8 @@ def main():
                         action="store_true", default=False,
                         help="Parse Internet2 topology")
     parser.add_argument("--fattree", "-f", dest="fattree",
-                        action="store_true", default=False)
+                        action="store_true", default=False,
+                        help="Parse Fattree topology")
 
     args = parser.parse_args()
 
@@ -450,7 +456,7 @@ def main():
     elif args.internet2:
         topo = Internet2Topo()
     elif args.fattree:
-        topo = FattreeTopo(4, 0.1)
+        topo = FattreeTopo(4, 1)
 
     topo.make_topofile("data")
     topo.make_rocketfile("data")
