@@ -6,6 +6,7 @@ import itertools
 import math
 import os
 import random
+import shutil
 import socket
 import struct
 import sys
@@ -274,6 +275,76 @@ class StanfordTopo(TfTopology):
                                            load_stanford_backbone_port_to_id_map,
                                            ciscoRouter)
 
+class DiamondTopo(Topology):
+    def __init__(self):
+        super(DiamondTopo, self).__init__()
+        self._make_topo()
+        self.paths = {}
+        self.add_path('h1', 'h2', ['h1', 's0', 's1', 's3', 'h2'])
+        self.make_flowtable()
+
+    def make_flowtable(self):
+        # make forwarding tables
+        for src in self.paths.keys():
+            for dst in self.paths[src].keys():
+                path = self.paths[src][dst]
+                src_ip = self.hosts[src].ip
+                dst_ip = self.hosts[dst].ip
+                wc = "255.255.255.255"
+                for location, nexthop in pairwise(path[1:]):
+                    flow = FlowEntry(dest=dst_ip,
+                                     wildcard=wc,
+                                     location=location,
+                                     nexthops=nexthop)
+                    self.switches[location].ft.append(flow)
+
+    def add_path(self, src, dst, path):
+        if src not in self.paths.keys():
+            self.paths[src] = {}
+
+        self.paths[src][dst] = path
+
+        # assume paths are bidirectional
+        if dst not in self.paths.keys():
+            self.paths[dst] = {}
+
+        self.paths[dst][src] = path
+
+    def _make_topo(self):
+        g = igraph.Graph()
+        g.add_vertices(['s0', 's1', 's2', 's3', 'h1', 'h2'])
+        g.add_edges([('s0','s1'),
+                     ('s0','s2'),
+                     ('s1','s3'),
+                     ('s2','s3'),
+                     ('h1', 's0'),
+                     ('h2', 's3')])
+
+        nodes = []
+        for name in ['s0', 's1', 's2', 's3']:
+            nodes.append(name)
+            self.switches[name] = Switch(name=name)
+
+        for name in ['h1', 'h2']:
+            nodes.append(name)
+            ip = "10.0.0.{0}".format(len(self.hosts.keys()) + 1)
+            self.hosts[name] = Host(name=name, ip=ip)
+
+        edges = g.get_edgelist()
+        for e in edges:
+            e0 = g.vs[e[0]].attributes()['name']
+            e1 = g.vs[e[1]].attributes()['name']
+
+            if e0 not in self.edges:
+                self.edges[e0] = []
+
+            if e1 not in self.edges:
+                self.edges[e1] = []
+
+            self.edges[e0].append(e1)
+            self.edges[e1].append(e0)
+
+
 class FattreeTopo(Topology):
     def __init__(self, k, path_density):
         super(FattreeTopo, self).__init__()
@@ -443,6 +514,9 @@ def main():
     parser.add_argument("--fattree", "-f", dest="fattree",
                         action="store_true", default=False,
                         help="Parse Fattree topology")
+    parser.add_argument("--diamond", "-d", dest="diamond",
+                        action="store_true", default=False,
+                        help="Parse Daimond topology")
 
     args = parser.parse_args()
 
@@ -457,10 +531,22 @@ def main():
         topo = Internet2Topo()
     elif args.fattree:
         topo = FattreeTopo(4, 1)
+    elif args.diamond:
+        topo = DiamondTopo()
+    else:
+        print "No topology type specified"
+        return
 
-    topo.make_topofile("data")
-    topo.make_rocketfile("data")
-    topo.make_graph("data")
+    data_dir = "data"
+
+    if os.path.exists(data_dir):
+        shutil.rmtree(data_dir)
+
+    os.makedirs(data_dir)
+
+    topo.make_topofile(data_dir)
+    topo.make_rocketfile(data_dir)
+    topo.make_graph(data_dir)
 
 if __name__ == "__main__":
     main()

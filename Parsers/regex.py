@@ -165,8 +165,8 @@ class FSA(object):
         self.dfa = self._parse()
         self.states = FSA.state_names(self.dfa)
         self.symbols = FSA.symbol_names(self.dfa)
-        self.final = FSA.pprint_state_name(self.dfa.Final)
-        self.initial = FSA.pprint_state_name(self.dfa.Initial)
+        self.final = FSA.pprint_state_name(self.dfa.Initial) # reverse?
+        self.initial = FSA.pprint_state_name(self.dfa.Final) # reverse?
         self.transitions = FSA.transition_names(self.dfa)
 
     def _parse(self):
@@ -175,6 +175,9 @@ class FSA(object):
         rnfa = nfa.reversal()
         dfa = rnfa.toDFA()
         dfa = dfa.completeMinimal()
+        print dfa.succintTransitions()
+        print dfa.Initial
+        print dfa.Final
         return dfa
 
     def __repr__(self):
