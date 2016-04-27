@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import FAdo
 import FAdo.reex
 from FAdo.reex import *
 

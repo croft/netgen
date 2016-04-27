@@ -1,12 +1,82 @@
 #!/usr/bin/env python
 
+import argparse
 import os
 import random
 import re
 import shutil
 import string
 
-import pyfsa.FSA as FSA
+import FAdo.reex
+from FAdo.reex import *
+
+# create a parse class with a custom alphabet as the lexer id rule
+def parser_factory(sigma):
+    class ParseRegAlphabet(ParseReg1):
+        def __init__(self, no_table=0, table='.tablereg'):
+            # sort by longest string length first:
+            # yappy seems to stop on first matching id, so to prevent
+            # matching a substring (which will raise an invalid regex error),
+            # place substrings last
+            siglist = sorted(list(sigma), key=len, reverse=True)
+            grammar = [("r", ["r", "|", "c1"], self.OrSemRule),
+                       ("r", ["c1"], self.DefaultSemRule),
+                       ("c1", ["c1", Conj, "c2"], self.ConjSemRule),
+                       ("c1", ["c2"], self.DefaultSemRule),
+                       ("c2", ["c2", Shuffle, "c"], self.ShuffleSemRule),
+                       ("c2", ["c"], self.DefaultSemRule),
+                       ("c", ["c", "s"], self.ConcatSemRule),
+                       ("c", ["s"], self.DefaultSemRule),
+                       ("s", ["s", "*"], self.StarSemRule),
+                       ("s", ["o"], self.DefaultSemRule),
+                       ("o", ["o", Option], self.OptionSemRule),
+                       ("o", ["f"], self.DefaultSemRule),
+                       ("f", ["b"], self.DefaultSemRule),
+                       ("f", ["(", "r", ")"], self.ParSemRule),
+                       ("b", ["id"], self.BaseSemRule),
+                       ("b", [EmptySet], self.BaseSemRule),
+                       ("b", [Epsilon], self.BaseSemRule)]
+            tokenize = [("\s+", ""),
+                        (Epsilon, lambda x: (x, x)),
+                        (EmptySet, lambda x: (x, x)),
+                        (Shuffle, lambda x: (x, x)),
+                        (Conj, lambda x: (x, x)),
+                        (Option, lambda x: (x, x)),
+                        # add custom alphabet
+                        ("({0})".format("|".join(siglist)),
+                         lambda x: ("id", x)),
+                        # old id rule
+                        #("[A-Za-z0-9]", lambda x: ("id", x)),
+                        ("\|", lambda x: (x, x)),
+                        ("\+", lambda x: ("|", x)),
+                        ("\*", lambda x: (x, x)),
+                        ("\(|\)", lambda x: (x, x))]
+            Yappy.__init__(self, tokenize, grammar, table, no_table)
+
+    return ParseRegAlphabet
+
+# convert a string to regex using a custom alphabet
+def str2regex_alpha(regex, alphabet):
+    return str2regexp(regex,
+                      parser=parser_factory(alphabet),
+                      sigma=set(alphabet),
+                      strict=True)
+
+# convert set difference expression (eg, N-s0) into regex disjunction
+def expand_regex(expr, topo):
+    matches = re.finditer(r"(\w+)\s*-\s*(\w+)",
+                          expr,
+                          re.IGNORECASE|re.MULTILINE)
+    for m in matches:
+        if m.group(1).strip() != "N":
+            print "Invalid syntax: {0} in {1}".format(m.group(1),
+                                                      m.group(0))
+            return None
+
+        diff = topo.switch_diff(m.group(2))
+        expr = expr.replace(m.group(0), "|".join(diff))
+
+    return expr
 
 class Topology(object):
     def __init__(self, fname):
@@ -71,30 +141,9 @@ class Network(object):
             self.classes[fname] = PacketClass(f)
             self.class_files[fname] = f
 
-class PacketSpecification(object):
-    def __init__(self, regex):
-        self.regex = regex
-
-    @classmethod
-    def expand(cls, regex, topo):
-        matches = re.finditer(r"(\w+)\s*-\s*(\w+)",
-                              regex,
-                              re.IGNORECASE|re.MULTILINE)
-        for m in matches:
-            if m.group(1).strip() != "N":
-                print "Invalid syntax: {0} in {1}".format(m.group(1),
-                                                          m.group(0))
-                return None
-
-            diff = topo.switch_diff(m.group(2))
-            regex = regex.replace(m.group(0), "|".join(diff))
-
-        return regex
-
-    def match(self, network):
-        regex = PacketSpecification.expand(self.regex, network.topo)
+    def match_classes(self, regex):
         matches = []
-        for p, pc in network.classes.iteritems():
+        for p, pc in self.classes.iteritems():
             for pathstr in pc.construct_strings():
                 if re.match(regex, pathstr) is not None:
                     matches.append(p)
@@ -102,127 +151,162 @@ class PacketSpecification(object):
 
         return sorted(matches, key=int)
 
-class ChangeSpecification(object):
-    def __init__(self, regex):
+class FSA(object):
+    def __init__(self, regex, sigma):
         self.regex = regex
-        self.terms = {}
+        if isinstance(sigma, list):
+            self.sigma = set(sigma)
+        else:
+            self.sigma = sigma
+        self.dfa = self._parse()
+        self.states = FSA.state_names(self.dfa)
+        self.symbols = FSA.symbol_names(self.dfa)
+        self.final = FSA.pprint_state_name(self.dfa.Final)
+        self.initial = FSA.pprint_state_name(self.dfa.Initial)
+        self.transitions = FSA.transition_names(self.dfa)
+
+    def _parse(self):
+        expr = str2regex_alpha(self.regex, self.sigma)
+        nfa = expr.toNFA()
+        rnfa = nfa.reversal()
+        dfa = rnfa.toDFA()
+        dfa = dfa.completeMinimal()
+        return dfa
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        output = "[INFO] states: {0}\n".format(" ".join(self.states))
+        output += "[INFO] start: {0}\n".format(" ".join(self.initial))
+        output += "[INFO] symbols: {0}\n".format(" ".join(self.symbols))
+        output += "[INFO] transitions:\n"
+        output += "\n".join(["{0} {1} {2}".format(start, t, end)
+                             for start, t, end in self.transitions])
+        output += "\n"
+        output += "[INFO] final: {0}".format(" ".join(self.final))
+        return output
 
     @classmethod
-    def generate_term(cls, alpha=None, length=2):
-        if alpha is None:
-            alpha = string.ascii_lowercase + string.ascii_uppercase
+    def pprint_state_name(cls, state):
+        if isinstance(state, set):
+            term = "/".join([str(s) for s in state])
+            return term
 
-        return ''.join(random.choice(alpha) for _ in range(length))
+        return str(state)
 
     @classmethod
-    def rewrite(cls, regex, topo):
-        terms = {}
-        matched = []
-        matches = re.finditer(r"(\w+)\s*-\s*(\w+)",
-                              regex,
-                              re.IGNORECASE|re.MULTILINE)
-        for m in matches:
-            if m.group(1).strip() != "N":
-                print "Invalid syntax: {0} in {1}".format(m.group(1),
-                                                          m.group(0))
-                return (None, None)
+    def state_names(cls, dfa):
+        states = []
+        for subset in dfa.States:
+            term = FSA.pprint_state_name(subset)
+            if term not in states:
+                states.append(term)
 
-            # skip duplicates
-            if m.group(0) in matched:
-                continue
+        return states
 
-            # in case we randomly generate an existing node's name
-            replacement = ChangeSpecification.generate_term()
-            while replacement in topo.switches + ['OD', 'od']:
-                replacement = ChangeSpecification.generate_term()
+    @classmethod
+    def symbol_names(cls, dfa):
+        symbols = []
+        for t in dfa.succintTransitions():
+            start, symbol, end = t
+            tokens = symbol.split(",")
+            for token in tokens:
+                token = token.strip()
+                if token not in symbols:
+                    symbols.append(token)
 
-            terms[replacement] = (m.group(0), m.group(1), m.group(2))
-            regex = regex.replace(m.group(0), replacement)
-            matched.append(m.group(0))
+        return sorted(symbols)
 
-        return (regex, terms)
+    @classmethod
+    def transition_names(cls, dfa):
+        lines = []
+        state_names = {}
+        for s in dfa.States:
+            state_names[str(s)] = FSA.pprint_state_name(s)
 
-    def to_fsa(self, network):
-        # regex, terms = ChangeSpecification.rewrite(self.regex, network.topo)
-        # fsa = FSA.compileRE(regex, terms.keys() + network.topo.switches)
-        # fsa = FSA.reverse(fsa)
-        # print fsa
+        for t in dfa.succintTransitions():
+            start, symbol, end = t
+            tokens = symbol.split(",")
+            for token in tokens:
+                token = token.strip()
+                lines.append((state_names[start],
+                              token,
+                              state_names[end]))
 
-        regex = PacketSpecification.expand(self.regex, network.topo)
-        print regex
-        fsa = FSA.compileRE(regex, network.topo.switches)
-        print fsa
-        fsa = FSA.reverse(fsa)
-        print fsa
+        return lines
 
 class Specification(object):
     def __init__(self, spec):
         self.spec = spec.strip()
         tokens = self.spec.split("=>")
-        if len(tokens) > 2:
+        if len(tokens) > 2 or len(tokens) < 1:
             raise Exception("Invalid specification {0}".format(self.spec))
 
-        self.lhs = PacketSpecification(tokens[0].strip())
+        self.lhs = tokens[0].strip()
         self.rhs = None
         if len(tokens) > 1:
-            self.rhs = ChangeSpecification(tokens[1].strip())
+            self.rhs = tokens[1].strip()
 
-    def parse(self, network):
-        self._parse_lhs(network)
-        self._parse_rhs(network)
+    def parse(self, network, destination):
+        self._parse_lhs(network, destination)
+        self._parse_rhs(network, destination)
 
-    def _parse_lhs(self, network):
+    def _parse_lhs(self, network, destination):
         # clean select dir
-        select_dir = "selected"
+        select_dir = os.path.join(destination, "selected")
         if os.path.exists(select_dir):
             shutil.rmtree(select_dir)
 
         os.makedirs(select_dir)
 
-        matches = self.lhs.match(network)
+        regex = expand_regex(self.lhs, network.topo)
+        matches = network.match_classes(regex)
         for m in matches:
-            shutil.copy2(network.class_files[m], "selected")
+            shutil.copy2(network.class_files[m], select_dir)
 
-    def _parse_rhs(self, network):
-        transitions = self.rhs.to_fsa(network)
+    def _parse_rhs(self, network, destination):
+        destination = os.path.join(destination, "automata.txt")
+        regex = expand_regex(self.rhs, network.topo)
+        fsa = FSA(regex, network.topo.switches)
+        with open(destination, 'w') as f:
+            f.write(str(fsa))
 
-def print_fsa(fsa):
-    fsa = fsa.determinized()
-    fsa = fsa.minimized()
-    print "[INFO] states:", " ".join([str(s) for s in fsa.states])
-    print "[INFO] start:", fsa.initialState
-    print "[INFO] symbols:",  " ".join(set([str(s[2]) for s in fsa.transitions if s[2][0] != '~']))
-    for t in fsa.transitions:
-        # ignore 'not' lables
-        if t[2][0] != '~':
-            print t[0], t[1], t[2]
-    print "[INFO] final:", " ".join([str(s) for s in fsa.finalStates])
-    print "-------------------------"
-    print fsa
+def main():
+    default_dest = "./output"
+    default_spec = "./spec.txt"
+    default_class = "./VeriFlow-v0.2/VeriFlow/class"
+    parser = argparse.ArgumentParser(description="NetGen specification parser")
+    parser.add_argument("--destination", "-d", dest="dest",
+                        default=default_dest,
+                        help="output file destination (default: %s)" % default_dest)
+    parser.add_argument("--spec", "-s", dest="spec",
+                        default="spec.txt",
+                        help="specification file (default: %s)" % default_spec)
+    parser.add_argument("--classes", "-c", dest="class_dir",
+                        default=default_class,
+                        help="packet class directory (default: %s)" % default_class)
 
-def test():
-    path="VeriFlow-v0.2/VeriFlow/class"
-    network = Network(path)
-    spec = Specification(r".* s0 .* => (N - s0)+ s2 (N - s0)+")
-    spec.parse(network)
+    args = parser.parse_args()
 
-def test_fsa():
-    fsa = FSA.compileRE(".*A.*B C.*")
-    # print_fsa(FSA.reverse(fsa))
-    print_fsa(fsa)
+    if not os.path.isfile(args.spec):
+        print "Specification file {0} does not exist!".format(args.spec)
+        return
 
-    fsa = FSA.compileRE("(a|b|c|d)+ e (a|b|c|d)+")
-    print fsa
+    if not os.path.isdir(args.class_dir):
+        print "Packet class directory {0} does not exist!".format(
+            args.class_dir)
+        return
 
-    # dfa = fsa.determinized()
-    # rev = FSA.reverse(dfa)
-    # f = FSA.reverse(f)
-    # print f
-    # print f.states
-    # print f.finalStates
-    # print f.labels()
-    # print dir(f)
+    if not os.path.isdir(args.dest):
+        os.makedirs(args.dest)
+
+    network = Network(args.class_dir)
+    print "Loaded network with {0} packet classes".format(
+        len(network.classes.keys()))
+
+    spec = Specification(open(args.spec).read())
+    spec.parse(network, args.dest)
 
 if __name__ == "__main__":
-    test()
-#    test_fsa()
+    main()
