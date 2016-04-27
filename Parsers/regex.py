@@ -6,6 +6,7 @@ import random
 import re
 import shutil
 import string
+import ConfigParser
 
 import FAdo.reex
 from FAdo.reex import *
@@ -14,9 +15,9 @@ from FAdo.reex import *
 def parser_factory(sigma):
     class ParseRegAlphabet(ParseReg1):
         def __init__(self, no_table=0, table='.tablereg'):
-            # sort by longest string length first:
-            # yappy seems to stop on first matching id, so to prevent
-            # matching a substring (which will raise an invalid regex error),
+            # sort by longest string first:
+            # matching on a substring will raise an invalid regex error,
+            # and since yappy seems to stop on first matching id,
             # place substrings last
             siglist = sorted(list(sigma), key=len, reverse=True)
             grammar = [("r", ["r", "|", "c1"], self.OrSemRule),
@@ -63,7 +64,7 @@ def str2regex_alpha(regex, alphabet):
                       strict=True)
 
 # convert set difference expression (eg, N-s0) into regex disjunction
-def expand_regex(expr, topo):
+def expand_regex(expr, topo, aliases):
     matches = re.finditer(r"(\w+)\s*-\s*(\w+)",
                           expr,
                           re.IGNORECASE|re.MULTILINE)
@@ -75,6 +76,9 @@ def expand_regex(expr, topo):
 
         diff = topo.switch_diff(m.group(2))
         expr = expr.replace(m.group(0), "|".join(diff))
+
+    for alias, values in aliases.iteritems():
+        expr = expr.replace(alias, "({0})".format("|".join(values)))
 
     return expr
 
@@ -153,11 +157,11 @@ class Network(object):
 
 class FSA(object):
     def __init__(self, regex, sigma):
-        self.regex = regex
         if isinstance(sigma, list):
             self.sigma = set(sigma)
         else:
             self.sigma = sigma
+        self.regex = regex
         self.dfa = self._parse()
         self.states = FSA.state_names(self.dfa)
         self.symbols = FSA.symbol_names(self.dfa)
@@ -184,7 +188,7 @@ class FSA(object):
         output += "\n".join(["{0} {1} {2}".format(start, t, end)
                              for start, t, end in self.transitions])
         output += "\n"
-        output += "[INFO] final: {0}".format(" ".join(self.final))
+        output += "[INFO] final: {0}\n".format(" ".join(self.final))
         return output
 
     @classmethod
@@ -237,16 +241,36 @@ class FSA(object):
         return lines
 
 class Specification(object):
-    def __init__(self, spec):
-        self.spec = spec.strip()
+    def __init__(self, spec_file):
+        cfg = ConfigParser.ConfigParser()
+        cfg.read(spec_file)
+
+        self.aliases = {}
+        for name, value in cfg.items("aliases"):
+            if name not in self.aliases:
+                self.aliases[name] = []
+            self.aliases[name].extend([v.strip() for v in value.split(",")])
+
+        if len(cfg.items("change")) == 0:
+            raise Exception("Missing required section [change]")
+
+        change_re = re.search(r"\[change\]([\s\S]+)(\[\w+]|$)",
+                              open(spec_file, 'r').read(),
+                              re.MULTILINE)
+        if change_re:
+            self.spec = change_re.group(1).replace("\n", "").strip()
+        else:
+            raise Exception("Unable to parse [change] section")
+
         tokens = self.spec.split("=>")
-        if len(tokens) > 2 or len(tokens) < 1:
+        if len(tokens) != 2:
             raise Exception("Invalid specification {0}".format(self.spec))
 
         self.lhs = tokens[0].strip()
-        self.rhs = None
-        if len(tokens) > 1:
-            self.rhs = tokens[1].strip()
+        self.rhs = tokens[1].strip()
+
+        print "Found aliases:", self.aliases.keys()
+        print "Using spec:", self.spec
 
     def parse(self, network, destination):
         self._parse_lhs(network, destination)
@@ -260,14 +284,18 @@ class Specification(object):
 
         os.makedirs(select_dir)
 
-        regex = expand_regex(self.lhs, network.topo)
+        regex = expand_regex(self.lhs, network.topo, self.aliases)
+        print "Lhs expanded:", regex
         matches = network.match_classes(regex)
         for m in matches:
+            print "Matched packet class:", \
+                os.path.basename(network.class_files[m])
             shutil.copy2(network.class_files[m], select_dir)
 
     def _parse_rhs(self, network, destination):
         destination = os.path.join(destination, "automata.txt")
-        regex = expand_regex(self.rhs, network.topo)
+        regex = expand_regex(self.rhs, network.topo, self.aliases)
+        print "Rhs expanded:", regex
         fsa = FSA(regex, network.topo.switches)
         with open(destination, 'w') as f:
             f.write(str(fsa))
@@ -305,7 +333,7 @@ def main():
     print "Loaded network with {0} packet classes".format(
         len(network.classes.keys()))
 
-    spec = Specification(open(args.spec).read())
+    spec = Specification(args.spec)
     spec.parse(network, args.dest)
 
 if __name__ == "__main__":

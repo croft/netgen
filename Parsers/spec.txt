@@ -1,0 +1,6 @@
+[aliases]
+fw = s0,s1
+lb = s3,s4
+
+[change]
+.* s0 .* => (N - s0)* s2 (N - s0)*
