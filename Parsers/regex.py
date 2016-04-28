@@ -161,23 +161,36 @@ class FSA(object):
             self.sigma = set(sigma)
         else:
             self.sigma = sigma
+
+        self.renameCount = 0
         self.regex = regex
         self.dfa = self._parse()
         self.states = FSA.state_names(self.dfa)
         self.symbols = FSA.symbol_names(self.dfa)
-        self.final = FSA.pprint_state_name(self.dfa.Initial) # reverse?
-        self.initial = FSA.pprint_state_name(self.dfa.Final) # reverse?
         self.transitions = FSA.transition_names(self.dfa)
+        self.final = [self.pprint_state_name(self.dfa.States[x])
+                      for x in self.dfa.Final]
+        self.initial = self.dfa.States[self.dfa.Initial]
 
     def _parse(self):
         expr = str2regex_alpha(self.regex, self.sigma)
-        nfa = expr.toNFA()
+        nfa = expr.nfaFollow()
         rnfa = nfa.reversal()
         dfa = rnfa.toDFA()
-        dfa = dfa.completeMinimal()
+        dfa = dfa.minimal(complete=True)
+
+        self.renameCount = len(dfa.States)
+        dfa = dfa.renameState(dfa.stateIndex('dead'), '0')
+        dfa = dfa.renameState(dfa.Initial, self.renameCount)
+        for i in range(len(dfa.States)):
+            state = dfa.States[i]
+            if isinstance(state, set):
+                self.renameCount += 1
+                dfa.renameState(i, str(self.renameCount))
+
         print dfa.succintTransitions()
-        print dfa.Initial
-        print dfa.Final
+        print dfa.States[dfa.Initial]
+        print map(lambda x:dfa.States[x], dfa.Final)
         return dfa
 
     def __repr__(self):
@@ -185,7 +198,7 @@ class FSA(object):
 
     def __str__(self):
         output = "[INFO] states: {0}\n".format(" ".join(self.states))
-        output += "[INFO] start: {0}\n".format(" ".join(self.initial))
+        output += "[INFO] start: {0}\n".format(self.initial)
         output += "[INFO] symbols: {0}\n".format(" ".join(self.symbols))
         output += "[INFO] transitions:\n"
         output += "\n".join(["{0} {1} {2}".format(start, t, end)

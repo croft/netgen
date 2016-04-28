@@ -4,7 +4,7 @@
 # (Note: traffic and path specs now separated by semicolon)
 # ----------------------------------------------------------
 # spec ::= traffic; S: path => path[od] [NM:R]
-# 
+#
 # traffic ts ::= true |
 #                match(header=val) |
 #                match(header,prefix) |
@@ -16,19 +16,45 @@
 # n ::= alpha
 # ----------------------------------------------------------
 
+import abc
 from pyparsing import Word, alphas, Literal, Group, alphanums
 
-class ExactMatch(object):
+class HeaderMatch(object):
+    __metaclass__ = abc.ABCMeta
+
+    NW_SRC = "IP_SRC"
+    NW_DST = "IP_DST"
+    DL_SRC = "MAC_SRC"
+    DL_DST = "MAC_DST"
+    TP_SRC = "TCP_SRC_PORT"
+    TP_DST = "TCP_DST_PORT"
+    Fields = [NW_SRC, NW_DST, DL_SRC, DL_DST, TP_SRC, TP_DST]
+
     def __init__(self, name, value):
+        if name.upper() not in HeaderMatch.Fields:
+            raise Exception("Invalid header field {0}".format(name))
+
         self.name = name
         self.value = value
 
+    @abc.abstractmethod
     def evaluate(self, rule):
-        # TODO
+        return False
+
+    def field_value(self, field):
+        # TODO: depends on packet class
         pass
 
     def __repr__(self):
         return str(self)
+
+class ExactMatch(HeaderMatch):
+    def __init__(self, name, value):
+        super(ExactMatch, self).__init__(name, value)
+
+    def evaluate(self, rule):
+        # TODO
+        pass
 
     def __str__(self):
         return "{0}={1}".format(self.name,
@@ -36,15 +62,11 @@ class ExactMatch(object):
 
 class PrefixMatch(object):
     def __init__(self, name, value):
-        self.name = name
-        self.value = value
+        super(PrefixMatch, self).__init__(name, value)
 
     def evaluate(self, rule):
         # TODO
         pass
-
-    def __repr__(self):
-        return str(self)
 
     def __str__(self):
         return "{0},{1}".format(self.name,
@@ -88,19 +110,21 @@ COMMA = Literal(",")
 COLON = Literal(";")
 MATCH = Literal("match")
 
-EXACT_MATCH = Group(MATCH.suppress() + 
+HEADER_WORDS = Word(alphanums+"_.")
+
+EXACT_MATCH = Group(MATCH.suppress() +
                     LPAREN.suppress() +
-                    Word(alphas) + 
+                    HEADER_WORDS +
                     Literal("=") +
-                    Word(alphas) +
+                    HEADER_WORDS +
                     RPAREN.suppress()
                 )
 
 PREFIX_MATCH = Group(MATCH.suppress() +
                      LPAREN.suppress() +
-                     Word(alphas) +
+                     HEADER_WORDS +
                      Literal(",") +
-                     Word(alphas) +
+                     HEADER_WORDS +
                      RPAREN.suppress()
                  )
 
@@ -121,7 +145,7 @@ grammar = (TRAFFIC +
            ARROW.suppress() +
            PATH)
 
-test = "not match(a=b); .* s2 .* => (N-s2)* s2 (N-s2)*"
+test = "not match(ip_src=a.b.c.d); .* s2 .* => (N-s2)* s2 (N-s2)*"
 parsed = grammar.parseString(test)
 t = TrafficSpec(parsed[0])
 print "Traffic:", t
