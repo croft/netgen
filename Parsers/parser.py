@@ -291,7 +291,7 @@ class DiamondTopo(Topology):
                 src_ip = self.hosts[src].ip
                 dst_ip = self.hosts[dst].ip
                 wc = "255.255.255.255"
-                for location, nexthop in pairwise(path[1:]):
+                for location, nexthop in pairwise(path[1:-1]):
                     flow = FlowEntry(dest=dst_ip,
                                      wildcard=wc,
                                      location=location,
@@ -367,7 +367,8 @@ class FattreeTopo(Topology):
                 src_ip = self.hosts[src].ip
                 dst_ip = self.hosts[dst].ip
                 wc = "255.255.255.255"
-                for location, nexthop in pairwise(path[1:]):
+                for location, nexthop in pairwise(path[1:-1]):
+                    print location, nexthop
                     flow = FlowEntry(dest=dst_ip,
                                      wildcard=wc,
                                      location=location,
