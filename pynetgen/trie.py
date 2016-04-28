@@ -12,43 +12,6 @@ from netaddr import *
 OFPFC_ADD = 0
 OFPFC_DELETE_STRICT = 1
 
-FieldIndex = { "IN_PORT": 0,
-               "DL_SRC" : 1,
-               "DL_DST" : 2,
-               "DL_TYPE" : 3,
-               "NW_SRC" : 4,
-               "NW_DST" : 5, }
-
-#               "FIELD_END" : 6,
-#               "METADATA" : 7,
-#               "WILDCARD" : 8 }
-
-FIELD_END = 6 #len(FieldIndex.keys())
-
-def getIndex(idx):
-    for k,v in FieldIndex.iteritems():
-        if v == idx:
-            return k
-
-#FieldWidth = { 0: 16,
-#               1 : 48,
-#               2 : 48,
-#               3 : 16,
-#               4 : 32,
-#               5 : 32 ,
-#               6 : 0 }
-
-FieldWidth = { "IN_PORT" : 16,
-               "DL_SRC" : 48,
-               "DL_DST" : 48,
-               "DL_TYPE" : 16,
-               "NW_SRC" : 32,
-               "NW_DST" : 32 ,
-               "FIELD_END" : 0 }
-
-def ip_to_binstr(ip):
-    return bin(int(ipaddr.IPv4Address(ip)))[2::]
-
 def iptoi(ip):
     # handle default value
     if ip == "0":
@@ -66,6 +29,49 @@ def mactoi(mac):
     if mac == "0":
         return 0
     return int(mac_to_binstr(mac))
+
+class FieldDefinition(object):
+    def __init__(self):
+        self.Index = {}
+        self.Width = {}
+        self.MaxValue = {}
+        self.intConverter = {}
+        self.count = 0
+
+    def addField(self, name, width, maxvalue, intfunc=None):
+        index = self.count
+        self.Index[name] = index
+        self.Index[index] = name
+        self.Width[index] = width
+        self.MaxValue[index] = maxvalue
+        if intfunc is None:
+            self.intConverter[index] = FieldDefinition.defaultConverter
+        else:
+            self.intConverter[index] = intfunc
+        self.count += 1
+
+    @classmethod
+    def defaultConverter(cls, val):
+        return int(val)
+
+    @property
+    def End(self):
+        return self.count
+
+    def intValue(self, index, value):
+        return self.intConverter[index](value)
+
+class PacketField(FieldDefinition):
+    def __init__(self):
+        super(PacketField, self).__init__()
+        self.addField("IN_PORT", 16, int(0xFFFF))
+        self.addField("DL_SRC", 48, int(0xFFFFFFFFFFFF), mactoi)
+        self.addField("DL_DST", 48, int(0xFFFFFFFFFFFF), mactoi)
+        self.addField("DL_TYPE", 16, int(0xFFFF))
+        self.addField("NW_SRC", 32, int(0xFFFFFFFF), iptoi)
+        self.addField("NW_DST", 32, int(0xFFFFFFFF), iptoi)
+
+HeaderField = PacketField()
 
 class ForwardingLink(object):
     def __init__(self, rule, isGateway=False):
@@ -118,9 +124,9 @@ class EquivalenceClass(object):
     def __init__(self, lowerBound = None, upperBound = None):
 
         if lowerBound is None:
-            lowerBound = [0] * FIELD_END
+            lowerBound = [0] * HeaderField.End
         if upperBound is None:
-            upperBound = [0] * FIELD_END
+            upperBound = [0] * HeaderField.End
 
         assert len(lowerBound) == len(upperBound)
         for i in range(len(lowerBound)):
@@ -132,23 +138,6 @@ class EquivalenceClass(object):
     def getRange(self, findex):
         assert findex <= len(self.lowerBound)
         return self.upperBound[findex] - self.lowerBound[findex]
-
-    @classmethod
-    def getMaxValue(cls, findex):
-        if findex == FieldIndex['IN_PORT']:
-            return int(0xFFFF)
-        elif findex == FieldIndex['DL_SRC']:
-            return int(0xFFFFFFFFFFFF)
-        elif findex == FieldIndex['DL_DST']:
-            return int(0xFFFFFFFFFFFF)
-        elif findex == FieldIndex['DL_TYPE']:
-            return int(0xFFFF)
-        elif findex == FieldIndex['NW_SRC']:
-            return int(0xFFFFFFFF)
-        elif findex == FieldIndex['NW_DST']:
-            return int(0xFFFFFFFF)
-        else:
-            raise ValueError("wrong field index")
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -173,8 +162,8 @@ class Rule(object):
     FORWARDING = 2
 
     def __init__(self):
-        self.fieldValue = [0] * FIELD_END
-        self.fieldMask = [0] * FIELD_END
+        self.fieldValue = [0] * HeaderField.End
+        self.fieldMask = [0] * HeaderField.End
         self.ruleType = Rule.DUMMY
         self.priority = Rule.INVALID_PRIORITY
         self.wildcards = 0
@@ -182,10 +171,10 @@ class Rule(object):
         self.nextHop = None
 
     def getEquivalenceClass(self):
-        lb = [0] * FIELD_END
-        ub = [0] * FIELD_END
+        lb = [0] * HeaderField.End
+        ub = [0] * HeaderField.End
 
-        for fname, findex in FieldIndex.iteritems():
+        for fname, findex in HeaderField.Index.iteritems():
             fieldValue = 0
             fieldMask = 0
 
@@ -201,11 +190,11 @@ class Rule(object):
 
             maskedValue = fieldValue & fieldMask
 
-            for j in range(FieldWidth[fname]):
+            for j in range(HeaderField.Width[findex]):
                 lb[findex] <<= 1
                 ub[findex] <<= 1
 
-                width = FieldWidth[fname]
+                width = HeaderField.Width[findex]
                 maskBit = 1 << ((width - 1) - j)
 
                 if (fieldMask & maskBit) == 0: # wildcard bit
@@ -220,29 +209,26 @@ class Rule(object):
         return EquivalenceClass(lb, ub)
 
     def getEquivalenceRange(self, fname):
-        findex = FieldIndex[fname]
+        findex = HeaderField.Index[fname]
         eqrange = EquivalenceRange()
 
         fieldValue = 0
         fieldMask = 0
 
-        if findex == FieldIndex['DL_SRC'] or findex == FieldIndex['DL_DST']:
-            fieldValue = mactoi(self.fieldValue[findex])
-            fieldMask = mactoi(self.fieldMask[findex])
-        elif findex == FieldIndex['NW_SRC'] or findex == FieldIndex['NW_DST']:
-            fieldValue = iptoi(self.fieldValue[findex])
-            fieldMask = iptoi(self.fieldMask[findex])
+        fieldValue = HeaderField.intValue(findex, self.fieldValue[findex])
+
+        if findex in self.fieldMask:
+            fieldMask = HeaderValue.intValue(findex, self.fieldMask[findex])
         else:
-            fieldValue = int(self.fieldValue[findex])
-            fieldMask = int(self.fieldValue[findex])
+            fieldMask = HeaderValue.intValue(findex, self.fieldValue[findex])
 
         maskedValue = fieldValue & fieldMask
 
-        for j in range(FieldWidth[fname]):
+        for j in range(HeaderField.Width[fname]):
             eqrange.lowerBound <<= 1
             eqrange.upperBound <<= 1
 
-            maskBit = 1 << ((FieldWidth[fname] - 1) - j)
+            maskBit = 1 << ((HeaderField.Width[fname] - 1) - j)
             if (fieldMask & maskBit) == 0: # wildcard bit
                 eqrange.upperBound |= 1
             else:
@@ -256,7 +242,7 @@ class Rule(object):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            for i in range(FIELD_END):
+            for i in range(HeaderField.End):
                 if self.fieldValue[i] != other.fieldValue[i] or \
                    self.fieldMask[i] != other.fieldMask[i]:
                     return False
@@ -278,33 +264,24 @@ class TrieNode(object):
         self.oneBranch = None
         self.wildcardBranch = None
         self.nextLevelTrie = None
-        self.ruleSet = None # key=Rule, Hash=KHash<rule>
+        self.ruleSet = None
 
 class Trie(object):
-    def __init__(self, fname): #fieldIndex):
+    def __init__(self, fieldIndex):
         self.root = None
-        self.fieldName = fname
-        self.fieldIndex = FieldIndex[fname]
+        self.fieldName = HeaderField.Index[fieldIndex]
+        self.fieldIndex = fieldIndex
         self.totalRuleCount = 0
-
-    @classmethod
-    def getIntValue(cls, findex, valueOrMask):
-        if findex == FieldIndex["DL_SRC"] or findex == FieldIndex["DL_DST"]:
-            return mactoi(valueOrMask)
-        elif findex == FieldIndex["NW_SRC"] or findex == FieldIndex["NW_DST"]:
-            return iptoi(valueOrMask)
-        else:
-            return int(valueOrMask)
 
     def findNode(self, fieldValue, fieldMask):
         if self.root is None or self.totalRuleCount == 0:
             return None
 
-        fieldInt = Trie.getIntValue(self.fieldIndex, fieldValue)
-        maskInt = Trie.getIntValue(self.fieldIndex, fieldMask)
+        fieldInt = HeaderField.intValue(self.fieldIndex, fieldValue)
+        maskInt = HeaderField.intValue(self.fieldIndex, fieldMask)
         maskedValue = fieldInt & maskInt
 
-        width = FieldWidth[self.fieldName]
+        width = HeaderField.Width[self.fieldIndex]
         curnode = self.root
 
         for i in range(width):
@@ -333,11 +310,11 @@ class Trie(object):
         if self.root is None:
             self.root = TrieNode()
 
-        fieldInt = Trie.getIntValue(self.fieldIndex, rule.fieldValue[self.fieldIndex])
-        maskInt = Trie.getIntValue(self.fieldIndex, rule.fieldMask[self.fieldIndex])
+        fieldInt = HeaderField.intValue(self.fieldIndex, rule.fieldValue[self.fieldIndex])
+        maskInt = HeaderField.intValue(self.fieldIndex, rule.fieldMask[self.fieldIndex])
         maskedValue = fieldInt & maskInt
 
-        width = FieldWidth[self.fieldName]
+        width = HeaderField.Width[self.fieldIndex]
         curnode = self.root
 
         for i in range(width):
@@ -393,16 +370,16 @@ class Trie(object):
     def getForwardingGraph(self, currentIndex, inTries, eqclass):
         graph = ForwardingGraph()
 
-        if currentIndex + 1 != FIELD_END:
+        if currentIndex + 1 != HeaderField.End:
             print "getForwardingTable() called on wrong trie"
             return
 
         fieldValue = eqclass.lowerBound[currentIndex]
-        fieldMask = EquivalenceClass.getMaxValue(currentIndex)
+        fieldMask = HeaderField.getMaxValue(currentIndex)
         maskedValue = fieldValue & fieldMask
 
         # TODO: what?
-        width = FieldIndex[getIndex(currentIndex)]
+        width = HeaderField.Width[currentIndex]
 
         for it in inTries:
             if it.totalRuleCount == 0:
@@ -469,11 +446,11 @@ class Trie(object):
         if self.root is None:
             return
 
-        fieldInt = Trie.getIntValue(self.fieldIndex, rule.fieldValue[self.fieldIndex])
-        maskInt = Trie.getIntValue(self.fieldIndex, rule.fieldMask[self.fieldIndex])
+        fieldInt = HeaderField.intValue(self.fieldIndex, rule.fieldValue[self.fieldIndex])
+        maskInt = HeaderField.intValue(self.fieldIndex, rule.fieldMask[self.fieldIndex])
         maskedValue = fieldInt & maskInt
 
-        width = FieldWidth[self.fieldName]
+        width = HeaderField.Width[self.fieldIndex]
         curnode = self.root
         eqrange = EquivalenceRange()
 
@@ -612,10 +589,10 @@ class Trie(object):
         outputTries = []
 
         nextIndex = curIndex + 1
-        assert nextIndex < FIELD_END
+        assert nextIndex < HeaderField.End
 
         fieldInt = lb
-        maskInt = EquivalenceClass.getMaxValue(curIndex)
+        maskInt = HeaderField.MaxValue[curIndex]
         maskedValue = fieldInt & maskInt
 
         for t in range(len(inputTries)):
@@ -628,8 +605,7 @@ class Trie(object):
             curLevelNodes.append(inputTrie.root)
             curnode = None
 
-            # TODO: refactor
-            width = FieldWidth[getIndex(curIndex)]
+            width = HeaderField.Width[curIndex]
             for i in range(width):
                 while len(curLevelNodes) > 0:
                     curnode = curLevelNodes[0]
@@ -678,8 +654,8 @@ class Trie(object):
         lbmap = {}
         ubmap = {}
 
-        fieldInt = Trie.getIntValue(nextIndex, rule.fieldValue[nextIndex])
-        maskInt = Trie.getIntValue(nextIndex, rule.fieldMask[nextIndex])
+        fieldInt = HeaderField.intValue(nextIndex, rule.fieldValue[nextIndex])
+        maskInt = HeaderField.intValue(nextIndex, rule.fieldMask[nextIndex])
         maskedValue = fieldInt & maskInt
 
         for t in range(len(outputTries)):
@@ -689,7 +665,7 @@ class Trie(object):
                 continue
 
             # TODO: refactor
-            width = FieldWidth[getIndex(nextIndex)]
+            width = HeaderField.Width[nextIndex]
             curnode = outputTrie.root
             eqrange = EquivalenceRange()
 
@@ -885,18 +861,18 @@ class Trie(object):
 
 class Veriflow(object):
     def __init__(self):
-        self.primaryTrie = Trie("IN_PORT")
+        self.primaryTrie = Trie(0)
 
     def addRule(self, rule):
         curTrie = self.primaryTrie
         tries = []
 
-        for i in range(FIELD_END):
+        for i in range(HeaderField.End):
             tries.append(curTrie)
             leaf = curTrie.addRule(rule)
 
             # if last level trie, need to check rule list
-            if i == (FIELD_END - 1):
+            if i == (HeaderField.End - 1):
                 if leaf.ruleSet is None:
                     leaf.ruleSet = []
                 else:
@@ -907,7 +883,7 @@ class Veriflow(object):
                 leaf.ruleSet.append(rule)
             else:
                 if leaf.nextLevelTrie is None:  # intermediate trie
-                    leaf.nextLevelTrie = Trie(getIndex(i + 1))
+                    leaf.nextLevelTrie = Trie(i + 1)
 
                 curTrie = leaf.nextLevelTrie
 
@@ -921,14 +897,14 @@ class Veriflow(object):
         tries = []
         leaves = []
 
-        for i in range(FIELD_END):
+        for i in range(HeaderField.End):
             leaf = curTrie.findNode(rule.fieldValue[i], rule.fieldMask[i])
             if leaf is None:
                 return False
                 #continue
 
             # if last level trie, need to check rule list
-            if i == (FIELD_END - 1):
+            if i == (HeaderField.End - 1):
                 if leaf.ruleSet is None:
                     raise Exception("leaf.ruleSet cannot be None")
 
@@ -955,9 +931,9 @@ class Veriflow(object):
         return False
 
     def _recGetAffected(self, rule, curIndex, prevClass, prevTries):
-        if curIndex == FIELD_END - 1:
+        if curIndex == HeaderField.End - 1:
             pc = EquivalenceClass()
-            for i in range(FIELD_END):
+            for i in range(HeaderField.End):
                 c = prevClass[i]
                 pc.lowerBound[i] = c.lowerBound[i]
                 pc.upperBound[i] = c.upperBound[i]
@@ -971,7 +947,7 @@ class Veriflow(object):
                     prevTries[-1])
 
                 if len(classes) == 0:
-                    field = getIndex(curIndex+1)
+                    field = HeaderField.fieldName(curIndex+1)
                     print "Error: {0} packet classes".format(field)
                 else:
                     ret = []
@@ -1007,7 +983,7 @@ class Veriflow(object):
 
         classes = self.primaryTrie.getEquivalenceClasses(rule)
         return self._recGetAffected(rule,
-                                    FieldIndex["IN_PORT"],
+                                    0,
                                     classes,
                                     [[self.primaryTrie]])
 
@@ -1037,8 +1013,8 @@ class Veriflow(object):
         for inport_pc in inportClasses:
             if rule.ruleType == Rule.FORWARDING:
                 dlsrcClasses, dlsrcTries = Trie.getNextLevelEquivalenceClasses(
-                    FieldIndex["IN_PORT"],
-                    inport_pc.lowerBound[FieldIndex["IN_PORT"]],
+                    HeaderField.Index["IN_PORT"],
+                    inport_pc.lowerBound[HeaderField.Index["IN_PORT"]],
                     rule,
                     inportTries)
 
@@ -1048,8 +1024,8 @@ class Veriflow(object):
 
                 for dlsrc_pc in dlsrcClasses:
                     dldstClasses, dldstTries = Trie.getNextLevelEquivalenceClasses(
-                        FieldIndex["DL_SRC"],
-                        dlsrc_pc.lowerBound[FieldIndex["DL_SRC"]],
+                        HeaderField.Index["DL_SRC"],
+                        dlsrc_pc.lowerBound[HeaderField.Index["DL_SRC"]],
                         rule,
                         dlsrcTries)
 
@@ -1059,8 +1035,8 @@ class Veriflow(object):
 
                     for dldst_pc in dldstClasses:
                         dltypClasses, dltypTries = Trie.getNextLevelEquivalenceClasses(
-                            FieldIndex["DL_DST"],
-                            dldst_pc.lowerBound[FieldIndex["DL_DST"]],
+                            HeaderField.Index["DL_DST"],
+                            dldst_pc.lowerBound[HeaderField.Index["DL_DST"]],
                             rule,
                             dldstTries)
 
@@ -1072,8 +1048,8 @@ class Veriflow(object):
 
                         for dltyp_pc in dltypClasses:
                             nwsrcClasses, nwsrcTries = Trie.getNextLevelEquivalenceClasses(
-                                FieldIndex["DL_TYPE"],
-                                dltyp_pc.lowerBound[FieldIndex["DL_TYPE"]],
+                                HeaderField.Index["DL_TYPE"],
+                                dltyp_pc.lowerBound[HeaderField.Index["DL_TYPE"]],
                                 rule,
                                 dltypTries)
 
@@ -1083,8 +1059,8 @@ class Veriflow(object):
 
                             for nwsrc_pc in nwsrcClasses:
                                 nwdstClasses, nwdstTries = Trie.getNextLevelEquivalenceClasses(
-                                    FieldIndex["NW_SRC"],
-                                    nwsrc_pc.lowerBound[FieldIndex["NW_SRC"]],
+                                    HeaderField.Index["NW_SRC"],
+                                    nwsrc_pc.lowerBound[HeaderField.Index["NW_SRC"]],
                                     rule,
                                     nwsrcTries)
 
@@ -1103,7 +1079,7 @@ class Veriflow(object):
                                                "NW_DST" : nwdst_pc }
 
                                     for key, value in bounds.iteritems():
-                                        index = FieldIndex[key]
+                                        index = HeaderField.Index[key]
                                         pc.lowerBound[index] = value.lowerBound[index]
                                         pc.upperBound[index] = value.upperBound[index]
 
@@ -1144,29 +1120,20 @@ def test_ec():
     e = EquivalenceClass(lb, ub)
     f = EquivalenceClass(lb, ub)
     assert (e == f) == True
-    print e.getRange(FieldIndex["NW_SRC"])
-    print e.getRange(FieldIndex["DL_SRC"])
-    assert e.getRange(FieldIndex["IN_PORT"]) == 1
+    print e.getRange(HeaderField.Index["NW_SRC"])
+    print e.getRange(HeaderField.Index["DL_SRC"])
+    assert e.getRange(HeaderField.Index["IN_PORT"]) == 1
 
-
-def test_binaddr():
-    mac = mac_to_binstr('00-1B-77-49-54-FD')
-    ip = ip_to_binstr('192.168.1.1')
-
-    print len(mac)
-    print mac
-    print len(ip)
-    print ip
 
 def test_rule():
     r1 = Rule()
 
     r1.ruleType = Rule.FORWARDING
-    r1.fieldValue[FieldIndex["NW_SRC"]] = iptoi("192.168.1.20")
-    r1.fieldMask[FieldIndex["NW_SRC"]] = iptoi("255.255.255.0")
+    r1.fieldValue[HeaderField.Index["NW_SRC"]] = iptoi("192.168.1.20")
+    r1.fieldMask[HeaderField.Index["NW_SRC"]] = iptoi("255.255.255.0")
 
     eclass = r1.getEquivalenceClass()
-    print "R1 EC: ", itoip(eclass.lowerBound[FieldIndex["NW_SRC"]]), itoip(eclass.upperBound[FieldIndex["NW_SRC"]])
+    print "R1 EC: ", itoip(eclass.lowerBound[HeaderField.Index["NW_SRC"]]), itoip(eclass.upperBound[HeaderField.Index["NW_SRC"]])
     er = r1.getEquivalenceRange("NW_SRC")
     print itoip(er.lowerBound), itoip(er.upperBound)
 
@@ -1176,8 +1143,8 @@ def test_trie():
     r1 = Rule()
 
     r1.ruleType = Rule.FORWARDING
-    r1.fieldValue[FieldIndex["NW_SRC"]] = iptoi("192.168.1.20")
-    r1.fieldMask[FieldIndex["NW_SRC"]] = iptoi("255.255.255.255")
+    r1.fieldValue[HeaderField.Index["NW_SRC"]] = iptoi("192.168.1.20")
+    r1.fieldMask[HeaderField.Index["NW_SRC"]] = iptoi("255.255.255.255")
     r1.priority = 5
 
     vf.addRule(r1)
@@ -1201,14 +1168,51 @@ def test():
 if __name__ == "__main__":
     test()
 
-#    temprange = EquivalenceRange(0, 1)
-#    onerange = temprange
-#    onerange.lowerBound = 0
-#    zerorange = temprange
-#    print onerange, zerorange
-
 
 # TODO:
 # see VeriFlow.cpp on adding rule (adds ruleset to trienode)
 # implement getForwardingGraph
 # fix vf_delflow
+
+# class HeaderField(object):
+#     Index = { "IN_PORT": 0,
+#               "DL_SRC" : 1,
+#               "DL_DST" : 2,
+#               "DL_TYPE" : 3,
+#               "NW_SRC" : 4,
+#               "NW_DST" : 5 }
+#     #"FIELD_END" : 6,
+#     #"METADATA" : 7,
+#     #"WILDCARD" : 8 }
+#     End = 6
+#     Width = { 0 : 16,
+#               1 : 48,
+#               2 : 48,
+#               3 : 16,
+#               4 : 32,
+#               5 : 32 ,
+#               6 : 0 }
+#     MaxValue = { 0 : int(0xFFFF),
+#                  1 : int(0xFFFFFFFFFFFF),
+#                  2 : int(0xFFFFFFFFFFFF),
+#                  3 : int(0xFFFF),
+#                  4 : int(0xFFFFFFFF),
+#                  5 : int(0xFFFFFFFF),
+#                  6 : 0 }
+#     @classmethod
+#     def fieldName(cls, index):
+#         for k,v in HeaderField.Index.iteritems():
+#             if v == index:
+#                 return k
+#     @classmethod
+#     def intValue(cls, index, value):
+#         mac = [HeaderField.Index["DL_SRC"],
+#                HeaderField.Index["DL_DST"]]
+#         ip = [HeaderField.Index["NW_SRC"],
+#               HeaderField.Index["NW_DST"]]
+#         if index in ip:
+#             return mactoi(valueOrMask)
+#         elif index in mac:
+#             return iptoi(valueOrMask)
+#         else:
+#             return int(valueOrMask)
