@@ -305,10 +305,9 @@ class DiamondTopo(Topology):
         self.paths[src][dst] = path
 
         # assume paths are bidirectional
-        if dst not in self.paths.keys():
-            self.paths[dst] = {}
-
-        self.paths[dst][src] = path
+        # if dst not in self.paths.keys():
+        #     self.paths[dst] = {}
+        # self.paths[dst][src] = path
 
     def _make_topo(self):
         g = igraph.Graph()
@@ -396,10 +395,9 @@ class FattreeTopo(Topology):
         self.paths[src][dst] = path
 
         # assume paths are bidirectional
-        if dst not in self.paths.keys():
-            self.paths[dst] = {}
-
-        self.paths[dst][src] = path
+        # if dst not in self.paths.keys():
+        #     self.paths[dst] = {}
+        # self.paths[dst][src] = path
 
     def path(self, src, dst):
         path = dijkstra.shortestPath(self.distances, src, dst)
