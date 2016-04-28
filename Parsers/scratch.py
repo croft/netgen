@@ -52,29 +52,32 @@ def str2regex_alpha(regex, alphabet):
 # =============================================================================
 # working example with ascii alphabet
 # =============================================================================
-expr = "aa*|b"
-re = str2regexp(expr)
-dfa = re.toDFA()
-dfa = dfa.completeMinimal()
-print "REGEX:", expr
-print "States:", dfa.States
-print "Initial:", dfa.Initial
-print "Final:", dfa.Final
-print "Transitions:", dfa.succintTransitions()
+# expr = "aa*|b"
+# re = str2regexp(expr)
+# dfa = re.toDFA()
+# dfa = dfa.completeMinimal()
+# print "REGEX:", expr
+# print "States:", dfa.States
+# print "Initial:", dfa.Initial
+# print "Final:", dfa.Final
+# print "Transitions:", dfa.succintTransitions()
 
 print "\n---------------------------------------\n"
 
 # =============================================================================
 # working example with switch names
 # =============================================================================
-alphabet = ["s0", "s1"]
-expr = "s0s0* s1 s0s0*"
+alphabet = ["s0", "s1", "s2", "N" ]
+expr = "s0s0* s2 s1s1* "
 re = str2regex_alpha(expr, alphabet)
-dfa = re.toDFA()
+dfa = re.nfaPosition().reversal().toDFA().minimal(complete=True)
+#dfa = re.toDFA()
 #dfa = dfa.completeMinimal()
+dfa = dfa.renameState(dfa.Initial, 'init')
+dfa = dfa.renameState(dfa.stateIndex('dead'), '0')
 print "REGEX:", expr
 print "States:", dfa.States
-print "Initial:", dfa.Initial
-print "Final:", dfa.Final
+print "Initial:", dfa.States[dfa.Initial]
+print "Final:", map(lambda x:dfa.States[x], dfa.Final)
 print "Transitions:", dfa.succintTransitions()
 

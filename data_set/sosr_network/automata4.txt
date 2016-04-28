@@ -1,0 +1,11 @@
+[INFO] states: 11 12 13 14 15 0
+[INFO] start: 11
+[INFO] symbols: 1 2 3 4 5 6 7 8 0 
+[INFO] transitions: 
+11 8 12
+12 7 13
+13 5 14
+14 1 15
+14 2 15
+14 3 15
+[INFO] final: 15
