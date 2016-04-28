@@ -300,7 +300,7 @@ class Trie(object):
 
         width = FieldWidth[self.fieldName]
         curnode = self.root
-        
+
         for i in range(width):
             mask = 1 << ((width - 1) - i)
             if (maskInt & mask) == 0:  # wildcard bit
@@ -319,7 +319,7 @@ class Trie(object):
                         curnode.oneBranch = TrieNode()
                         curnode.oneBranch.parent = curnode
                     curnode = curnode.oneBranch
-        
+
         return curnode
 
     def removeRule(self, node):
@@ -443,8 +443,6 @@ class Trie(object):
                 self.addToBoundList(temprange.lowerBound,
                                     temprange.upperBound)
 
-        print self.upperBoundList
-        print self.lowerBoundList
         self.lowerBoundList.sort()
         self.upperBoundList.sort()
 
@@ -488,7 +486,6 @@ class Trie(object):
                 ub = self.upperBoundList[0]
                 self.upperBoundList = self.upperBoundList[1:]
 
-            
             pktclass = EquivalenceClass()
             pktclass.lowerBound[self.fieldIndex] = lb
             pktclass.upperBound[self.fieldIndex] = ub
@@ -772,7 +769,6 @@ class Trie(object):
         string += self.traversePreorder(node.wildcardBranch, fname, level + 1, 2)
         return string
         
-
 def vf_addflow(primaryTrie, rule):
     curTrie = primaryTrie
     tries = []
@@ -808,6 +804,7 @@ def vf_delflow(primaryTrie, rule):
         leaf = curTrie.findNode(rule.fieldValue[i], rule.fieldMask[i])
         if leaf is None:
             return False
+            #continue
 
         # if last level trie, need to check rule list        
         if i == (FIELD_END - 1):
@@ -891,22 +888,29 @@ def test_trie():
 
     r1.ruleType = Rule.FORWARDING
     r1.fieldValue[FieldIndex["NW_SRC"]] = iptoi("192.168.1.20")
-    r1.fieldMask[FieldIndex["NW_SRC"]] = iptoi("255.255.255.0")
+    r1.fieldMask[FieldIndex["NW_SRC"]] = iptoi("255.255.255.255")
 
     t = Trie("NW_SRC")
-    n = t.addRule(r1)
-    t.totalRuleCount += 1
-    print n
+    # n = t.addRule(r1)
+    # t.totalRuleCount += 1
+    # print n
 
-    n = t.findNode(iptoi("192.168.1.20"), iptoi("255.255.255.0"))
-    print n
+    vf_addflow(t, r1)
+    print t.totalRuleCount
 
-    print t.tostr()
+    # n = t.findNode(iptoi("192.168.1.20"), iptoi("255.255.255.255"))
+    # print n
+    # # print t.tostr()
+
+    vf_delflow(t, r1)
+    print t.totalRuleCount
+
+    print t.getEquivalenceClasses(r1)
     
 def test():
 #    test_ec()
-    print "Testing rule"
-    test_rule()
+    # print "Testing rule"
+    # test_rule()
 
     print "Testing trie"
     test_trie()
@@ -923,3 +927,6 @@ if __name__ == "__main__":
 
 # TODO:
 #  see VeriFlow.cpp on adding rule (adds ruleset to trienode)
+
+# implement getForwardingGraph
+# fix vf_delflow
