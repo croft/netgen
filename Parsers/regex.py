@@ -171,13 +171,15 @@ class FSA(object):
 
     def _parse(self):
         expr = str2regex_alpha(self.regex, self.sigma)
-        nfa = expr.toNFA()
+        nfa = expr.nfaFollow()
         rnfa = nfa.reversal()
         dfa = rnfa.toDFA()
-        dfa = dfa.completeMinimal()
+        dfa = dfa.minimal(complete=True)
+        dfa = dfa.renameState(dfa.Initial, 'init')
+        dfa = dfa.renameState(dfa.stateIndex('dead'), '0')
         print dfa.succintTransitions()
-        print dfa.Initial
-        print dfa.Final
+        print dfa.States[dfa.Initial]
+        print map(lambda x:dfa.States[x], dfa.Final)
         return dfa
 
     def __repr__(self):
