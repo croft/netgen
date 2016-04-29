@@ -84,6 +84,13 @@ class ForwardingLink(object):
         else:
             return False
 
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return "{0} {1}".format(self.rule.location,
+                                self.rule.nextHop)
+
 class ForwardingGraph(object):
     def __init__(self):
         self.links = {}
@@ -105,6 +112,18 @@ class ForwardingGraph(object):
 
     def compare(self, first, second):
         return first.rule.priority >= second.rule.priority
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        s = "ForwardingGraph - Link count: " + str(self.totalRuleCount)
+        for link, rules in self.links.iteritems():
+            s += str(link)
+            s += "   " + " ".join(str(s) for s in rules)
+            s += "\n"
+        return s
+
 
 class EquivalenceRange(object):
     def __init__(self, lowerBound = 0, upperBound = 0):
@@ -242,6 +261,9 @@ class Rule(object):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
+            if self.location != other.location or \
+               self.wildcards != other.wildcards or self.priority != other.priority:
+                return False
             for i in range(HeaderField.End):
                 if self.fieldValue[i] != other.fieldValue[i] or \
                    self.fieldMask[i] != other.fieldMask[i]:
@@ -255,7 +277,8 @@ class Rule(object):
 
     def __str__(self):
         # TODO:
-        return "Value: {0}, Mask: {1}".format(self.fieldValue, self.fieldMask)
+        return "Value: {0}, Mask: {1}, Loc: {2}, NH: {3}, Pri: {4}".format(
+            self.fieldValue, self.fieldMask, self.location, self.nextHop, self.priority)
 
 class TrieNode(object):
     def __init__(self):
@@ -367,7 +390,8 @@ class Trie(object):
             self.root = None
             self.totalRuleCount = 0
 
-    def getForwardingGraph(self, currentIndex, inTries, eqclass):
+    @classmethod
+    def getForwardingGraph(cls, currentIndex, inTries, eqclass):
         graph = ForwardingGraph()
 
         if currentIndex + 1 != HeaderField.End:
@@ -375,10 +399,9 @@ class Trie(object):
             return
 
         fieldValue = eqclass.lowerBound[currentIndex]
-        fieldMask = HeaderField.getMaxValue(currentIndex)
+        fieldMask = HeaderField.MaxValue[currentIndex]
         maskedValue = fieldValue & fieldMask
 
-        # TODO: what?
         width = HeaderField.Width[currentIndex]
 
         for it in inTries:
@@ -420,7 +443,6 @@ class Trie(object):
                 nextLevelNodes = []
 
             for node in currLevelNodes:
-                print "CURR"
                 if node.ruleSet is not None:
                     for rule in node.ruleSet:
                         if rule.ruleType != Rule.FORWARDING:
@@ -877,7 +899,7 @@ class Veriflow(object):
                     leaf.ruleSet = []
                 else:
                     if rule in leaf.ruleSet:  # already exists
-                        print "Rule already exists"
+                        #print "Rule already exists"
                         return False
 
                 leaf.ruleSet.append(rule)
@@ -937,7 +959,7 @@ class Veriflow(object):
                 c = prevClass[i]
                 pc.lowerBound[i] = c.lowerBound[i]
                 pc.upperBound[i] = c.upperBound[i]
-            return pc
+            return (pc, prevTries[-1])
         else:
             if rule.ruleType == Rule.FORWARDING:
                 classes, tries = Trie.getNextLevelEquivalenceClasses(
@@ -986,6 +1008,9 @@ class Veriflow(object):
                                     0,
                                     classes,
                                     [[self.primaryTrie]])
+
+    def getForwardingGraph(self, tries, eqclass):
+        return Trie.getForwardingGraph(HeaderField.End - 1, tries, eqclass)
 
     def old_getAffectedEquivalenceClasses(self, rule, command):
         finalPacketClasses = []
@@ -1151,7 +1176,7 @@ def test_trie():
 
     classes =  vf.getAllEquivalenceClasses()#[0]
     for c in classes:
-        print c
+        print
 
     # for pc in vf.primaryTrie.getEquivalenceClasses(r1):
     #     print pc
@@ -1165,8 +1190,38 @@ def test():
     print "Testing trie"
     test_trie()
 
+def test2():
+    import os
+    files = [os.path.join('data', f)
+             for f in os.listdir("data") if f[0] == 'R']
+
+    vf = Veriflow()
+    for dev in files:
+        for line in open(dev).readlines():
+            # print line
+            tokens = line.split()
+            r = Rule()
+            r.ruleType = Rule.FORWARDING
+            r.fieldValue[HeaderField.Index["NW_SRC"]] = iptoi(tokens[2])
+            r.fieldMask[HeaderField.Index["NW_SRC"]] = iptoi(tokens[3])
+            r.priority = tokens[7]
+            r.location = tokens[4]
+            r.nextHop = tokens[5]
+            # print r
+            vf.addRule(r)
+
+    classes = vf.getAllEquivalenceClasses()
+    for i in range(len(classes)):
+        c = classes[i]
+        graph = vf.getForwardingGraph(c[1], c[0])
+        # print "--------------------"
+        # for name, link in graph.links.iteritems():
+        #     print i, name, " ".join(str(l.rule.nextHop) for l in link)
+    print len(classes)
+
 if __name__ == "__main__":
-    test()
+    test2()
+#    test()
 
 
 # TODO:
