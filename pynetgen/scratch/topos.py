@@ -1,19 +1,9 @@
 #!/usr/bin/env python
 
-import argparse
 import igraph
 import itertools
 import math
-import os
 import random
-import shutil
-import socket
-import struct
-import sys
-import time
-
-import dijkstra
-import graphviz
 
 from utils.load_stanford_backbone import *
 from utils.load_internet2_backbone import *
@@ -24,126 +14,14 @@ from config_parser.cisco_router_parser import ciscoRouter
 from config_parser.juniper_parser import juniperRouter
 from config_parser.transfer_function_to_openflow import OpenFlow_Rule_Generator
 
+import dijkstra
+from network import Topology, Switch, Host, FlowEntry, int2mac
+
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b = itertools.tee(iterable)
     next(b, None)
     return itertools.izip(a, b)
-
-def int2mac(addr):
-    h = "{0:#0{1}x}".format(addr, 12)[2:]
-    return ':'.join(s.encode('hex') for s in h.decode('hex'))
-
-def int2ip(addr):
-    return socket.inet_ntoa(struct.pack("!I", addr))
-
-def wc2ip(wc):
-    if wc == 0:
-        return int2ip(int("1"*32, 2))
-
-    return int2ip(int("1"*32, 2) ^ int("1"*wc, 2))
-
-class Node(object):
-    def __init__(self, ip=None, mac=None, name=None):
-        self.ip = ip
-        self.mac = mac
-        self.name = name
-
-class Switch(Node):
-    def __init__(self, ip=None, mac=None, name=None):
-        self.ft = []
-        super(Switch, self).__init__(ip, mac, name)
-
-class Host(Node):
-    def __init__(self, ip=None, mac=None, name=None):
-        self.ft = []
-        super(Host, self).__init__(ip, mac, name)
-
-class FlowEntry(object):
-    def __init__(self, dest, wildcard, location, nexthops, priority=1, src=None):
-        if not isinstance(nexthops, list):
-            nexthops = [nexthops]
-
-        self.dest = dest
-        self.src = src
-        self.wildcard = wildcard
-        self.location = location
-        self.nexthops = nexthops
-        self.priority = priority
-
-    def __repr__(self):
-        return str(self)
-
-    def __str__(self):
-        if len(self.nexthops) == 0:
-            nhops = "-"
-        else:
-            nhops = ",".join(self.nexthops)
-
-        return "- - {0} {1} {2} {3} - {4}".format(self.dest,
-                                                  self.wildcard,
-                                                  self.location,
-                                                  nhops,
-                                                  self.priority)
-
-class Topology(object):
-    def __init__(self):
-        self.switches = {}
-        self.hosts = {}
-        self.edges = {}
-        self.paths = {}
-
-    # TODO: better perf
-    @property
-    def nodes(self):
-        n = self.switches.copy()
-        n.update(self.hosts)
-        return n
-
-    def make_configmap(self, dest_dir):
-        out = []
-        for switch in self.switches.keys():
-            out.append("R R{0}".format(switch))
-        with open(os.path.join(dest_dir, "config.map"), 'w') as f:
-            f.writelines(out)
-
-    def make_topofile(self, dest_dir):
-        out = []
-        written = []
-        for src, dsts in self.edges.iteritems():
-            for dst in dsts:
-                if (dst,src) not in written:
-                    out.append("{0} {1}\n".format(dst, src))
-                    written.append((src, dst))
-
-        with open(os.path.join(dest_dir, "topo.txt"), 'w') as f:
-            f.writelines(out)
-
-    def make_rocketfile(self, dest_dir):
-        for sw in self.switches.values():
-            with open(os.path.join(dest_dir, "R_" + sw.name), 'w') as f:
-                f.write("\n".join([str(flow) for flow in sw.ft]))
-
-    def make_graph(self, dest_dir):
-        g = graphviz.Graph(format='svg')
-        for node in self.hosts.keys() + self.edges.keys():
-            g.node(node)
-
-        added = []
-        for src, dsts in self.edges.iteritems():
-            for dst in dsts:
-                if (src,dst) not in added:
-                    g.edge(src, dst)
-                    added.append((dst, src))
-
-        g.render(os.path.join(dest_dir, "topo.gv"))
-
-    def switch_diff(self, diff):
-        if not isinstance(diff, list):
-            diff = [diff]
-
-        return [s for s in self.switches.keys() if s not in diff]
-
 
 class TfTopology(Topology):
     def __init__(self, definition, ntf, ttf, port_ids, router):
@@ -316,8 +194,6 @@ class DiamondTopo(Topology):
                 path = self.paths[src][dst]
                 src_ip = self.nodes[src].ip
                 dst_ip = self.nodes[dst].ip
-#                src_ip = self.hosts[src].ip
-#                dst_ip = self.hosts[dst].ip
                 wc = "255.255.255.255"
                 #for location, nexthop in pairwise(path[1:]):
                 for location, nexthop in pairwise(path):
@@ -394,8 +270,8 @@ class FattreeTopo(Topology):
         for src in self.paths.keys():
             for dst in self.paths[src].keys():
                 path = self.paths[src][dst]
-                src_ip = self.hosts[src].ip
-                dst_ip = self.hosts[dst].ip
+                src_ip = self.nodes[src].ip
+                dst_ip = self.nodes[dst].ip
                 wc = "255.255.255.255"
                 for location, nexthop in pairwise(path[1:]):
                     flow = FlowEntry(dest=dst_ip,

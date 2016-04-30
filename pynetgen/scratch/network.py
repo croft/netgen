@@ -1,38 +1,40 @@
 #!/usr/bin/env python
 
+import graphviz
 import ipaddr
+import netaddr
+import os
+import re
 import socket
 import struct
-from netaddr import *
-
-import argparse
-import os
-import random
-import re
-import shutil
-import string
-import ConfigParser
-
-import FAdo.reex
-from FAdo.reex import *
 
 # TODO: replace with actual OF values
 OFPFC_ADD = 0
 OFPFC_DELETE_STRICT = 1
 
-def iptoi(ip):
+def ip2int(ip):
     # handle default value
     if ip == "0":
         return 0
     return int(ipaddr.IPv4Address(ip))
 
-def itoip(i):
+def int2ip(i):
     return socket.inet_ntoa(struct.pack("!I", i))
 
-def mac_to_binstr(mac):
-    return EUI(mac).bits().replace("-", "")
+def int2mac(mac):
+    h = "{0:#0{1}x}".format(mac, 12)[2:]
+    return ':'.join(s.encode('hex') for s in h.decode('hex'))
 
-def mactoi(mac):
+def wc2ip(wc):
+    if wc == 0:
+        return int2ip(int("1"*32, 2))
+
+    return int2ip(int("1"*32, 2) ^ int("1"*wc, 2))
+
+def mac_to_binstr(mac):
+    return netaddr.EUI(mac).bits().replace("-", "")
+
+def mac2int(mac):
     # handle default value
     if mac == "0":
         return 0
@@ -73,39 +75,13 @@ class PacketField(FieldDefinition):
     def __init__(self):
         super(PacketField, self).__init__()
         self.addField("IN_PORT", 16, int(0xFFFF))
-        self.addField("DL_SRC", 48, int(0xFFFFFFFFFFFF), mactoi)
-        self.addField("DL_DST", 48, int(0xFFFFFFFFFFFF), mactoi)
+        self.addField("DL_SRC", 48, int(0xFFFFFFFFFFFF), mac2int)
+        self.addField("DL_DST", 48, int(0xFFFFFFFFFFFF), mac2int)
         self.addField("DL_TYPE", 16, int(0xFFFF))
-        self.addField("NW_SRC", 32, int(0xFFFFFFFF), iptoi)
-        self.addField("NW_DST", 32, int(0xFFFFFFFF), iptoi)
+        self.addField("NW_SRC", 32, int(0xFFFFFFFF), ip2int)
+        self.addField("NW_DST", 32, int(0xFFFFFFFF), ip2int)
 
 HeaderField = PacketField()
-
-# TODO: merge network.topo and topos.topo
-class Topology(object):
-    def __init__(self, fname):
-        self.edges = Topology.get_edges(fname)
-
-        # TODO: better way to filter hosts, combine keys+values
-        self.switches = [s for s in self.edges.keys() if s[0] != 'h'] + \
-                        [s for s in self.edges.values() if s[0] != 'h']
-        self.switches = list(set(self.switches))
-
-    @classmethod
-    def get_edges(cls, fname, offset=0):
-        edges = {}
-        with open(fname) as f:
-            for line in f.readlines():
-                tokens = line.strip().split()
-                edges[tokens[offset]] = tokens[offset+1]
-
-        return edges
-
-    def switch_diff(self, diff):
-        if not isinstance(diff, list):
-            diff = [diff]
-
-        return [s for s in self.switches if s not in diff]
 
 class PacketClass(object):
     def __init__(self, fname=None):
@@ -127,6 +103,12 @@ class PacketClass(object):
             strings.append(" ".join(s))
 
         return strings
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return "\n".join("1 {0} {1}".format(k,v) for k,v in self.edges.iteritems())
 
 class Network(object):
     def __init__(self, class_dir=None):
@@ -162,3 +144,105 @@ class Network(object):
                     break
 
         return sorted(matches, key=int)
+
+class Node(object):
+    def __init__(self, ip=None, mac=None, name=None):
+        self.ip = ip
+        self.mac = mac
+        self.name = name
+
+class Switch(Node):
+    def __init__(self, ip=None, mac=None, name=None):
+        self.ft = []
+        super(Switch, self).__init__(ip, mac, name)
+
+class Host(Node):
+    def __init__(self, ip=None, mac=None, name=None):
+        self.ft = []
+        super(Host, self).__init__(ip, mac, name)
+
+class FlowEntry(object):
+    def __init__(self, dest, wildcard, location, nexthops, priority=1, src=None):
+        if not isinstance(nexthops, list):
+            nexthops = [nexthops]
+
+        self.dest = dest
+        self.src = src
+        self.wildcard = wildcard
+        self.location = location
+        self.nexthops = nexthops
+        self.priority = priority
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        if len(self.nexthops) == 0:
+            nhops = "-"
+        else:
+            nhops = ",".join(self.nexthops)
+
+        return "- - {0} {1} {2} {3} - {4}".format(self.dest,
+                                                  self.wildcard,
+                                                  self.location,
+                                                  nhops,
+                                                  self.priority)
+
+class Topology(object):
+    def __init__(self):
+        self.switches = {}
+        self.hosts = {}
+        self.edges = {}
+        self.paths = {}
+
+    # TODO: better perf?
+    @property
+    def nodes(self):
+        n = self.switches.copy()
+        n.update(self.hosts)
+        return n
+
+    def make_configmap(self, dest_dir, mapfile="config.map"):
+        out = []
+        for switch in self.switches.keys():
+            out.append("R R{0}\n".format(switch))
+        with open(os.path.join(dest_dir, mapfile), 'w') as f:
+            f.writelines(out)
+
+    def make_topofile(self, dest_dir, topofile="topo.txt"):
+        out = []
+        written = []
+        for src, dsts in self.edges.iteritems():
+            for dst in dsts:
+                if (dst,src) not in written:
+                    out.append("{0} {1}\n".format(dst, src))
+                    written.append((src, dst))
+
+        with open(os.path.join(dest_dir, topofile), 'w') as f:
+            f.writelines(out)
+
+    def make_rocketfile(self, dest_dir):
+        for sw in self.switches.values():
+            with open(os.path.join(dest_dir, "R_" + sw.name), 'w') as f:
+                f.write("\n".join([str(flow) for flow in sw.ft]))
+
+    def make_graph(self, dest_dir, graphfile="topo.gv"):
+        g = graphviz.Graph(format='svg')
+        for node in self.hosts.keys() + self.edges.keys():
+            g.node(node)
+
+        added = []
+        for src, dsts in self.edges.iteritems():
+            for dst in dsts:
+                if (src,dst) not in added:
+                    g.edge(src, dst)
+                    added.append((dst, src))
+
+        g.render(os.path.join(dest_dir, graphfile))
+
+    def switch_diff(self, diff):
+        if not isinstance(diff, list):
+            diff = [diff]
+
+        return [s for s in self.switches.keys() if s not in diff]
+

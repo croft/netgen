@@ -24,17 +24,17 @@ def ft2rules(loc, ft):
     for flow in ft:
         r = trie.Rule()
         r.ruleType = trie.Rule.FORWARDING
-        
+
         if flow.src is not None:
-            r.fieldValue[HeaderField.Index["NW_SRC"]] = network.iptoi(flow.src)
-            r.fieldMask[HeaderField.Index["NW_SRC"]] = network.iptoi("255.255.255.255")
+            r.fieldValue[HeaderField.Index["NW_SRC"]] = network.ip2int(flow.src)
+            r.fieldMask[HeaderField.Index["NW_SRC"]] = network.ip2int("255.255.255.255")
 
         if flow.dest is not None:
-            r.fieldValue[HeaderField.Index["NW_DST"]] = network.iptoi(flow.dest)
-            r.fieldMask[HeaderField.Index["NW_DST"]] = network.iptoi("255.255.255.255")
+            r.fieldValue[HeaderField.Index["NW_DST"]] = network.ip2int(flow.dest)
+            r.fieldMask[HeaderField.Index["NW_DST"]] = network.ip2int("255.255.255.255")
 
         r.priority = flow.priority
-        
+
         # TODO: how to handle multiple next hops?
         r.nextHop = flow.nexthops[0]
 
@@ -108,7 +108,7 @@ def main():
         topo.make_rocketfile(data_dir)
         topo.make_graph(data_dir)
         topo.make_configmap(data_dir)
-    
+
     # ----------------- PACKET CLASS DISCOVERY
     mtrie = trie.MultilevelTrie()
     for switch in topo.switches.values():

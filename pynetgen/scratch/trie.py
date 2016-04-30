@@ -1,14 +1,6 @@
 #!/usr/bin/env python
 
-# Ubuntu install:
-# python-ipaddr
-
-import ipaddr
-import socket
-import struct
-from netaddr import *
-
-from network import iptoi, itoip, mac_to_binstr, mactoi, OFPFC_ADD, OFPFC_DELETE_STRICT, HeaderField
+from network import OFPFC_ADD, OFPFC_DELETE_STRICT, HeaderField
 
 class ForwardingLink(object):
     def __init__(self, rule, isGateway=False):
@@ -134,16 +126,8 @@ class Rule(object):
             fieldValue = 0
             fieldMask = 0
 
-            if fname == 'DL_SRC' or fname == 'DL_DST':
-                fieldValue = mactoi(self.fieldValue[findex])
-                fieldMask = mactoi(self.fieldMask[findex])
-            elif fname == 'NW_SRC' or fname == 'NW_DST':
-                fieldValue = iptoi(self.fieldValue[findex])
-                fieldMask = iptoi(self.fieldMask[findex])
-            else:
-                fieldValue = int(self.fieldValue[findex])
-                fieldMask = int(self.fieldMask[findex])
-
+            fieldValue = HeaderField.intValue(findex, self.fieldValue[findex])
+            fieldMask = HeaderField.intValue(findex, self.fieldMask[findex])
             maskedValue = fieldValue & fieldMask
 
             for j in range(HeaderField.Width[findex]):
@@ -954,154 +938,3 @@ class MultilevelTrie(object):
         dummyRule = Rule()
         dummyRule.ruleType = Rule.FORWARDING
         return self.getAffectedEquivalenceClasses(dummyRule, OFPFC_ADD)
-
-
-# def sim():
-#     primaryTrie = None
-
-# def test_ec():
-#     e = EquivalenceRange([0, 1, 2], [1, 2, 3])
-#     print e
-
-#     lb = [0,
-#           mactoi('00-00-00-00-00-00'),
-#           mactoi('00-00-00-00-00-00'),
-#           0x00,
-#           iptoi('192.168.0.1'),
-#           iptoi('192.168.0.2')]
-#     ub = [1,
-#           mactoi('00-00-00-00-00-01'),
-#           mactoi('00-00-00-00-00-02'),
-#           0x00,
-#           iptoi('192.168.0.2'),
-#           iptoi('192.168.0.4')]
-
-#     e = EquivalenceClass(lb, ub)
-#     f = EquivalenceClass(lb, ub)
-#     assert (e == f) == True
-#     print e.getRange(HeaderField.Index["NW_SRC"])
-#     print e.getRange(HeaderField.Index["DL_SRC"])
-#     assert e.getRange(HeaderField.Index["IN_PORT"]) == 1
-
-
-# def test_rule():
-#     r1 = Rule()
-
-#     r1.ruleType = Rule.FORWARDING
-#     r1.fieldValue[HeaderField.Index["NW_SRC"]] = iptoi("192.168.1.20")
-#     r1.fieldMask[HeaderField.Index["NW_SRC"]] = iptoi("255.255.255.0")
-
-#     eclass = r1.getEquivalenceClass()
-#     print "R1 EC: ", itoip(eclass.lowerBound[HeaderField.Index["NW_SRC"]]), itoip(eclass.upperBound[HeaderField.Index["NW_SRC"]])
-#     er = r1.getEquivalenceRange("NW_SRC")
-#     print itoip(er.lowerBound), itoip(er.upperBound)
-
-
-# def test_trie():
-#     vf = Veriflow()
-#     r1 = Rule()
-
-#     r1.ruleType = Rule.FORWARDING
-#     r1.fieldValue[HeaderField.Index["NW_SRC"]] = iptoi("192.168.1.20")
-#     r1.fieldMask[HeaderField.Index["NW_SRC"]] = iptoi("255.255.255.255")
-#     r1.priority = 5
-
-#     vf.addRule(r1)
-
-#     classes =  vf.getAllEquivalenceClasses()#[0]
-#     for c in classes:
-#         print
-
-#     # for pc in vf.primaryTrie.getEquivalenceClasses(r1):
-#     #     print pc
-#         # vf.primaryTrie.getForwardingGraph(FIELD_END - 1, [vf.primaryTrie], pc)
-
-# def test():
-#     # test_ec()
-#     # print "Testing rule"
-#     # test_rule()
-
-#     print "Testing trie"
-#     test_trie()
-
-# def test2():
-#     import os
-#     files = [os.path.join('data', f)
-#              for f in os.listdir("data") if f[0] == 'R']
-
-#     vf = Veriflow()
-#     for dev in files:
-#         for line in open(dev).readlines():
-#             # print line
-#             tokens = line.split()
-#             r = Rule()
-#             r.ruleType = Rule.FORWARDING
-#             r.fieldValue[HeaderField.Index["NW_SRC"]] = iptoi(tokens[2])
-#             r.fieldMask[HeaderField.Index["NW_SRC"]] = iptoi(tokens[3])
-#             r.priority = tokens[7]
-#             r.location = tokens[4]
-#             r.nextHop = tokens[5]
-#             # print r
-#             vf.addRule(r)
-
-#     classes = vf.getAllEquivalenceClasses()
-#     for i in range(len(classes)):
-#         c = classes[i]
-#         graph = vf.getForwardingGraph(c[1], c[0])
-#         # print "--------------------"
-#         # for name, link in graph.links.iteritems():
-#         #     print i, name, " ".join(str(l.rule.nextHop) for l in link)
-#     print len(classes)
-
-# if __name__ == "__main__":
-#     test2()
-# #    test()
-
-
-# # TODO:
-# # see VeriFlow.cpp on adding rule (adds ruleset to trienode)
-# # implement getForwardingGraph
-# # fix vf_delflow
-
-# # class HeaderField(object):
-# #     Index = { "IN_PORT": 0,
-# #               "DL_SRC" : 1,
-# #               "DL_DST" : 2,
-# #               "DL_TYPE" : 3,
-# #               "NW_SRC" : 4,
-# #               "NW_DST" : 5 }
-# #     #"FIELD_END" : 6,
-# #     #"METADATA" : 7,
-# #     #"WILDCARD" : 8 }
-# #     End = 6
-# #     Width = { 0 : 16,
-# #               1 : 48,
-# #               2 : 48,
-# #               3 : 16,
-# #               4 : 32,
-# #               5 : 32 ,
-# #               6 : 0 }
-# #     MaxValue = { 0 : int(0xFFFF),
-# #                  1 : int(0xFFFFFFFFFFFF),
-# #                  2 : int(0xFFFFFFFFFFFF),
-# #                  3 : int(0xFFFF),
-# #                  4 : int(0xFFFFFFFF),
-# #                  5 : int(0xFFFFFFFF),
-# #                  6 : 0 }
-# #     @classmethod
-# #     def fieldName(cls, index):
-# #         for k,v in HeaderField.Index.iteritems():
-# #             if v == index:
-# #                 return k
-# #     @classmethod
-# #     def intValue(cls, index, value):
-# #         mac = [HeaderField.Index["DL_SRC"],
-# #                HeaderField.Index["DL_DST"]]
-# #         ip = [HeaderField.Index["NW_SRC"],
-# #               HeaderField.Index["NW_DST"]]
-# #         if index in ip:
-# #             return mactoi(valueOrMask)
-# #         elif index in mac:
-# #             return iptoi(valueOrMask)
-# #         else:
-# #             return int(valueOrMask)

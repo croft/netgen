@@ -3,16 +3,12 @@
 import abc
 import argparse
 import os
-import random
 import re
 import shutil
-import string
 import ConfigParser
 
-import FAdo.reex
 from FAdo.reex import *
 
-from network import *
 from grammar import SpecGrammar
 
 # create a parse class with a custom alphabet as the lexer id rule
@@ -293,13 +289,7 @@ class Specification(object):
         self.aliases = {}
         self.matched_classes = []
         self.fsa = None
-        # tokens = self.spec.split("=>")
-        # if len(tokens) != 2:
-        #     raise Exception("Invalid specification {0}".format(self.spec))
-        # self.lhs = tokens[0].strip()
-        # self.rhs = tokens[1].strip()
-        # print "Found aliases:", self.aliases.keys()
-        # print "Using spec:", self.spec
+        print "Found aliases:", self.aliases.keys()
 
     def parse(self, network, destination):
         cfg = ConfigParser.ConfigParser()
@@ -329,79 +319,43 @@ class Specification(object):
         if len(parsed[3]) > 1:
             raise Exception("rhs error")
 
-        self.lhs = parsed[2][0]
-        self.rhs = parsed[3][0]
+        self.lhs = parsed[2][0].strip()
+        self.rhs = parsed[3][0].strip()
 
-        self._parse_lhs(network)
-        self._parse_rhs(network)
-        
-    def _parse_lhs(self, network):
-        # # clean select dir
-        # select_dir = os.path.join(destination, "selected")
-        # if os.path.exists(select_dir):
-        #     shutil.rmtree(select_dir)
-        # os.makedirs(select_dir)
+        self._parse_lhs(network, destination)
+        self._parse_rhs(network, destination)
+
+        # TODO: better place for this
+        network.topo.make_topofile(destination, topofile="Topology.txt")
+        network.topo.make_configmap(destination)
+
+    def _parse_lhs(self, network, destination):
+        # clean select dir
+        select_dir = os.path.join(destination, "selected")
+        if os.path.exists(select_dir):
+            shutil.rmtree(select_dir)
+        os.makedirs(select_dir)
 
         regex = expand_regex(self.lhs, network.topo, self.aliases)
         print "Lhs expanded:", regex
-        self.matched_classes = network.match_classes(regex)
-        # for m in matches:
-        #     print "Matched packet class:", \
-        #         os.path.basename(network.class_files[m])
-        #     shutil.copy2(network.class_files[m], select_dir)
 
-    def _parse_rhs(self, network):
-        # destination = os.path.join(destination, "automata.txt")
+        self.matched_classes = network.match_classes(regex)
+        for c in self.matched_classes:
+            print "Matched packet class:", c
+            with open(os.path.join(select_dir, "{0}.txt".format(c)), 'w') as f:
+                f.write(str(network.classes[c]))
+
+    def _parse_rhs(self, network, destination):
+        destination = os.path.join(destination, "automata.txt")
         regex = expand_regex(self.rhs, network.topo, self.aliases)
         print "Rhs expanded:", regex
         self.fsa = FSA(regex, network.topo.switches)
         print str(self.fsa)
-        # with open(destination, 'w') as f:
-        #     f.write(str(fsa))
+        with open(destination, 'w') as f:
+            f.write(str(self.fsa))
 
-def main():
-    default_dest = "./output"
-    default_spec = "./spec.txt"
-    default_class = "./VeriFlow-v0.2/VeriFlow/class"
-    parser = argparse.ArgumentParser(description="NetGen specification parser")
-    parser.add_argument("--destination", "-d", dest="dest",
-                        default=default_dest,
-                        help="output file destination (default: %s)" % default_dest)
-    parser.add_argument("--spec", "-s", dest="spec",
-                        default="spec.txt",
-                        help="specification file (default: %s)" % default_spec)
-    parser.add_argument("--classes", "-c", dest="class_dir",
-                        default=default_class,
-                        help="packet class directory (default: %s)" % default_class)
+    def __repr__(self):
+        return str(self)
 
-    args = parser.parse_args()
-
-    if not os.path.isfile(args.spec):
-        print "Specification file {0} does not exist!".format(args.spec)
-        return
-
-    if not os.path.isdir(args.class_dir):
-        print "Packet class directory {0} does not exist!".format(
-            args.class_dir)
-        return
-
-    if not os.path.isdir(args.dest):
-        os.makedirs(args.dest)
-
-    network = Network(args.class_dir)
-    print "Loaded network with {0} packet classes".format(
-        len(network.classes.keys()))
-
-    spec = Specification(args.spec)
-    spec.parse(network, args.dest)
-
-    # copy topology file
-    if not os.path.isfile(os.path.join(args.class_dir, "topo.txt")):
-        print "Missing topo.txt file"
-        return
-
-    shutil.copy2(os.path.join(args.class_dir, "topo.txt"),
-                 os.path.join(args.dest, "Topology.txt"))
-
-if __name__ == "__main__":
-    main()
+    def __str__(self):
+        return self.spec_str
