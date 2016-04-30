@@ -3,4 +3,4 @@ fw = s0, s1
 lb = s2
 
 [change]
-not match(ip_src=a.b.c.d); h1: .* s1 .* => (N-s1) s2 (N-s1)
+not match(ip_src=a.b.c.d); s0: .* s1 .* => (N-s1)* s2 (N-s1)*

@@ -187,6 +187,9 @@ class DiamondTopo(Topology):
         self.add_path('s0', 's3', ['s0', 's1', 's3'])
         self.make_flowtable()
 
+        # TODO: manually set egress
+        self.egress.append('s3')
+
     def make_flowtable(self):
         # make forwarding tables
         for src in self.paths.keys():

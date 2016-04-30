@@ -8,6 +8,7 @@ import sys
 import trie
 import network
 import spec
+import synthesis
 from topos import StanfordTopo, Internet2Topo, FattreeTopo, DiamondTopo
 from network import HeaderField
 
@@ -46,7 +47,7 @@ def ft2rules(loc, ft):
 # TODO: use one data structure for both
 def graph2pc(i, fg):
     classes = []
-    pc = network.PacketClass()
+    pc = network.PacketClass(idx=i)
     for name, link in fg.links.iteritems():
         if len(link) > 1:
             raise Exception("Don't know how to handle multiple links?")
@@ -135,5 +136,7 @@ def main():
     s = spec.Specification(args.spec)
     s.parse(net, args.dest)
 
+    solver = synthesis.Synthesizer(net, s)
+    solver.solve()
 if __name__ == "__main__":
     main()

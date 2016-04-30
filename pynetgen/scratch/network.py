@@ -84,11 +84,28 @@ class PacketField(FieldDefinition):
 HeaderField = PacketField()
 
 class PacketClass(object):
-    def __init__(self, fname=None):
+    def __init__(self, fname=None, idx=None):
+        self.idx = idx
         if fname is None:
             self.edges = {}
         else:
             self.edges = Topology.get_edges(fname, 1)
+
+    def original_dest(self, network):
+        dest = {}
+        egress = network.topo.egresses()
+        for src in network.topo.switches.keys():
+            if src in egress:
+                dest[src] = src
+                continue
+
+            temp = src
+            while temp in self.edges:
+                temp = self.edges[temp]
+                if temp in egress:
+                    dest[src] = temp
+
+        return dest
 
     def construct_strings(self):
         strings = []
@@ -108,7 +125,7 @@ class PacketClass(object):
         return str(self)
 
     def __str__(self):
-        return "\n".join("1 {0} {1}".format(k,v) for k,v in self.edges.iteritems())
+        return "\n".join("{0} {1} {2}".format(self.idx, k,v) for k,v in self.edges.iteritems())
 
 class Network(object):
     def __init__(self, class_dir=None):
@@ -194,6 +211,17 @@ class Topology(object):
         self.hosts = {}
         self.edges = {}
         self.paths = {}
+        self.egress = []
+
+    @property
+    def intrepr(self):
+        count = 1
+        alias = {}
+        for name in sorted(self.nodes.keys()):
+            alias[name] = count
+            count += 1
+
+        return alias
 
     # TODO: better perf?
     @property
@@ -201,6 +229,39 @@ class Topology(object):
         n = self.switches.copy()
         n.update(self.hosts)
         return n
+
+    def egresses(self):
+        # if manually defined
+        if len(self.egress) > 0:
+            return self.egress
+
+        # otherwise, any switch with switch degree 1 or
+        # connected to a host
+        e = []
+        for s in self.switches.keys():
+            if len(self.edges[s]) == 1:
+                e.append(s)
+                continue
+
+            for neighbor in self.edges[s]:
+                if neighbor in self.hosts:
+                    e.append(s)
+                    break
+
+        return e
+
+    def iter_edges(self):
+        out = []
+        written = []
+        for src in sorted(self.edges.keys()):
+            for dst in self.edges[src]:
+                if (dst, src) not in written:
+                    written.append((src, dst))
+        return written
+
+        with open(os.path.join(dest_dir, topofile), 'w') as f:
+            f.writelines(out)
+
 
     def make_configmap(self, dest_dir, mapfile="config.map"):
         out = []

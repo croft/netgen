@@ -98,6 +98,12 @@ class FSA(object):
         self.final = [self.pprint_state_name(self.dfa.States[x])
                       for x in self.dfa.Final]
         self.initial = self.dfa.States[self.dfa.Initial]
+        self.symbolAliases = {}
+
+        symcount = 0
+        for s in sorted(self.symbols):
+            self.symbolAliases[s] = symcount
+            symcount += 1
 
     def _parse(self):
         expr = str2regex_alpha(self.regex, self.sigma)
@@ -314,6 +320,8 @@ class Specification(object):
         parsed = SpecGrammar.parseString(self.spec_str)
         # TODO: process traffic spec, sources
 
+        self.sources = parsed[1]
+
         if len(parsed[2]) > 1:
             raise Exception("lhs error")
         if len(parsed[3]) > 1:
@@ -359,3 +367,8 @@ class Specification(object):
 
     def __str__(self):
         return self.spec_str
+
+if __name__ == "__main__":
+    parsed = SpecGrammar.parseString("not match(ip_src=a.b.c.d); h1, h2: .* s1 .* => (N-s1) s2 (N-s1)")
+    for i, p in enumerate(parsed):
+        print i, p
