@@ -566,8 +566,6 @@ def main():
 
     topo.make_topofile(data_dir)
     topo.make_rocketfile(data_dir)
-    topo.make_graph(data_dir)
-    topo.make_configmap(data_dir)
 
 if __name__ == "__main__":
     main()
