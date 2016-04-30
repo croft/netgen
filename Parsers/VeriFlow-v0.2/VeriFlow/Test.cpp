@@ -155,6 +155,14 @@ void Test::test()
 	dst << src.rdbuf();
     }
 
+    if (fopen("data/config.map", "r")) {
+	cout << "\ncopying topology\n";
+	std::ifstream src("data/config.map", std::ios::binary);
+	std::ofstream dst("class/config.map", std::ios::binary);
+
+	dst << src.rdbuf();
+    }
+
     cout<<"done";
 
     gettimeofday(&t1, NULL);
