@@ -11,10 +11,10 @@ class Synthesizer(object):
 
     def solve(self):
         #for k in self.range(len(self.network.topo.switches.keys())):
-        for i in range(2, 3):
-            print "Phase", i
+        for i in range(5):
+            print "Phase", i+1
             
-            attempt = SolveAttempt(self.fsa, self.network, i, self.spec)
+            attempt = SolveAttempt(self.fsa, self.network, i+1, self.spec)
             attempt.define_max_rules()
             attempt.delta_sat_topo()
             
@@ -31,13 +31,17 @@ class Synthesizer(object):
                                                          self.fsa,
                                                          self.network.topo.switches.keys()))
             
-            # attempt.accept_automata(rho)
+            attempt.accept_automata(rho)
             model = attempt.solve()
             if model is not None:
                 print "**********************************"
                 print "*  MODEL FOUND"
                 print "**********************************"
                 print model
+                print model[dest]
+                print model[rho]
+                print model[cycle]
+                print model[delta]
                 break
 
 class SolveAttempt(object):
@@ -116,9 +120,9 @@ class SolveAttempt(object):
 
             # convert to integer representation
             egress = [self.network.topo.intrepr[e] for e in self.network.topo.egresses()]
+            print egress
             aliases = self.network.topo.intrepr
-            nodes = self.network.topo.switches.keys()
-            for nodename in nodes:
+            for nodename in self.network.topo.switches.keys():
                 #if nodename not in pc.edges.keys():
                 #    continue
 
@@ -247,6 +251,8 @@ class ComputeDestination(RecursiveDefinition):
         query = BoolVal(True)
         for pc in self.network.classes.values():
             for src in self.spec.sources:
+                # TODO: do we need to filter here?
+                # if src in pc.edges.keys() + pc.edges.values():
                 src_int = self.network.topo.intrepr[src]
 
                 # TODO: cleanup original_dest syntax, awkward ()[]

@@ -119,13 +119,14 @@ def main():
     classes = mtrie.getAllEquivalenceClasses()
     packetcls = {}
     for i in range(len(classes)):
+        idx = len(packetcls.keys()) + 1
         pktcls, pkttrie = classes[i]
         c = classes[i]
         graph = mtrie.getForwardingGraph(pkttrie, pktcls)
-        pc = graph2pc(i, graph)
+        pc = graph2pc(idx, graph)
         if pc is not None:
             # TODO: no reason for this to be dict anymore?
-            packetcls[i] = pc
+            packetcls[idx] = pc
 
     # TODO: redo constructor
     net = network.Network()
