@@ -92,11 +92,28 @@ class Topology(object):
         self.edges = {}
         self.paths = {}
 
+    # TODO: better perf
+    @property
+    def nodes(self):
+        n = self.switches.copy()
+        n.update(self.hosts)
+        return n
+
+    def make_configmap(self, dest_dir):
+        out = []
+        for switch in self.switches.keys():
+            out.append("R R{0}".format(switch))
+        with open(os.path.join(dest_dir, "config.map"), 'w') as f:
+            f.writelines(out)
+
     def make_topofile(self, dest_dir):
         out = []
+        written = []
         for src, dsts in self.edges.iteritems():
             for dst in dsts:
-                out.append("{0} {1}\n".format(src, dst))
+                if (dst,src) not in written:
+                    out.append("{0} {1}\n".format(dst, src))
+                    written.append((src, dst))
 
         with open(os.path.join(dest_dir, "topo.txt"), 'w') as f:
             f.writelines(out)
@@ -280,7 +297,8 @@ class DiamondTopo(Topology):
         super(DiamondTopo, self).__init__()
         self._make_topo()
         self.paths = {}
-        self.add_path('h1', 'h2', ['h1', 's0', 's1', 's3', 'h2'])
+        #self.add_path('h1', 'h2', ['h1', 's0', 's1', 's3', 'h2'])
+        self.add_path('s0', 's3', ['s0', 's1', 's3'])
         self.make_flowtable()
 
     def make_flowtable(self):
@@ -288,10 +306,13 @@ class DiamondTopo(Topology):
         for src in self.paths.keys():
             for dst in self.paths[src].keys():
                 path = self.paths[src][dst]
-                src_ip = self.hosts[src].ip
-                dst_ip = self.hosts[dst].ip
+                src_ip = self.nodes[src].ip
+                dst_ip = self.nodes[dst].ip
+#                src_ip = self.hosts[src].ip
+#                dst_ip = self.hosts[dst].ip
                 wc = "255.255.255.255"
-                for location, nexthop in pairwise(path[1:]):
+                #for location, nexthop in pairwise(path[1:]):
+                for location, nexthop in pairwise(path):
                     flow = FlowEntry(dest=dst_ip,
                                      wildcard=wc,
                                      location=location,
@@ -305,30 +326,31 @@ class DiamondTopo(Topology):
         self.paths[src][dst] = path
 
         # assume paths are bidirectional
-        if dst not in self.paths.keys():
-            self.paths[dst] = {}
-
-        self.paths[dst][src] = path
+        # if dst not in self.paths.keys():
+        #     self.paths[dst] = {}
+        # self.paths[dst][src] = path
 
     def _make_topo(self):
         g = igraph.Graph()
-        g.add_vertices(['s0', 's1', 's2', 's3', 'h1', 'h2'])
+        #g.add_vertices(['s0', 's1', 's2', 's3', 'h1', 'h2'])
+        g.add_vertices(['s0', 's1', 's2', 's3'])
         g.add_edges([('s0','s1'),
                      ('s0','s2'),
                      ('s1','s3'),
-                     ('s2','s3'),
-                     ('h1', 's0'),
-                     ('h2', 's3')])
+                     ('s2','s3')])
+#                     ('h1', 's0'),
+#                     ('h2', 's3')])
 
         nodes = []
         for name in ['s0', 's1', 's2', 's3']:
             nodes.append(name)
-            self.switches[name] = Switch(name=name)
+            ip = "10.0.1.{0}".format(len(self.switches.keys()) + 1)
+            self.switches[name] = Switch(name=name ,ip=ip)
 
-        for name in ['h1', 'h2']:
-            nodes.append(name)
-            ip = "10.0.0.{0}".format(len(self.hosts.keys()) + 1)
-            self.hosts[name] = Host(name=name, ip=ip)
+        # for name in ['h1', 'h2']:
+        #     nodes.append(name)
+        #     ip = "10.0.0.{0}".format(len(self.hosts.keys()) + 1)
+        #     self.hosts[name] = Host(name=name, ip=ip)
 
         edges = g.get_edgelist()
         for e in edges:
@@ -343,7 +365,6 @@ class DiamondTopo(Topology):
 
             self.edges[e0].append(e1)
             self.edges[e1].append(e0)
-
 
 class FattreeTopo(Topology):
     def __init__(self, k, path_density):
@@ -396,10 +417,9 @@ class FattreeTopo(Topology):
         self.paths[src][dst] = path
 
         # assume paths are bidirectional
-        if dst not in self.paths.keys():
-            self.paths[dst] = {}
-
-        self.paths[dst][src] = path
+        # if dst not in self.paths.keys():
+        #     self.paths[dst] = {}
+        # self.paths[dst][src] = path
 
     def path(self, src, dst):
         path = dijkstra.shortestPath(self.distances, src, dst)
@@ -547,6 +567,7 @@ def main():
     topo.make_topofile(data_dir)
     topo.make_rocketfile(data_dir)
     topo.make_graph(data_dir)
+    topo.make_configmap(data_dir)
 
 if __name__ == "__main__":
     main()

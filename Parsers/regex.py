@@ -86,8 +86,10 @@ class Topology(object):
     def __init__(self, fname):
         self.edges = Topology.get_edges(fname)
 
-        # TODO: better way to filter hosts
-        self.switches = [s for s in self.edges.keys() if s[0] != 'h']
+        # TODO: better way to filter hosts, combine keys+values
+        self.switches = [s for s in self.edges.keys() if s[0] != 'h'] + \
+                        [s for s in self.edges.values() if s[0] != 'h']
+        self.switches = list(set(self.switches))
 
     @classmethod
     def get_edges(cls, fname, offset=0):
@@ -157,13 +159,13 @@ class Network(object):
 
 class FSA(object):
     def __init__(self, regex, sigma):
+        self.regex = regex
         if isinstance(sigma, list):
             self.sigma = set(sigma)
         else:
             self.sigma = sigma
 
         self.renameCount = 0
-        self.regex = regex
         self.dfa = self._parse()
         self.states = FSA.state_names(self.dfa)
         self.symbols = FSA.symbol_names(self.dfa)
@@ -178,15 +180,27 @@ class FSA(object):
         rnfa = nfa.reversal()
         dfa = rnfa.toDFA()
         dfa = dfa.minimal(complete=True)
-
         self.renameCount = len(dfa.States)
-        dfa = dfa.renameState(dfa.stateIndex('dead'), '0')
-        dfa = dfa.renameState(dfa.Initial, self.renameCount)
+
         for i in range(len(dfa.States)):
             state = dfa.States[i]
-            if isinstance(state, set):
+            if state == 'dead':
+                dfa.renameState(i, 0)
+            else:
+                #if isinstance(state, set):
                 self.renameCount += 1
-                dfa.renameState(i, str(self.renameCount))
+                dfa.renameState(i, self.renameCount)
+
+        # add transitions: (dead, any, dead)
+        for i in range(len(dfa.States)):
+            dfa.addTransition(i, 0, dfa.stateIndex(0))
+
+        # add transitions: (final, any, dead)
+        for f in dfa.Final:
+            for s in FSA.symbol_names(dfa):
+                if dfa.Delta(f, s) is not None:
+                    dfa.delTransition(f, s, dfa.Delta(f,s))
+                dfa.addTransition(f, s, dfa.stateIndex(0))
 
         print dfa.succintTransitions()
         print dfa.States[dfa.Initial]
@@ -351,6 +365,15 @@ def main():
 
     spec = Specification(args.spec)
     spec.parse(network, args.dest)
+
+    # copy topology file
+    if not os.path.isfile(os.path.join(args.class_dir, "topo.txt")):
+        print "Missing topo.txt file"
+        return
+
+    shutil.copy2(os.path.join(args.class_dir, "topo.txt"),
+                 os.path.join(args.dest, "Topology.txt"))
+
 
 if __name__ == "__main__":
     main()
