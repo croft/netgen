@@ -81,6 +81,11 @@ class Synthesizer(object):
         self.network = AbstractNetwork(network, spec)
         self.spec = spec
         self.fsa = spec.fsa
+        # print "Nodes: ", self.network.node_strrep.keys()
+        # print "Rules: ", self.network.rules
+        # print "Classes: ", self.network.classes
+        # print "Sources: ", self.nework.sources
+        # raise Exception("blah")
 
     def path_solution(self, model):
         varnames = {}
@@ -102,6 +107,7 @@ class Synthesizer(object):
 
     def solve(self):
         for i in range(len(self.network.nodes)):
+        # for i in range(2,3):
             print "-------------------------------------------"
             print "        Phase:", i+1
             print "-------------------------------------------"
@@ -118,14 +124,14 @@ class Synthesizer(object):
             rho = Function("rho", IntSort(), IntSort(), IntSort())
             delta = Function("delta", IntSort(), IntSort(), IntSort())
             query.exec_recursion(ModifiedFunctionality(rho,
-                                                         delta,
-                                                         self.fsa,
-                                                         self.network.nodes))
+                                                       delta,
+                                                       self.fsa,
+                                                       self.network.nodes))
 
             query.accept_automata(rho)
             model = query.solve()
             if model is not None:
-                print "**********************************"
+                print "\n**********************************"
                 print "*  MODEL FOUND"
                 print "**********************************"
                 path = self.path_solution(model)
@@ -219,15 +225,16 @@ class SmtQuery(object):
                     for i in range(self.k):
                         self.query = And(self.query,
                                          Implies(And(node == self.n[i],pc == self.p[i]),
-                                                 func.change_rec(node, pc, self.n1[i])))
+                                                 func.recurse(node, pc, self.n1[i])))
                         notnew = And(notnew,
                                      Or(node != self.n[i], pc != self.p[i]))
 
-                    nexthop = self.network.rev_rules[node][pc]
+                    # TODO: reversing rules isn't needed?   rev_rules
+                    nexthop = self.network.rules[node][pc]
                     self.query = And(self.query,
-                                     Implies(notnew, func.default_rec(node,
-                                                                      pc,
-                                                                      nexthop)))
+                                     Implies(notnew, func.recurse(node,
+                                                                  pc,
+                                                                  nexthop)))
 
     def accept_automata(self, rho):
         for pc in self.network.classes:
@@ -246,11 +253,7 @@ class RecursiveDefinition(object):
         return
 
     @abc.abstractmethod
-    def change_rec(self, i, j, expr):
-        return
-
-    @abc.abstractmethod
-    def default_rec(self, i, j, expr):
+    def recurse(self, i, j, expr):
         return
 
     @abc.abstractmethod
@@ -268,10 +271,7 @@ class Cyclicity(RecursiveDefinition):
     def base(self, node, pc):
         return self.cycle(node, pc) == 0
 
-    def change_rec(self, node, pc, n_to):
-        return self.cycle(node, pc) > self.cycle(n_to, pc)
-
-    def default_rec(self, node, pc, n_to):
+    def recurse(self, node, pc, n_to):
         return self.cycle(node, pc) > self.cycle(n_to, pc)
 
     def auxiliary_def(self):
@@ -290,10 +290,7 @@ class ModifiedFunctionality(RecursiveDefinition):
     def base(self, node, pc):
         return self.rho(node, pc) == self.delta(self.fsa.initial, node)
 
-    def change_rec(self, node, pc, n_to):
-        return self.rho(node, pc) == self.delta(self.rho(n_to, pc), node)
-
-    def default_rec(self, node, pc, n_to):
+    def recurse(self, node, pc, n_to):
         return self.rho(node, pc) == self.delta(self.rho(n_to, pc), node)
 
     def auxiliary_def(self):
@@ -316,10 +313,7 @@ class ComputeDestination(RecursiveDefinition):
     def base(self, node, pc):
         return self.dest(node, pc) == node
 
-    def change_rec(self, node, pc, n_to):
-        return self.dest(node, pc) == self.dest(n_to, pc)
-
-    def default_rec(self, node, pc, n_to):
+    def recurse(self, node, pc, n_to):
         return self.dest(node, pc) == self.dest(n_to, pc)
 
     def auxiliary_def(self):
