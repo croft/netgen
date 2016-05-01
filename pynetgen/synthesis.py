@@ -9,15 +9,33 @@ class Synthesizer(object):
         self.spec = spec
         self.fsa = spec.fsa
 
+    def path_solution(self, model):
+        varnames = {}
+        for g in model:
+            if str(g)[0] == 'n':
+                varnames[str(g)] = model[g]
+
+        links = []
+        for i in range(len(varnames.keys())/2):
+            from_name = "n_{0}".format(i)
+            to_name = "n1_{0}".format(i)
+            links.append((varnames[from_name], varnames[to_name]))
+
+        # convert int representation to string
+        # TODO: better way to convert to int?
+        return [(self.network.topo.strrepr[int(str(f))],
+                 self.network.topo.strrepr[int(str(t))])
+                for (f, t) in links]
+
     def solve(self):
-        #for k in self.range(len(self.network.topo.switches.keys())):
-        for i in range(5):
+        #for i in range(5):
+        for i in range(len(self.network.topo.switches.keys())):
             print "Phase", i+1
-            
+
             attempt = SolveAttempt(self.fsa, self.network, i+1, self.spec)
             attempt.define_max_rules()
             attempt.delta_sat_topo()
-            
+
             cycle = Function("cycle", IntSort(), IntSort(), IntSort())
             attempt.exec_recursion(Cyclicity(cycle))
 
@@ -30,18 +48,19 @@ class Synthesizer(object):
                                                          delta,
                                                          self.fsa,
                                                          self.network.topo.switches.keys()))
-            
+
             attempt.accept_automata(rho)
             model = attempt.solve()
             if model is not None:
                 print "**********************************"
                 print "*  MODEL FOUND"
                 print "**********************************"
-                print model
-                print model[dest]
-                print model[rho]
-                print model[cycle]
-                print model[delta]
+                path = self.path_solution(model)
+                print path
+                # print model[dest]
+                # print model[rho]
+                # print model[cycle]
+                # print model[delta]
                 break
 
 class SolveAttempt(object):
@@ -70,7 +89,7 @@ class SolveAttempt(object):
     def delta_sat_topo(self):
         topostr = "(define-fun topology ((node_from Int) (node_to Int)) Bool \n"
         aliases = self.network.topo.intrepr
-        
+
         lparens = 0
         for from_node, to_node in self.network.topo.iter_edges():
             from_int = aliases[from_node]
@@ -86,10 +105,10 @@ class SolveAttempt(object):
             topostr += "\n (declare-const {0} Int)".format(self.n[i])
             topostr += "\n (declare-const {0} Int)".format(self.n1[i])
             topostr += "\n (assert (topology {0} {1}))".format(self.n[i], self.n1[i])
-        
+
         print topostr
         self.query = And(self.query, parse_smt2_string(topostr, ctx=main_ctx()))
-        
+
     def define_max_rules(self):
         num_nodes = len(self.network.topo.switches.keys())
 
@@ -120,7 +139,6 @@ class SolveAttempt(object):
 
             # convert to integer representation
             egress = [self.network.topo.intrepr[e] for e in self.network.topo.egresses()]
-            print egress
             aliases = self.network.topo.intrepr
             for nodename in self.network.topo.switches.keys():
                 #if nodename not in pc.edges.keys():
@@ -136,7 +154,7 @@ class SolveAttempt(object):
                             And(IntVal(node) == self.n[i],
                                 IntVal(pc.idx) == self.pc[i]),
                             recfun.change_rec(node, pc.idx, self.n1[i])))
-                        
+
                         notnew = And(notnew, Or(IntVal(node) != self.n[i],
                                                 IntVal(pc.idx) != self.pc[i]))
 
@@ -160,7 +178,7 @@ class SolveAttempt(object):
                 eachsrc = BoolVal(False)
                 for final in self.fsa.final:
                     eachsrc = Or(eachsrc, rho(IntVal(src), IntVal(pc.idx)) == IntVal(final))
-                    
+
                 self.query = And(self.query, eachsrc)
 
 class RecursiveDefinition(object):

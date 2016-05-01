@@ -214,6 +214,10 @@ class Topology(object):
         self.egress = []
 
     @property
+    def strrepr(self):
+        return {v: k for k,v in self.intrepr.items()}
+
+    @property
     def intrepr(self):
         count = 1
         alias = {}
