@@ -183,12 +183,11 @@ class DiamondTopo(Topology):
         super(DiamondTopo, self).__init__()
         self._make_topo()
         self.paths = {}
-        #self.add_path('h1', 'h2', ['h1', 's0', 's1', 's3', 'h2'])
-        self.add_path('s0', 's3', ['s0', 's1', 's3'])
+        self.add_path('s1', 's4', ['s1', 's2', 's4'])
         self.make_flowtable()
 
         # TODO: manually set egress
-        self.egress.append('s3')
+        self.egress.append('s4')
 
     def make_flowtable(self):
         # make forwarding tables
@@ -198,7 +197,6 @@ class DiamondTopo(Topology):
                 src_ip = self.nodes[src].ip
                 dst_ip = self.nodes[dst].ip
                 wc = "255.255.255.255"
-                #for location, nexthop in pairwise(path[1:]):
                 for location, nexthop in pairwise(path):
                     flow = FlowEntry(dest=dst_ip,
                                      wildcard=wc,
@@ -220,17 +218,14 @@ class DiamondTopo(Topology):
 
     def _make_topo(self):
         g = igraph.Graph()
-        #g.add_vertices(['s0', 's1', 's2', 's3', 'h1', 'h2'])
-        g.add_vertices(['s0', 's1', 's2', 's3'])
-        g.add_edges([('s0','s1'),
-                     ('s0','s2'),
+        g.add_vertices(['s1', 's2', 's3', 's4'])
+        g.add_edges([('s1','s2'),
                      ('s1','s3'),
-                     ('s2','s3')])
-#                     ('h1', 's0'),
-#                     ('h2', 's3')])
+                     ('s2','s4'),
+                     ('s3','s4')])
 
         nodes = []
-        for name in ['s0', 's1', 's2', 's3']:
+        for name in ['s1', 's2', 's3', 's4']:
             nodes.append(name)
             ip = "10.0.1.{0}".format(len(self.switches.keys()) + 1)
             self.switches[name] = Switch(name=name ,ip=ip)
@@ -239,6 +234,74 @@ class DiamondTopo(Topology):
         #     nodes.append(name)
         #     ip = "10.0.0.{0}".format(len(self.hosts.keys()) + 1)
         #     self.hosts[name] = Host(name=name, ip=ip)
+
+        edges = g.get_edgelist()
+        for e in edges:
+            e0 = g.vs[e[0]].attributes()['name']
+            e1 = g.vs[e[1]].attributes()['name']
+
+            if e0 not in self.edges:
+                self.edges[e0] = []
+
+            if e1 not in self.edges:
+                self.edges[e1] = []
+
+            self.edges[e0].append(e1)
+            self.edges[e1].append(e0)
+
+class DiamondExtendedTopo(Topology):
+    def __init__(self):
+        super(DiamondExtendedTopo, self).__init__()
+        self._make_topo()
+        self.paths = {}
+        self.add_path('s1', 's6', ['s1', 's2', 's3', 's5', 's6'])
+        self.make_flowtable()
+
+        # TODO: manually set egress
+        self.egress.append('s6')
+
+    def make_flowtable(self):
+        # make forwarding tables
+        for src in self.paths.keys():
+            for dst in self.paths[src].keys():
+                path = self.paths[src][dst]
+                src_ip = self.nodes[src].ip
+                dst_ip = self.nodes[dst].ip
+                wc = "255.255.255.255"
+                for location, nexthop in pairwise(path):
+                    flow = FlowEntry(dest=dst_ip,
+                                     wildcard=wc,
+                                     location=location,
+                                     nexthops=nexthop,
+                                     src=src_ip)
+                    self.switches[location].ft.append(flow)
+
+    def add_path(self, src, dst, path):
+        if src not in self.paths.keys():
+            self.paths[src] = {}
+
+        self.paths[src][dst] = path
+
+        # assume paths are bidirectional
+        # if dst not in self.paths.keys():
+        #     self.paths[dst] = {}
+        # self.paths[dst][src] = path
+
+    def _make_topo(self):
+        g = igraph.Graph()
+        g.add_vertices(['s1', 's2', 's3', 's4', 's5', 's6'])
+        g.add_edges([('s1','s2'),
+                     ('s2','s3'),
+                     ('s3','s5'),
+                     ('s2','s4'),
+                     ('s4','s5'),
+                     ('s5','s6')])
+
+        nodes = []
+        for name in ['s1', 's2', 's3', 's4', 's5', 's6']:
+            nodes.append(name)
+            ip = "10.0.1.{0}".format(len(self.switches.keys()) + 1)
+            self.switches[name] = Switch(name=name ,ip=ip)
 
         edges = g.get_edgelist()
         for e in edges:

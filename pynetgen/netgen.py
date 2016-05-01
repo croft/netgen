@@ -9,13 +9,16 @@ import trie
 import network
 import spec
 import synthesis
-from topos import StanfordTopo, Internet2Topo, FattreeTopo, DiamondTopo
+from topos import (StanfordTopo, Internet2Topo,
+                   FattreeTopo, DiamondTopo,
+                   DiamondExtendedTopo)
 from network import HeaderField
 
 TOPOS = { "stanford" : StanfordTopo,
           "internet2" : Internet2Topo,
           "fattree" : FattreeTopo,
-          "diamond" : DiamondTopo
+          "diamond" : DiamondTopo,
+          "diamondext" : DiamondExtendedTopo
       }
 
 # TODO: use one data structure for both
