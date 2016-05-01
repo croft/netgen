@@ -3,9 +3,77 @@
 import abc
 from z3 import *
 
+class AbstractNetwork(object):
+    def __init__(self, concrete_network, spec):
+        # TODO: rename below
+        self.concrete_network = concrete_network
+        topo = concrete_network.topo
+        classes = concrete_network.classes.values()
+
+        self.edges = []
+        self.rules = {}
+
+        # automata is backwards, so we need to lookup reverse of (src, pc) -> dst
+        self.rev_rules = {}
+
+        self.node_strrep = {}
+        self.node_intrep = {}
+        self.class_pcrep = {}
+
+        # switch renaming
+        for switch in topo.switches.keys():
+            # TODO: clean this up
+            alias = spec.fsa.symbolAliases[switch]
+            self.node_strrep[alias] = switch
+            self.node_intrep[switch] = alias
+
+        # packet class renaming
+        idx = 1
+        for pc in classes:
+            self.class_pcrep[idx] = pc
+            idx += 1
+
+        for src, dst in topo.iteredges():
+            self.edges.append((self.node_intrep[src],
+                               self.node_intrep[dst]))
+
+        # add drop node
+        for switch in self.node_strrep.keys():
+            self.edges.append((switch, 0))
+            # self.edges.append((0, switch))
+
+        # set default value 0
+        for switch in self.node_strrep.keys():
+            self.rules[switch] = {}
+            self.rev_rules[switch] = {}
+
+            for pcid in self.class_pcrep.keys():
+                self.rules[switch][pcid] = 0
+                self.rev_rules[switch][pcid] = 0
+
+        for pcid, pc in self.class_pcrep.iteritems():
+            # TODO: inconsistency in edge-type iterator between pc and topo
+            for src, dst in pc.edges.iteritems():
+                src_int = self.node_intrep[src]
+                dst_int = self.node_intrep[dst]
+                self.rules[src_int][pcid] = dst_int
+                self.rev_rules[dst_int][pcid] = src_int
+
+        self.sources = [self.node_intrep[s] for s in spec.sources]
+        self.immutable = [self.node_intrep[s] for s in spec.immutables]
+        self.sinks = [self.node_intrep[s] for s in topo.egresses()]
+
+    @property
+    def nodes(self):
+        return self.node_strrep.keys()
+
+    @property
+    def classes(self):
+        return self.class_pcrep.keys()
+
 class Synthesizer(object):
     def __init__(self, network, spec):
-        self.network = network
+        self.network = AbstractNetwork(network, spec)
         self.spec = spec
         self.fsa = spec.fsa
 
@@ -23,56 +91,58 @@ class Synthesizer(object):
 
         # convert int representation to string
         # TODO: better way to convert to int?
-        return [(self.network.topo.strrepr[int(str(f))],
-                 self.network.topo.strrepr[int(str(t))])
+        return [(self.network.node_strrep[int(str(f))],
+                 self.network.node_strrep[int(str(t))])
                 for (f, t) in links]
 
     def solve(self):
-        #for i in range(5):
-        for i in range(len(self.network.topo.switches.keys())):
-            print "Phase", i+1
-
-            attempt = SolveAttempt(self.fsa, self.network, i+1, self.spec)
-            attempt.define_max_rules()
-            attempt.delta_sat_topo()
+        for i in range(len(self.network.nodes)):
+            print "-------------------------------------------"
+            print "        Phase:", i+1
+            print "-------------------------------------------"
+            query = SmtQuery(self.fsa, self.network, i+1, self.spec)
+            query.define_k_rules()
+            query.delta_sat_topo()
 
             cycle = Function("cycle", IntSort(), IntSort(), IntSort())
-            attempt.exec_recursion(Cyclicity(cycle))
+            query.exec_recursion(Cyclicity(cycle))
 
             dest = Function("dest", IntSort(), IntSort(), IntSort())
-            attempt.exec_recursion(ComputeDestination(dest, self.network, self.spec))
+            query.exec_recursion(ComputeDestination(dest, self.network, self.spec))
 
             rho = Function("rho", IntSort(), IntSort(), IntSort())
             delta = Function("delta", IntSort(), IntSort(), IntSort())
-            attempt.exec_recursion(ModifiedFunctionality(rho,
+            query.exec_recursion(ModifiedFunctionality(rho,
                                                          delta,
                                                          self.fsa,
-                                                         self.network.topo.switches.keys()))
+                                                         self.network.nodes))
 
-            attempt.accept_automata(rho)
-            model = attempt.solve()
+            query.accept_automata(rho)
+            model = query.solve()
             if model is not None:
                 print "**********************************"
                 print "*  MODEL FOUND"
                 print "**********************************"
                 path = self.path_solution(model)
                 print path
+                # print model
                 # print model[dest]
                 # print model[rho]
                 # print model[cycle]
                 # print model[delta]
                 break
 
-class SolveAttempt(object):
+
+class SmtQuery(object):
     def __init__(self, fsa, network, k, spec):
-        self.network = network
         self.fsa = fsa
-        self.model = None
+        self.network = network
+        self.k = k
+        self.spec = spec
+
+        self.p = []
         self.n = []
         self.n1 = []
-        self.pc = []
-        self.max_changes = k
-        self.spec = spec
 
         self.solver = Solver()
         self.solver.reset()
@@ -86,22 +156,23 @@ class SolveAttempt(object):
         else:
             return None
 
+    def enforce_immutability(self):
+        # TODO: rules for immutable nodes and classes not in specpc
+        pass
+
     def delta_sat_topo(self):
         topostr = "(define-fun topology ((node_from Int) (node_to Int)) Bool \n"
-        aliases = self.network.topo.intrepr
-
         lparens = 0
-        for from_node, to_node in self.network.topo.iter_edges():
-            from_int = aliases[from_node]
-            to_int = aliases[to_node]
-            topostr += " ( ite ( and ( = node_from {0} ) ( = node_to {1} )) true \n".format(from_int, to_int)
+
+        for from_node, to_node in self.network.edges:
+            topostr += " ( ite ( and ( = node_from {0} ) ( = node_to {1} )) true \n".format(from_node, to_node)
             lparens += 1
 
         topostr += " false"
         topostr += ")" * (lparens+1)
         topostr += "\n"
 
-        for i in range(self.max_changes):
+        for i in range(self.k):
             topostr += "\n (declare-const {0} Int)".format(self.n[i])
             topostr += "\n (declare-const {0} Int)".format(self.n1[i])
             topostr += "\n (assert (topology {0} {1}))".format(self.n[i], self.n1[i])
@@ -109,75 +180,56 @@ class SolveAttempt(object):
         print topostr
         self.query = And(self.query, parse_smt2_string(topostr, ctx=main_ctx()))
 
-    def define_max_rules(self):
-        num_nodes = len(self.network.topo.switches.keys())
-
-        for i in range(self.max_changes):
+    def define_k_rules(self):
+        for i in range(self.k):
             n_str = "n_{0}".format(i)
             p_str = "p_{0}".format(i)
             n1_str = "n1_{0}".format(i)
 
             n_const = Const(n_str, IntSort())
             self.n.append(n_const)
-            self.query = And(self.query, IntVal(0) < n_const)
-            self.query = And(self.query, n_const <= IntVal(num_nodes))
+            self.query = And(self.query, 0 < n_const)
+            self.query = And(self.query, n_const <= len(self.network.nodes))
 
             p_const = Const(p_str, IntSort())
-            self.pc.append(p_const)
-            self.query = And(self.query, IntVal(0) < p_const)
-            self.query = And(self.query, p_const <= IntVal(len(self.network.classes.keys())))
+            self.p.append(p_const)
+            self.query = And(self.query, 0 < p_const)
+            self.query = And(self.query, p_const <= len(self.network.classes))
 
             n1_const = Const(n1_str, IntSort())
             self.n1.append(n1_const)
-            self.query = And(self.query, IntVal(0) < n1_const)
-            self.query = And(self.query, n1_const <= IntVal(num_nodes))
+            self.query = And(self.query, 0 < n1_const)
+            self.query = And(self.query, n1_const <= len(self.network.nodes))
 
-    def exec_recursion(self, recfun):
-        for pc in self.network.classes.values():
-            self.query = And(self.query, recfun.auxiliary_def())
-            self.query = And(self.query, recfun.encode_null(pc.idx))
+    def exec_recursion(self, func):
+        for pc in self.network.classes:
+            self.query = And(self.query, func.auxiliary_def())
+            self.query = And(self.query, func.encode_null(pc))
 
-            # convert to integer representation
-            egress = [self.network.topo.intrepr[e] for e in self.network.topo.egresses()]
-            aliases = self.network.topo.intrepr
-            for nodename in self.network.topo.switches.keys():
-                #if nodename not in pc.edges.keys():
-                #    continue
-
-                node = aliases[nodename]
-                if node in egress:
-                    self.query = And(self.query, recfun.base(node, pc.idx))
+            for node in self.network.nodes:
+                if node in self.network.sinks:
+                    self.query = And(self.query, func.base(node, pc))
                 else:
                     notnew = BoolVal(True)
-                    for i in range(self.max_changes):
-                        self.query = And(self.query, Implies(
-                            And(IntVal(node) == self.n[i],
-                                IntVal(pc.idx) == self.pc[i]),
-                            recfun.change_rec(node, pc.idx, self.n1[i])))
+                    for i in range(self.k):
+                        self.query = And(self.query,
+                                         Implies(And(node == self.n[i],pc == self.p[i]),
+                                                 func.change_rec(node, pc, self.n1[i])))
+                        notnew = And(notnew,
+                                     Or(node != self.n[i], pc != self.p[i]))
 
-                        notnew = And(notnew, Or(IntVal(node) != self.n[i],
-                                                IntVal(pc.idx) != self.pc[i]))
-
-                    # next hop in packet classes, as an integer
-                    # TODO: can we remove this?
-                    if nodename in pc.edges:
-                        hop = pc.edges[nodename]
-                        nexthop = aliases[hop]
-                    else:
-                        nexthop = 0
-
-                    self.query = And(self.query, Implies(notnew,
-                                                         recfun.default_rec(node,
-                                                                            pc.idx,
-                                                                            nexthop)))
+                    nexthop = self.network.rev_rules[node][pc]
+                    self.query = And(self.query,
+                                     Implies(notnew, func.default_rec(node,
+                                                                      pc,
+                                                                      nexthop)))
 
     def accept_automata(self, rho):
-        for pc in self.network.classes.values():
-            sources = [self.network.topo.intrepr[s] for s in self.spec.sources]
-            for src in sources:
+        for pc in self.network.classes:
+            for src in self.network.sources:
                 eachsrc = BoolVal(False)
                 for final in self.fsa.final:
-                    eachsrc = Or(eachsrc, rho(IntVal(src), IntVal(pc.idx)) == IntVal(final))
+                    eachsrc = Or(eachsrc, rho(src, pc) == final)
 
                 self.query = And(self.query, eachsrc)
 
@@ -209,19 +261,19 @@ class Cyclicity(RecursiveDefinition):
         self.cycle = cycle
 
     def base(self, node, pc):
-        return self.cycle(IntVal(node), IntVal(pc)) == IntVal(0)
+        return self.cycle(node, pc) == 0
 
     def change_rec(self, node, pc, n_to):
-        return self.cycle(IntVal(node), IntVal(pc)) > self.cycle(n_to, IntVal(pc))
+        return self.cycle(node, pc) > self.cycle(n_to, pc)
 
     def default_rec(self, node, pc, n_to):
-        return self.cycle(IntVal(node), IntVal(pc)) > self.cycle(IntVal(n_to), IntVal(pc))
+        return self.cycle(node, pc) > self.cycle(n_to, pc)
 
     def auxiliary_def(self):
         return BoolVal(True)
 
     def encode_null(self, pc):
-        return self.cycle(IntVal(0), IntVal(pc)) == IntVal(0)
+        return self.cycle(0, pc) == 0
 
 class ModifiedFunctionality(RecursiveDefinition):
     def __init__(self, rho, delta, fsa, nodes):
@@ -231,24 +283,24 @@ class ModifiedFunctionality(RecursiveDefinition):
         self.nodes = nodes
 
     def base(self, node, pc):
-        return self.rho(IntVal(node), IntVal(pc)) == self.delta(IntVal(self.fsa.initial), IntVal(node))
+        return self.rho(node, pc) == self.delta(self.fsa.initial, node)
 
     def change_rec(self, node, pc, n_to):
-        return self.rho(IntVal(node), IntVal(pc)) == self.delta(self.rho(n_to, IntVal(pc)), IntVal(node))
+        return self.rho(node, pc) == self.delta(self.rho(n_to, pc), node)
 
     def default_rec(self, node, pc, n_to):
-        return self.rho(IntVal(node), IntVal(pc)) == self.delta(self.rho(IntVal(n_to), IntVal(pc)), IntVal(node))
+        return self.rho(node, pc) == self.delta(self.rho(n_to, pc), node)
 
     def auxiliary_def(self):
         query = BoolVal(True)
         for start, symbol, end in self.fsa.transitions:
             symbol = self.fsa.symbolAliases[symbol]
-            query = And(query, self.delta(IntVal(start), IntVal(symbol)) == IntVal(end))
+            query = And(query, self.delta(start, symbol) == end)
 
         return query
 
     def encode_null(self, pc):
-        return self.rho(IntVal(0), IntVal(pc)) == IntVal(0)
+        return self.rho(0, pc) == 0
 
 class ComputeDestination(RecursiveDefinition):
     def __init__(self, dest, network, spec):
@@ -257,29 +309,28 @@ class ComputeDestination(RecursiveDefinition):
         self.spec = spec
 
     def base(self, node, pc):
-        return self.dest(IntVal(node), IntVal(pc)) == IntVal(node)
+        return self.dest(node, pc) == node
 
     def change_rec(self, node, pc, n_to):
-        return self.dest(IntVal(node), IntVal(pc)) == self.dest(n_to, IntVal(pc))
+        return self.dest(node, pc) == self.dest(n_to, pc)
 
     def default_rec(self, node, pc, n_to):
-        return self.dest(IntVal(node), IntVal(pc)) == self.dest(IntVal(n_to), IntVal(pc))
+        return self.dest(node, pc) == self.dest(n_to, pc)
 
     def auxiliary_def(self):
         query = BoolVal(True)
-        for pc in self.network.classes.values():
-            for src in self.spec.sources:
+        for pc in self.network.classes:
+            for src in self.network.sources:
                 # TODO: do we need to filter here?
-                # if src in pc.edges.keys() + pc.edges.values():
-                src_int = self.network.topo.intrepr[src]
-
                 # TODO: cleanup original_dest syntax, awkward ()[]
-                odname = pc.original_dest(self.network)[src]
-                odint= self.network.topo.intrepr[odname]
+                srcname = self.network.node_strrep[src]
+                pcobj = self.network.class_pcrep[pc]
+                odname = pcobj.original_dest(self.network.concrete_network)[srcname]
+                odint = self.network.node_intrep[odname]
                 query = And(query,
-                            self.dest(IntVal(src_int), IntVal(pc.idx)) == IntVal(odint))
+                            self.dest(src, pc) == odint)
 
         return query
 
     def encode_null(self, pc):
-        return self.dest(IntVal(0), IntVal(pc)) == IntVal(0)
+        return self.dest(0, pc) == 0

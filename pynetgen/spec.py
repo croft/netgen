@@ -290,6 +290,7 @@ class Specification(object):
         self.spec_str = None
         self.ts = None
         self.sources = None
+        self.immutables = []  # TODO: parse immutable nodes
         self.lhs = None
         self.rhs = None
         self.aliases = {}

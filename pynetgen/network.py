@@ -213,6 +213,15 @@ class Topology(object):
         self.paths = {}
         self.egress = []
 
+    def iteredges(self):
+        e = []
+        for src, dsts in self.edges.iteritems():
+            if not isinstance(dsts, list):
+                dsts = [dsts]
+            for dst in dsts:
+                e.append((src, dst))
+        return e
+
     @property
     def strrepr(self):
         return {v: k for k,v in self.intrepr.items()}
