@@ -118,7 +118,6 @@ class FSA(object):
             if state == 'dead':
                 dfa.renameState(i, 0)
             else:
-                #if isinstance(state, set):
                 self.renameCount += 1
                 dfa.renameState(i, self.renameCount)
 
@@ -127,11 +126,11 @@ class FSA(object):
             dfa.addTransition(i, 0, dfa.stateIndex(0))
 
         # add transitions: (final, any, dead)
-        for f in dfa.Final:
-            for s in FSA.symbol_names(dfa):
-                if dfa.Delta(f, s) is not None:
-                    dfa.delTransition(f, s, dfa.Delta(f,s))
-                dfa.addTransition(f, s, dfa.stateIndex(0))
+        # for f in dfa.Final:
+        #     for s in FSA.symbol_names(dfa):
+        #         if dfa.Delta(f, s) is not None:
+        #             dfa.delTransition(f, s, dfa.Delta(f,s))
+        #         dfa.addTransition(f, s, dfa.stateIndex(0))
 
         print dfa.succintTransitions()
         print dfa.States[dfa.Initial]
