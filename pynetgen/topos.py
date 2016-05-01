@@ -276,7 +276,7 @@ class FattreeTopo(Topology):
                 src_ip = self.nodes[src].ip
                 dst_ip = self.nodes[dst].ip
                 wc = "255.255.255.255"
-                for location, nexthop in pairwise(path[1:]):
+                for location, nexthop in pairwise(path[1:-1]):
                     flow = FlowEntry(dest=dst_ip,
                                      wildcard=wc,
                                      location=location,
@@ -294,10 +294,11 @@ class FattreeTopo(Topology):
         # for p in random.sample(pairs, count):
         #     print p[0], p[1]
         #     self.path(p[0], p[1])
-        count = int(density * len(self.hosts.keys()))
-        for p,v in pairwise(random.sample(self.hosts.keys(), count)):
-            print p,v
-            self.path(p,v)
+        # count = int(density * len(self.hosts.keys()))
+        # for p,v in pairwise(random.sample(self.hosts.keys(), count)):
+        #     print p,v
+        #     self.path(p,v)
+        self.path("h25", "h34")
 
     def add_path(self, src, dst, path):
         if src not in self.paths.keys():

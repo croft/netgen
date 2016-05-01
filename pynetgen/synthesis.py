@@ -34,6 +34,11 @@ class AbstractNetwork(object):
             idx += 1
 
         for src, dst in topo.iteredges():
+            # end host or external node
+            if src not in self.node_intrep.keys() or \
+               dst not in self.node_intrep.keys():
+                continue
+
             self.edges.append((self.node_intrep[src],
                                self.node_intrep[dst]))
 
