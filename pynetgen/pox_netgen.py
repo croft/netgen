@@ -37,6 +37,7 @@ class OpenFlowTopology(object):
         LinkEvents for discovered switches. It's our job to take these
         LinkEvents and update pox.topology.
         """
+        log.info("LINK EVENT")
         link = event.link
         sw1 = self.topology.getEntityByID(link.dpid1)
         sw2 = self.topology.getEntityByID(link.dpid2)
@@ -50,6 +51,7 @@ class OpenFlowTopology(object):
             sw2.ports[link.port2].entities.discard(sw1)
 
     def _handle_openflow_ConnectionUp (self, event):
+        log.info("UP")
         sw = self.topology.getEntityByID(event.dpid)
         add = False
         if sw is None:
@@ -66,6 +68,7 @@ class OpenFlowTopology(object):
             sw.raiseEvent(SwitchJoin, sw)
 
     def _handle_openflow_ConnectionDown (self, event):
+        log.info("DOWN")
         sw = self.topology.getEntityByID(event.dpid)
         if sw is None:
             log.warn("Switch %s disconnected, but... it doesn't exist!" %
@@ -407,13 +410,16 @@ class OFSyncFlowTable (EventMixin):
                 if(command == OFSyncFlowTable.ADD):
                     self.flow_table.add_entry(entry)
                     added.append(entry)
-            else:
-                removed.extend(self.flow_table.remove_matching_entries(entry.match,
-                    entry.priority, strict=command == OFSyncFlowTable.REMOVE_STRICT))
+                else:
+                    removed.extend(self.flow_table.remove_matching_entries(
+                        entry.match, entry.priority,
+                        strict=command == OFSyncFlowTable.REMOVE_STRICT))
+
                 #print "op: %s, pending: %s" % (op, self._pending)
-            if op in self._pending:
-                self._pending.remove(op)
-            self._pending_op_to_barrier.pop(op, None)
+                if op in self._pending:
+                    self._pending.remove(op)
+                self._pending_op_to_barrier.pop(op, None)
+
             del self._pending_barrier_to_ops[barrier.xid]
             self.raiseEvent(FlowTableModification(added = added, removed=removed))
             return EventHalt
