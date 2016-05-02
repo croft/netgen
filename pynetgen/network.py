@@ -8,6 +8,8 @@ import re
 import socket
 import struct
 
+import trie
+
 # TODO: replace with actual OF values
 OFPFC_ADD = 0
 OFPFC_DELETE_STRICT = 1
@@ -39,6 +41,46 @@ def mac2int(mac):
     if mac == "0":
         return 0
     return int(mac_to_binstr(mac))
+
+# TODO: use one data structure for both
+# TODO: add mask to flowtable
+def ft2rules(loc, ft):
+    rules = []
+    for flow in ft:
+        r = trie.Rule()
+        r.ruleType = trie.Rule.FORWARDING
+
+        if flow.src is not None:
+            r.fieldValue[HeaderField.Index["NW_SRC"]] = ip2int(flow.src)
+            r.fieldMask[HeaderField.Index["NW_SRC"]] = ip2int("255.255.255.255")
+
+        if flow.dest is not None:
+            r.fieldValue[HeaderField.Index["NW_DST"]] = ip2int(flow.dest)
+            r.fieldMask[HeaderField.Index["NW_DST"]] = ip2int("255.255.255.255")
+
+        r.priority = flow.priority
+
+        # TODO: how to handle multiple next hops?
+        r.nextHop = flow.nexthops[0]
+
+        r.location = loc
+        rules.append(r)
+
+    return rules
+
+# TODO: use one data structure for both
+def graph2pc(i, fg):
+    classes = []
+    pc = PacketClass(idx=i)
+    for name, link in fg.links.iteritems():
+        if len(link) > 1:
+            raise Exception("Don't know yet how to handle multiple links?")
+        pc.edges[name] = link[0].rule.nextHop
+
+    if len(pc.edges) == 0:
+        return None
+
+    return pc
 
 class FieldDefinition(object):
     def __init__(self):
@@ -128,29 +170,25 @@ class PacketClass(object):
         return "\n".join("{0} {1} {2}".format(self.idx, k,v) for k,v in self.edges.iteritems())
 
 class Network(object):
-    def __init__(self, class_dir=None):
+    def __init__(self, topo):
+        self.topo = topo
         self.classes = {}
-        self.class_files = {}
-        self.topo = None
+        self._compute_classes()
 
-        if class_dir is None:
-            return
+    def _compute_classes(self):
+        mtrie = trie.MultilevelTrie()
+        for switch in self.topo.switches.values():
+            for rule in ft2rules(switch.name, switch.ft):
+                mtrie.addRule(rule)
 
-        files = [os.path.join(class_dir, f) for f in os.listdir(class_dir)
-                 if os.path.isfile(os.path.join(class_dir, f))
-                 and os.path.splitext(f)[1] == '.txt'
-                 and f != "topo.txt"]
-
-        if not os.path.isfile(os.path.join(class_dir, "topo.txt")):
-            raise Exception("Missing {0} file"
-                            .format(os.path.join(class_dir, "topo.txt")))
-
-        self.topo = Topology(os.path.join(class_dir, "topo.txt"))
-
-        for f in files:
-            fname = os.path.splitext(os.path.basename(f))[0]
-            self.classes[fname] = PacketClass(f)
-            self.class_files[fname] = f
+        eqclasses = mtrie.getAllEquivalenceClasses()
+        for pclass, ptrie in eqclasses:
+            idx = len(self.classes) + 1
+            # TODO: reorg params so getAllEq is same as getFwdGraph
+            graph = mtrie.getForwardingGraph(ptrie, pclass)
+            pc = graph2pc(idx, graph)
+            if pc is not None:
+                self.classes[idx] = pc
 
     def match_classes(self, regex):
         matches = []
@@ -213,15 +251,6 @@ class Topology(object):
         self.paths = {}
         self.egress = []
 
-    def iteredges(self):
-        e = []
-        for src, dsts in self.edges.iteritems():
-            if not isinstance(dsts, list):
-                dsts = [dsts]
-            for dst in dsts:
-                e.append((src, dst))
-        return e
-
     @property
     def strrepr(self):
         return {v: k for k,v in self.intrepr.items()}
@@ -243,6 +272,26 @@ class Topology(object):
         n.update(self.hosts)
         return n
 
+    def write_debug_output(self, data_dir="data"):
+        if os.path.exists(data_dir):
+            shutil.rmtree(data_dir)
+
+        os.makedirs(data_dir)
+        topo.make_topofile(data_dir)
+        topo.make_rocketfile(data_dir)
+        topo.make_graph(data_dir)
+        topo.make_configmap(data_dir)
+
+    def iteredges(self):
+        e = []
+        for src, dsts in self.edges.iteritems():
+            if not isinstance(dsts, list):
+                dsts = [dsts]
+            for dst in dsts:
+                e.append((src, dst))
+        return e
+
+    # TODO: make property, hide manually defined egresses self.egress
     def egresses(self):
         # if manually defined
         if len(self.egress) > 0:
@@ -262,19 +311,6 @@ class Topology(object):
                     break
 
         return e
-
-    def iter_edges(self):
-        out = []
-        written = []
-        for src in sorted(self.edges.keys()):
-            for dst in self.edges[src]:
-                if (dst, src) not in written:
-                    written.append((src, dst))
-        return written
-
-        with open(os.path.join(dest_dir, topofile), 'w') as f:
-            f.writelines(out)
-
 
     def make_configmap(self, dest_dir, mapfile="config.map"):
         out = []
