@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TOPOS=("diamond" "diamondext") #"fattree")
+TOPOS=("diamond" "diamondext" "fattree")
 
 for topo in ${TOPOS[*]}
 do

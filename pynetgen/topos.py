@@ -317,6 +317,88 @@ class DiamondExtendedTopo(Topology):
             self.edges[e0].append(e1)
             self.edges[e1].append(e0)
 
+class ThintreeTopo(Topology):
+    def __init__(self):
+        super(ThintreeTopo, self).__init__()
+        self._make_topo()
+        self.paths = {}
+        self.add_path('s1', 's10', ['s1', 's2', 's4', 's8', 's10'])
+        self.make_flowtable()
+        self.egress.append('s10')
+        self.egress.append('s11')
+
+        # adding this (s1 = source AND egress) causes it to fail
+        self.egress.append('s1')
+
+    def make_flowtable(self):
+        # make forwarding tables
+        for src in self.paths.keys():
+            for dst in self.paths[src].keys():
+                path = self.paths[src][dst]
+                src_ip = self.nodes[src].ip
+                dst_ip = self.nodes[dst].ip
+                wc = "255.255.255.255"
+                for location, nexthop in pairwise(path):
+                    flow = FlowEntry(dest=dst_ip,
+                                     wildcard=wc,
+                                     location=location,
+                                     nexthops=nexthop,
+                                     src=src_ip)
+                    self.switches[location].ft.append(flow)
+
+    def add_path(self, src, dst, path):
+        if src not in self.paths.keys():
+            self.paths[src] = {}
+
+        self.paths[src][dst] = path
+
+    def _make_topo(self):
+        g = igraph.Graph()
+        g.add_vertices(['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11'])
+        g.add_edges([('s1','s2'),
+                     ('s1','s3'),
+                     ('s2','s4'),
+                     ('s2','s5'),
+                     ('s2','s6'),
+                     ('s2','s7'),
+                     ('s3','s4'),
+                     ('s3','s5'),
+                     ('s3','s6'),
+                     ('s3','s7'),
+                     ('s8','s4'),
+                     ('s8','s5'),
+                     ('s8','s6'),
+                     ('s8','s7'),
+                     ('s9','s4'),
+                     ('s9','s5'),
+                     ('s9','s6'),
+                     ('s9','s7'),
+                     ('s8','s10'),
+                     ('s9','s10'),
+                     ('s8','s11'),
+                     ('s9','s11'),
+                     ])
+
+        nodes = []
+        for name in ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11']:
+            nodes.append(name)
+            ip = "10.0.1.{0}".format(len(self.switches.keys()) + 1)
+            self.switches[name] = Switch(name=name ,ip=ip)
+
+        edges = g.get_edgelist()
+        for e in edges:
+            e0 = g.vs[e[0]].attributes()['name']
+            e1 = g.vs[e[1]].attributes()['name']
+
+            if e0 not in self.edges:
+                self.edges[e0] = []
+
+            if e1 not in self.edges:
+                self.edges[e1] = []
+
+            self.edges[e0].append(e1)
+            self.edges[e1].append(e0)
+
 class FattreeTopo(Topology):
     def __init__(self, k, path_density):
         super(FattreeTopo, self).__init__()
@@ -404,6 +486,7 @@ class FattreeTopo(Topology):
             nodes[i] = name
             self.hosts[name] = Host(name=name)
 
+
         for e in edges:
             e0 = nodes[e[0]]
             e1 = nodes[e[1]]
@@ -426,6 +509,8 @@ class FattreeTopo(Topology):
                 self.distances[e1] = {}
 
             self.distances[e1][e0] = 2
+
+        self.egress = [nodes[e] for e in self.egress]
 
         count = 1
         for h in self.hosts:
@@ -453,6 +538,7 @@ class FattreeTopo(Topology):
             for agg in range(0, self.size/2):
                 core_offset = agg * self.size/2
 
+
                 # connect core and aggregate switches
                 for core in range(0, self.size/2):
                     g.add_edge(agg_offset + agg, core_offset + core)
@@ -460,6 +546,7 @@ class FattreeTopo(Topology):
                 # connect aggregate and edge switches
                 for edge in range(0, self.size/2):
                     g.add_edge(agg_offset + agg, edge_offset + edge)
+                    self.egress.append(edge_offset + edge)
 
             # connect edge switches with hosts
             for edge in range(0, self.size/2):

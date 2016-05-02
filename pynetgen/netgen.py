@@ -11,14 +11,16 @@ import spec
 import synthesis
 from topos import (StanfordTopo, Internet2Topo,
                    FattreeTopo, DiamondTopo,
-                   DiamondExtendedTopo)
+                   DiamondExtendedTopo, ThintreeTopo)
+
 from network import HeaderField
 
 TOPOS = { "stanford" : StanfordTopo,
           "internet2" : Internet2Topo,
           "fattree" : FattreeTopo,
           "diamond" : DiamondTopo,
-          "diamondext" : DiamondExtendedTopo
+          "diamondext" : DiamondExtendedTopo,
+          "thintree" : ThintreeTopo
       }
 
 def main():
