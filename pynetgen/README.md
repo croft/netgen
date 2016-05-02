@@ -5,9 +5,9 @@
 Z3 [[github.com](https://github.com/Z3Prover/z3#python)]  
 * Install Python bindings: `python scripts/mk_make.py --python`  
 
-Python libraries: 
-Install Python package manager `pip`: `sudo apt-get install pip`  
-Install libraries: `sudo pip install fado ipaddr graphviz`  
+Python libraries  
+* Install Python package manager `pip`: `sudo apt-get install pip`  
+* Install libraries: `sudo pip install fado ipaddr graphviz`  
 
 
 ### Walkthrough
