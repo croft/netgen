@@ -320,7 +320,8 @@ class Specification(object):
         parsed = SpecGrammar.parseString(self.spec_str)
         # TODO: process traffic spec, sources
 
-        self.sources = parsed[1]
+        # without converting to str, node names won't match "node in sources"
+        self.sources = [str(s) for s in parsed[1]]
 
         if len(parsed[2]) > 1:
             raise Exception("lhs error")
