@@ -25,7 +25,7 @@ TOPOS = { "stanford" : StanfordTopo,
 def main():
     prog = os.path.basename(sys.argv[0])
     default_dest = "./output"
-    default_spec = "./spec.txt"
+    default_spec = "./specs/default.txt"
     topos = "|".join(TOPOS.keys())
     desc = "NetGen dataplane change generator"
     usage = "{0} [options]\ntype {0} -h for details".format(prog)
