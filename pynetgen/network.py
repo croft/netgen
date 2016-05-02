@@ -126,12 +126,18 @@ class PacketField(FieldDefinition):
 HeaderField = PacketField()
 
 class PacketClass(object):
-    def __init__(self, fname=None, idx=None):
+    def __init__(self, idx=None):
         self.idx = idx
-        if fname is None:
-            self.edges = {}
-        else:
-            self.edges = Topology.get_edges(fname, 1)
+        self.edges = {}
+
+    def iteredges(self):
+        e = []
+        for src, dsts in self.edges.iteritems():
+            if not isinstance(dsts, list):
+                dsts = [dsts]
+            for dst in dsts:
+                e.append((src, dst))
+        return e
 
     def original_dest(self, network):
         dest = {}
@@ -182,9 +188,8 @@ class Network(object):
                 mtrie.addRule(rule)
 
         eqclasses = mtrie.getAllEquivalenceClasses()
-        for pclass, ptrie in eqclasses:
+        for ptrie, pclass in eqclasses:
             idx = len(self.classes) + 1
-            # TODO: reorg params so getAllEq is same as getFwdGraph
             graph = mtrie.getForwardingGraph(ptrie, pclass)
             pc = graph2pc(idx, graph)
             if pc is not None:

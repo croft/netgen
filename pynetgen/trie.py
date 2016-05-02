@@ -197,7 +197,7 @@ class Rule(object):
         return str(self)
 
     def __str__(self):
-        # TODO:
+        # TODO: convert values
         return "Value: {0}, Mask: {1}, Loc: {2}, NH: {3}, Pri: {4}".format(
             self.fieldValue, self.fieldMask, self.location, self.nextHop, self.priority)
 
@@ -374,7 +374,8 @@ class Trie(object):
 
                         link = ForwardingLink(rule)
 
-                        # TODO: here VeriFlow distinguishes between test and proxy mode
+                        # here, VeriFlow distinguishes between test and proxy mode
+                        # no proxy mode here, so skip
                         if rule.location == rule.nextHop:
                             link.isGateway = True
 
@@ -439,7 +440,6 @@ class Trie(object):
                 raise Exception("Invalid node found")
 
             if curnode.oneBranch is not None:
-                # TODO: should use copy here?
                 onerange = temprange.copy()
                 onerange.lowerBound |= 1
                 onerange.upperBound |= 1
@@ -578,7 +578,6 @@ class Trie(object):
                                 nextLevelNodes.append(curnode.wildcardBranch)
 
                 curLevelNodes = nextLevelNodes
-                # TODO: is this right? Veriflow erase(0, end)
                 nextLevelNodes = []
 
             for i in range(len(curLevelNodes)):
@@ -588,10 +587,7 @@ class Trie(object):
                 else:
                     raise Exception("invalid node")
 
-            # right indent?
-
         # found next level tries, now compute equivalence classes
-        # TODO: fix below
         lblist = []
         ublist = []
         lbmap = {}
@@ -607,7 +603,6 @@ class Trie(object):
             if outputTrie.totalRuleCount == 0:
                 continue
 
-            # TODO: refactor
             width = HeaderField.Width[nextIndex]
             curnode = outputTrie.root
             eqrange = EquivalenceRange()
@@ -654,7 +649,6 @@ class Trie(object):
                     raise Exception("Invalid node found")
 
                 if curnode.oneBranch is not None:
-                    # TODO: should use copy here?
                     onerange = temprange.copy()
                     onerange.lowerBound |= 1
                     onerange.upperBound |= 1
@@ -738,7 +732,7 @@ class Trie(object):
             pktclass.upperBound[nextIndex] = ub
             packetClasses.append(pktclass)
 
-        return (packetClasses, outputTries)
+        return (outputTries, packetClasses)
 
     def addToBoundList(self, lb, ub):
         if lb not in self.lowerBoundMap:
@@ -880,10 +874,10 @@ class MultilevelTrie(object):
                 c = prevClass[i]
                 pc.lowerBound[i] = c.lowerBound[i]
                 pc.upperBound[i] = c.upperBound[i]
-            return (pc, prevTries[-1])
+            return (prevTries[-1], pc)
         else:
             if rule.ruleType == Rule.FORWARDING:
-                classes, tries = Trie.getNextLevelEquivalenceClasses(
+                tries, classes = Trie.getNextLevelEquivalenceClasses(
                     curIndex,
                     prevClass[-1].lowerBound[curIndex],
                     rule,
