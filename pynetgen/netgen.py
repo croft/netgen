@@ -2,7 +2,6 @@
 
 import argparse
 import os
-import shutil
 import sys
 
 import trie
@@ -64,11 +63,14 @@ def main():
     net = network.Network(topo)
 
     s = spec.Specification(args.spec)
-    s.parse(net, args.dest)
+    s.parse(net)
 
     if args.debug:
-        topo.write_debug_output()
-        s.write_debug_output(net)
+        if not os.path.isdir(args.dest):
+            os.makedirs(args.dest)
+
+        topo.write_debug_output(args.dest)
+        s.write_debug_output(net, args.dest)
 
     solver = synthesis.Synthesizer(net, s)
     solver.solve()

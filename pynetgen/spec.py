@@ -297,7 +297,7 @@ class Specification(object):
         self.fsa = None
         print "Found aliases:", self.aliases.keys()
 
-    def parse(self, network, destination):
+    def parse(self, network):
         cfg = ConfigParser.ConfigParser()
         cfg.read(self.spec_file)
 
@@ -331,10 +331,10 @@ class Specification(object):
         self.lhs = parsed[2][0].strip()
         self.rhs = parsed[3][0].strip()
 
-        self._parse_lhs(network, destination)
-        self._parse_rhs(network, destination)
+        self._parse_lhs(network)
+        self._parse_rhs(network)
 
-    def _parse_lhs(self, network, destination):
+    def _parse_lhs(self, network):
         # clean select dir
         regex = expand_regex(self.lhs, network.topo, self.aliases)
         print "Lhs expanded:", regex
@@ -343,7 +343,7 @@ class Specification(object):
         for c in self.matched_classes:
             print "Matched packet class:", c
 
-    def _parse_rhs(self, network, destination):
+    def _parse_rhs(self, network):
         regex = expand_regex(self.rhs, network.topo, self.aliases)
         print "Rhs expanded:", regex
         self.fsa = FSA(regex, network.topo.switches)
