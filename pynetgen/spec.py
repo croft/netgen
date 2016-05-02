@@ -333,32 +333,32 @@ class Specification(object):
         self._parse_lhs(network, destination)
         self._parse_rhs(network, destination)
 
-        # TODO: better place for this
-        network.topo.make_topofile(destination, topofile="Topology.txt")
-        network.topo.make_configmap(destination)
-
     def _parse_lhs(self, network, destination):
         # clean select dir
-        select_dir = os.path.join(destination, "selected")
-        if os.path.exists(select_dir):
-            shutil.rmtree(select_dir)
-        os.makedirs(select_dir)
-
         regex = expand_regex(self.lhs, network.topo, self.aliases)
         print "Lhs expanded:", regex
 
         self.matched_classes = network.match_classes(regex)
         for c in self.matched_classes:
             print "Matched packet class:", c
-            with open(os.path.join(select_dir, "{0}.txt".format(c)), 'w') as f:
-                f.write(str(network.classes[c]))
 
     def _parse_rhs(self, network, destination):
-        destination = os.path.join(destination, "automata.txt")
         regex = expand_regex(self.rhs, network.topo, self.aliases)
         print "Rhs expanded:", regex
         self.fsa = FSA(regex, network.topo.switches)
         print str(self.fsa)
+
+    def write_debug_output(self, network, data_dir="output"):
+        select_dir = os.path.join(data_dir, "selected")
+        if os.path.exists(select_dir):
+            shutil.rmtree(select_dir)
+
+        os.makedirs(select_dir)
+        for c in self.matched_classes:
+            with open(os.path.join(select_dir, "{0}.txt".format(c)), 'w') as f:
+                f.write(str(network.classes[c]))
+
+        destination = os.path.join(data_dir, "automata.txt")
         with open(destination, 'w') as f:
             f.write(str(self.fsa))
 

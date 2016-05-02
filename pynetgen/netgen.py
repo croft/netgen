@@ -59,13 +59,14 @@ def main():
     else:
         topo = TOPOS[args.topo]()
 
-    if args.debug:
-        topo.write_debug_output()
-
     net = network.Network(topo)
 
     s = spec.Specification(args.spec)
     s.parse(net, args.dest)
+
+    if args.debug:
+        topo.write_debug_output()
+        s.write_debug_output(net)
 
     solver = synthesis.Synthesizer(net, s)
     solver.solve()

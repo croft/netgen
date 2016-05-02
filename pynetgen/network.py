@@ -276,15 +276,11 @@ class Topology(object):
         n.update(self.hosts)
         return n
 
-    def write_debug_output(self, data_dir="data"):
-        if os.path.exists(data_dir):
-            shutil.rmtree(data_dir)
-
-        os.makedirs(data_dir)
-        topo.make_topofile(data_dir)
-        topo.make_rocketfile(data_dir)
-        topo.make_graph(data_dir)
-        topo.make_configmap(data_dir)
+    def write_debug_output(self, data_dir="output"):
+        self.make_topofile(data_dir)
+        self.make_rocketfile(data_dir)
+        self.make_graph(data_dir)
+        self.make_configmap(data_dir)
 
     def iteredges(self):
         e = []
