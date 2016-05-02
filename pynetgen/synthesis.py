@@ -5,16 +5,12 @@ from z3 import *
 
 class AbstractNetwork(object):
     def __init__(self, concrete_network, spec):
-        # TODO: rename below
         self.concrete_network = concrete_network
         topo = concrete_network.topo
         classes = concrete_network.classes.values()
 
         self.edges = []
         self.rules = {}
-
-        # automata is backwards, so we need to lookup reverse of (src, pc) -> dst
-        self.rev_rules = {}
 
         self.node_strrep = {}
         self.node_intrep = {}
@@ -50,19 +46,14 @@ class AbstractNetwork(object):
         # set default value 0
         for switch in self.node_strrep.keys():
             self.rules[switch] = {}
-            self.rev_rules[switch] = {}
-
             for pcid in self.class_pcrep.keys():
                 self.rules[switch][pcid] = 0
-                self.rev_rules[switch][pcid] = 0
 
         for pcid, pc in self.class_pcrep.iteritems():
-            # TODO: inconsistency in edge-type iterator between pc and topo
-            for src, dst in pc.edges.iteritems():
+            for src, dst in pc.iteredges():
                 src_int = self.node_intrep[src]
                 dst_int = self.node_intrep[dst]
                 self.rules[src_int][pcid] = dst_int
-                self.rev_rules[dst_int][pcid] = src_int
 
         self.sources = [self.node_intrep[s] for s in spec.sources]
         self.immutable = [self.node_intrep[s] for s in spec.immutables]
@@ -229,7 +220,7 @@ class SmtQuery(object):
                         notnew = And(notnew,
                                      Or(node != self.n[i], pc != self.p[i]))
 
-                    # TODO: reversing rules isn't needed?   rev_rules
+                    # TODO: reversing rules isn't needed? rev_rules
                     nexthop = self.network.rules[node][pc]
                     self.query = And(self.query,
                                      Implies(notnew, func.recurse(node,
@@ -320,7 +311,6 @@ class ComputeDestination(RecursiveDefinition):
         query = BoolVal(True)
         for pc in self.network.classes:
             for src in self.network.sources:
-                # TODO: do we need to filter here?
                 # TODO: cleanup original_dest syntax, awkward ()[]
                 srcname = self.network.node_strrep[src]
                 pcobj = self.network.class_pcrep[pc]

@@ -1,0 +1,11 @@
+[aliases]
+fw = s0, s1
+lb = s2
+
+# FATTREE
+# installed: h25 -> s14 -> s6 -> s0 -> s10 -> s19 -> h34
+# not match(ip_src=a.b.c.d); s14: .* s0 .* => (N-s0)(N-s0)* s3 (N-s0)(N-s0)*
+
+
+[change]
+not match(ip_src=a.b.c.d); s14: .* s0 .* => (N-s0)(N-s0)* s3 (N-s0)(N-s0)*

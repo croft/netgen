@@ -1,0 +1,10 @@
+[aliases]
+fw = s0, s1
+lb = s2
+
+# DIAMOND
+# installed: s1 -> s2 -> s4
+# not match(ip_src=a.b.c.d); s1: .* s2 .* => (N-s2) s3 (N-s2)
+
+[change]
+not match(ip_src=a.b.c.d); s1: .* s2 .* => (N-s2) s3 (N-s2)
