@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import igraph
-import itertools
 import math
 import random
 
@@ -14,14 +13,7 @@ from config_parser.cisco_router_parser import ciscoRouter
 from config_parser.juniper_parser import juniperRouter
 from config_parser.transfer_function_to_openflow import OpenFlow_Rule_Generator
 
-import dijkstra
-from network import Topology, Switch, Host, FlowEntry, int2mac
-
-def pairwise(iterable):
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
-    a, b = itertools.tee(iterable)
-    next(b, None)
-    return itertools.izip(a, b)
+from network import Topology, Switch, Host, FlowEntry, int2mac, pairwise
 
 class TfTopology(Topology):
     def __init__(self, definition, ntf, ttf, port_ids, router):
@@ -182,39 +174,6 @@ class DiamondTopo(Topology):
     def __init__(self):
         super(DiamondTopo, self).__init__()
         self._make_topo()
-        self.paths = {}
-        self.add_path('s1', 's4', ['s1', 's2', 's4'])
-        self.make_flowtable()
-
-        # TODO: manually set egress
-        self.egress.append('s4')
-
-    def make_flowtable(self):
-        # make forwarding tables
-        for src in self.paths.keys():
-            for dst in self.paths[src].keys():
-                path = self.paths[src][dst]
-                src_ip = self.nodes[src].ip
-                dst_ip = self.nodes[dst].ip
-                wc = "255.255.255.255"
-                for location, nexthop in pairwise(path):
-                    flow = FlowEntry(dest=dst_ip,
-                                     wildcard=wc,
-                                     location=location,
-                                     nexthops=nexthop,
-                                     src=src_ip)
-                    self.switches[location].ft.append(flow)
-
-    def add_path(self, src, dst, path):
-        if src not in self.paths.keys():
-            self.paths[src] = {}
-
-        self.paths[src][dst] = path
-
-        # assume paths are bidirectional
-        # if dst not in self.paths.keys():
-        #     self.paths[dst] = {}
-        # self.paths[dst][src] = path
 
     def _make_topo(self):
         g = igraph.Graph()
@@ -253,39 +212,6 @@ class DiamondExtendedTopo(Topology):
     def __init__(self):
         super(DiamondExtendedTopo, self).__init__()
         self._make_topo()
-        self.paths = {}
-        self.add_path('s1', 's6', ['s1', 's2', 's3', 's5', 's6'])
-        self.make_flowtable()
-
-        # TODO: manually set egress
-        self.egress.append('s6')
-
-    def make_flowtable(self):
-        # make forwarding tables
-        for src in self.paths.keys():
-            for dst in self.paths[src].keys():
-                path = self.paths[src][dst]
-                src_ip = self.nodes[src].ip
-                dst_ip = self.nodes[dst].ip
-                wc = "255.255.255.255"
-                for location, nexthop in pairwise(path):
-                    flow = FlowEntry(dest=dst_ip,
-                                     wildcard=wc,
-                                     location=location,
-                                     nexthops=nexthop,
-                                     src=src_ip)
-                    self.switches[location].ft.append(flow)
-
-    def add_path(self, src, dst, path):
-        if src not in self.paths.keys():
-            self.paths[src] = {}
-
-        self.paths[src][dst] = path
-
-        # assume paths are bidirectional
-        # if dst not in self.paths.keys():
-        #     self.paths[dst] = {}
-        # self.paths[dst][src] = path
 
     def _make_topo(self):
         g = igraph.Graph()
@@ -321,40 +247,12 @@ class ThintreeTopo(Topology):
     def __init__(self):
         super(ThintreeTopo, self).__init__()
         self._make_topo()
-        self.paths = {}
-        self.add_path('s1', 's10', ['s1', 's2', 's4', 's8', 's10'])
-        self.make_flowtable()
-        self.egress.append('s10')
-        self.egress.append('s11')
-
-        # adding this (s1 = source AND egress) causes it to fail
-        self.egress.append('s1')
-
-    def make_flowtable(self):
-        # make forwarding tables
-        for src in self.paths.keys():
-            for dst in self.paths[src].keys():
-                path = self.paths[src][dst]
-                src_ip = self.nodes[src].ip
-                dst_ip = self.nodes[dst].ip
-                wc = "255.255.255.255"
-                for location, nexthop in pairwise(path):
-                    flow = FlowEntry(dest=dst_ip,
-                                     wildcard=wc,
-                                     location=location,
-                                     nexthops=nexthop,
-                                     src=src_ip)
-                    self.switches[location].ft.append(flow)
-
-    def add_path(self, src, dst, path):
-        if src not in self.paths.keys():
-            self.paths[src] = {}
-
-        self.paths[src][dst] = path
 
     def _make_topo(self):
         g = igraph.Graph()
-        g.add_vertices(['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11'])
+        g.add_vertices(['s1', 's2', 's3', 's4', 's5', 's6',
+                        's7', 's8', 's9', 's10', 's11'])
+
         g.add_edges([('s1','s2'),
                      ('s1','s3'),
                      ('s2','s4'),
@@ -380,7 +278,8 @@ class ThintreeTopo(Topology):
                      ])
 
         nodes = []
-        for name in ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11']:
+        for name in ['s1', 's2', 's3', 's4', 's5', 's6',
+                     's7', 's8', 's9', 's10', 's11']:
             nodes.append(name)
             ip = "10.0.1.{0}".format(len(self.switches.keys()) + 1)
             self.switches[name] = Switch(name=name ,ip=ip)
@@ -400,75 +299,29 @@ class ThintreeTopo(Topology):
             self.edges[e1].append(e0)
 
 class FattreeTopo(Topology):
-    def __init__(self, k, path_density):
+    def __init__(self, k=4, density=1):
         super(FattreeTopo, self).__init__()
         self.size = k
-        self.path_density = path_density
         self.distances = {}
         self.pods = {}
         self.pods_rev = {}
-        self.paths = {}
-
         self._make_topo()
-        self.make_connections(self.path_density)
-        self.make_flowtable()
 
-    def make_flowtable(self):
-        # make forwarding tables
-        for src in self.paths.keys():
-            for dst in self.paths[src].keys():
-                path = self.paths[src][dst]
-                src_ip = self.nodes[src].ip
-                dst_ip = self.nodes[dst].ip
-                wc = "255.255.255.255"
-                for location, nexthop in pairwise(path[1:-1]):
-                    flow = FlowEntry(dest=dst_ip,
-                                     wildcard=wc,
-                                     location=location,
-                                     nexthops=nexthop,
-                                     src=src_ip)
-                    self.switches[location].ft.append(flow)
-
-    def make_connections(self, density):
+    @classmethod
+    def make_connections(cls, instance, density):
         # f = math.factorial
-        # n = len(self.hosts.keys())
+        # n = len(instance.hosts.keys())
         # r = 2
         # combinations = f(n) / (f(r) * f(n-r))
         # count = int(density * combinations)
-        # pairs = list(itertools.combinations(self.hosts.keys(), 2))
+        # pairs = list(itertools.combinations(instance.hosts.keys(), 2))
         # for p in random.sample(pairs, count):
         #     print p[0], p[1]
-        #     self.path(p[0], p[1])
-        # count = int(density * len(self.hosts.keys()))
-        # for p,v in pairwise(random.sample(self.hosts.keys(), count)):
-        #     print p,v
-        #     self.path(p,v)
-        self.path("h25", "h34")
-
-    def add_path(self, src, dst, path):
-        if src not in self.paths.keys():
-            self.paths[src] = {}
-
-        self.paths[src][dst] = path
-
-        # assume paths are bidirectional
-        # if dst not in self.paths.keys():
-        #     self.paths[dst] = {}
-        # self.paths[dst][src] = path
-
-    def path(self, src, dst):
-        path = dijkstra.shortestPath(self.distances, src, dst)
-        self.add_path(src, dst, path)
-        return path
-
-    def alt_path(self, src, dst):
-        distances = self.distances.copy()
-        for k,v in pairwise(self.paths[src][dst]):
-            distances[k][v] = distances[k][v] + 1
-
-        path = dijkstra.shortestPath(self.distances, src, dst)
-        self.add_path(src, dst, path)
-        return path
+        #     instance.make_path(p[0], p[1])
+        count = int(density * len(instance.hosts.keys()))
+        for p,v in pairwise(random.sample(instance.hosts.keys(), count)):
+            print p,v
+            instance.make_path(p,v)
 
     def _make_topo(self):
         g = self._generate_graph()
@@ -486,7 +339,6 @@ class FattreeTopo(Topology):
             nodes[i] = name
             self.hosts[name] = Host(name=name)
 
-
         for e in edges:
             e0 = nodes[e[0]]
             e1 = nodes[e[1]]
@@ -500,17 +352,7 @@ class FattreeTopo(Topology):
             self.edges[e0].append(e1)
             self.edges[e1].append(e0)
 
-            if e0 not in self.distances.keys():
-                self.distances[e0] = {}
-
-            self.distances[e0][e1] = 2
-
-            if e1 not in self.distances.keys():
-                self.distances[e1] = {}
-
-            self.distances[e1][e0] = 2
-
-        self.egress = [nodes[e] for e in self.egress]
+        self._egresses = [nodes[e] for e in self._egresses]
 
         count = 1
         for h in self.hosts:
@@ -546,7 +388,7 @@ class FattreeTopo(Topology):
                 # connect aggregate and edge switches
                 for edge in range(0, self.size/2):
                     g.add_edge(agg_offset + agg, edge_offset + edge)
-                    self.egress.append(edge_offset + edge)
+                    self._egresses.append(edge_offset + edge)
 
             # connect edge switches with hosts
             for edge in range(0, self.size/2):

@@ -2,16 +2,24 @@
 
 import graphviz
 import ipaddr
+import itertools
 import netaddr
 import os
 import re
 import socket
 import struct
 
+import dijkstra
 import trie
 
 OFPFC_ADD = 0
 OFPFC_DELETE_STRICT = 4
+
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return itertools.izip(a, b)
 
 def ip2int(ip):
     # handle default value
@@ -138,14 +146,14 @@ class PacketClass(object):
                 e.append((src, dst))
         return e
 
-    def original_dest(self, network, sources=None):
+    def original_dest(self, topo, sources=None):
         if sources is None:
             sources = []
 
         dest = {}
-        egress = [e for e in network.topo.egresses()
+        egress = [e for e in topo.egresses
                   if e not in sources]
-        for src in network.topo.switches.keys():
+        for src in topo.switches.keys():
             if src in egress:
                 dest[src] = src
                 continue
@@ -178,35 +186,60 @@ class PacketClass(object):
     def __str__(self):
         return "\n".join("{0} {1} {2}".format(self.idx, k,v) for k,v in self.edges.iteritems())
 
-class Network(object):
-    def __init__(self, topo):
-        self.topo = topo
-        self.classes = {}
-        self._compute_classes()
+class NetworkConfig(object):
+    def __init__(self, paths=None, egresses=None, pathfunc=None, params=None):
+        self.egresses = egresses
+        self.pathfunc = pathfunc
+        self.paths = {}
 
-    def _compute_classes(self):
-        mtrie = trie.MultilevelTrie()
-        for switch in self.topo.switches.values():
-            for rule in ft2rules(switch.name, switch.ft):
-                mtrie.addRule(rule)
+        if egresses is None:
+            self.egresses = []
 
-        eqclasses = mtrie.getAllEquivalenceClasses()
-        for ptrie, pclass in eqclasses:
-            idx = len(self.classes) + 1
-            graph = mtrie.getForwardingGraph(ptrie, pclass)
-            pc = graph2pc(idx, graph)
-            if pc is not None:
-                self.classes[idx] = pc
+        for src, dst, path in paths:
+            if src not in self.paths:
+                self.paths[src] = {}
 
-    def match_classes(self, regex):
-        matches = []
-        for p, pc in self.classes.iteritems():
-            for pathstr in pc.construct_strings():
-                if re.match(regex, pathstr) is not None:
-                    matches.append(p)
-                    break
+            self.paths[src][dst] = path
 
-        return sorted(matches, key=int)
+        if len(paths) > 0 and pathfunc is not None:
+            raise Exception("Path generator function and explicit paths "
+                            "supplied!  Use only one!")
+
+    def apply_config(self, topo_instance):
+        if self.pathfunc is not None:
+            self.paths = self.pathfunc(topo_instance)
+        else:
+            # look for paths with src,dst but no path specified
+            for src in self.paths:
+                for dst in self.paths[src]:
+                    if self.paths[src][dst] is None:
+                        self.paths[src][dst] = topo_instance.make_path(src, dst)
+
+        for e in self.egresses:
+            if e not in topo_instance.switches:
+                raise Exception("Supplied egress not in topology: {0}"
+                                .format(e))
+
+        for src in self.paths:
+            if src not in topo_instance.switches and \
+               src not in topo_instance.hosts:
+                raise Exception("Supplied path src not in topology: {0}"
+                                .format(src))
+
+            for dst in self.paths[src]:
+                if dst not in topo_instance.switches and \
+                   src not in topo_instance.hosts:
+                    raise Exception("Supplied path dst not in topology: {0}"
+                                    .format(dst))
+
+                for node in self.paths[src][dst]:
+                    if node not in topo_instance.switches and \
+                       node not in topo_instance.hosts:
+                        raise Exception("Node in path not in topology: {0}"
+                                        .format(node))
+
+        topo_instance.paths = self.paths
+        topo_instance._egresses = self.egresses
 
 class Node(object):
     def __init__(self, ip=None, mac=None, name=None):
@@ -257,7 +290,9 @@ class Topology(object):
         self.hosts = {}
         self.edges = {}
         self.paths = {}
-        self.egress = []
+        self.distances = {}
+        self._egresses = []
+        self._classes = {}
 
     @property
     def strrepr(self):
@@ -273,12 +308,108 @@ class Topology(object):
 
         return alias
 
-    # TODO: better perf?
     @property
     def nodes(self):
         n = self.switches.copy()
         n.update(self.hosts)
         return n
+
+    @property
+    def classes(self):
+        if len(self._classes) == 0:
+            self._compute_classes()
+        return self._classes
+
+    @property
+    def egresses(self):
+        # if manually defined
+        if len(self._egresses) > 0:
+            return self._egresses
+
+        # otherwise, any switch with switch degree 1 or
+        # any switch connected to a host
+        e = []
+        for s in self.switches.keys():
+            if len(self.edges[s]) == 1:
+                e.append(s)
+                continue
+
+            for neighbor in self.edges[s]:
+                if neighbor in self.hosts:
+                    e.append(s)
+                    break
+
+        return e
+
+    def apply_config(self, config):
+        config.apply_config(self)
+        self.make_flowtable()
+
+    def add_path(self, src, dst, path):
+        if src not in self.paths.keys():
+            self.paths[src] = {}
+
+        self.paths[src][dst] = path
+
+        # assume paths are bidirectional
+        # if dst not in self.paths.keys():
+        #     self.paths[dst] = {}
+        # self.paths[dst][src] = path
+
+    def _compute_classes(self):
+        mtrie = trie.MultilevelTrie()
+        for switch in self.switches.values():
+            for rule in ft2rules(switch.name, switch.ft):
+                mtrie.addRule(rule)
+
+        eqclasses = mtrie.getAllEquivalenceClasses()
+        for ptrie, pclass in eqclasses:
+            idx = len(self._classes) + 1
+            graph = mtrie.getForwardingGraph(ptrie, pclass)
+            pc = graph2pc(idx, graph)
+            if pc is not None:
+                self._classes[idx] = pc
+
+    def _compute_distances(self):
+        self.distances = {}
+        for e1, e2 in self.iteredges():
+            if e1 not in self.distances:
+                self.distances[e1] = {}
+            if e2 not in self.distances:
+                self.distances[e2] = {}
+
+            self.distances[e1][e2] = 2
+            self.distances[e2][e1] = 2
+
+    def match_classes(self, regex):
+        matches = []
+        for p, pc in self.classes.iteritems():
+            for pathstr in pc.construct_strings():
+                if re.match(regex, pathstr) is not None:
+                    matches.append(p)
+                    break
+
+        return sorted(matches, key=int)
+
+    def make_path(self, src, dst):
+        if len(self.distances) == 0:
+            self._compute_distances()
+
+        path = dijkstra.shortestPath(self.distances, src, dst)
+        self.add_path(src, dst, path)
+        return path
+
+    def alt_path(self, src, dst):
+        if len(self.distances) == 0:
+            self._compute_distances()
+
+        distances = self.distances.copy()
+        for k,v in pairwise(self.paths[src][dst]):
+            distances[k][v] = distances[k][v] + 1
+
+        path = dijkstra.shortestPath(self.distances, src, dst)
+        self.add_path(src, dst, path)
+        return path
 
     def write_debug_output(self, data_dir="output"):
         self.make_topofile(data_dir)
@@ -293,27 +424,6 @@ class Topology(object):
                 dsts = [dsts]
             for dst in dsts:
                 e.append((src, dst))
-        return e
-
-    # TODO: make property, hide manually defined egresses self.egress
-    def egresses(self):
-        # if manually defined
-        if len(self.egress) > 0:
-            return self.egress
-
-        # otherwise, any switch with switch degree 1 or
-        # connected to a host
-        e = []
-        for s in self.switches.keys():
-            if len(self.edges[s]) == 1:
-                e.append(s)
-                continue
-
-            for neighbor in self.edges[s]:
-                if neighbor in self.hosts:
-                    e.append(s)
-                    break
-
         return e
 
     def make_configmap(self, dest_dir, mapfile="config.map"):
@@ -360,3 +470,26 @@ class Topology(object):
 
         return [s for s in self.switches.keys() if s not in diff]
 
+    def make_flowtable(self):
+        for src in self.paths.keys():
+            for dst in self.paths[src].keys():
+                path = self.paths[src][dst]
+                src_ip = self.nodes[src].ip
+                dst_ip = self.nodes[dst].ip
+                wc = "255.255.255.255"
+
+                # do we need to filter hosts?
+                fwd_path = path
+                if path[0] in self.hosts:
+                    fwd_path = path[1:]
+
+                if path[-1] in self.hosts:
+                    fwd_path = fwd_path[:-1]
+
+                for location, nexthop in pairwise(fwd_path):
+                    flow = FlowEntry(dest=dst_ip,
+                                     wildcard=wc,
+                                     location=location,
+                                     nexthops=nexthop,
+                                     src=src_ip)
+                    self.switches[location].ft.append(flow)

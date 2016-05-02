@@ -297,7 +297,7 @@ class Specification(object):
         self.fsa = None
         print "Found aliases:", self.aliases.keys()
 
-    def parse(self, network):
+    def parse(self, topo):
         cfg = ConfigParser.ConfigParser()
         cfg.read(self.spec_file)
 
@@ -331,25 +331,25 @@ class Specification(object):
         self.lhs = parsed[2][0].strip()
         self.rhs = parsed[3][0].strip()
 
-        self._parse_lhs(network)
-        self._parse_rhs(network)
+        self._parse_lhs(topo)
+        self._parse_rhs(topo)
 
-    def _parse_lhs(self, network):
+    def _parse_lhs(self, topo):
         # clean select dir
-        regex = expand_regex(self.lhs, network.topo, self.aliases)
+        regex = expand_regex(self.lhs, topo, self.aliases)
         print "Lhs expanded:", regex
 
-        self.matched_classes = network.match_classes(regex)
+        self.matched_classes = topo.match_classes(regex)
         for c in self.matched_classes:
             print "Matched packet class:", c
 
-    def _parse_rhs(self, network):
-        regex = expand_regex(self.rhs, network.topo, self.aliases)
+    def _parse_rhs(self, topo):
+        regex = expand_regex(self.rhs, topo, self.aliases)
         print "Rhs expanded:", regex
-        self.fsa = FSA(regex, network.topo.switches)
+        self.fsa = FSA(regex, topo.switches)
         print str(self.fsa)
 
-    def write_debug_output(self, network, data_dir="output"):
+    def write_debug_output(self, topo, data_dir="output"):
         select_dir = os.path.join(data_dir, "selected")
         if os.path.exists(select_dir):
             shutil.rmtree(select_dir)
@@ -357,7 +357,7 @@ class Specification(object):
         os.makedirs(select_dir)
         for c in self.matched_classes:
             with open(os.path.join(select_dir, "{0}.txt".format(c)), 'w') as f:
-                f.write(str(network.classes[c]))
+                f.write(str(topo.classes[c]))
 
         destination = os.path.join(data_dir, "automata.txt")
         with open(destination, 'w') as f:

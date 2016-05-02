@@ -6,7 +6,6 @@ from z3 import *
 class AbstractNetwork(object):
     def __init__(self, concrete_network, spec):
         self.concrete_network = concrete_network
-        topo = concrete_network.topo
         classes = concrete_network.classes.values()
 
         self.edges = []
@@ -17,7 +16,7 @@ class AbstractNetwork(object):
         self.class_pcrep = {}
 
         # switch renaming
-        for switch in topo.switches.keys():
+        for switch in self.concrete_network.switches.keys():
             # TODO: clean this up
             alias = spec.fsa.symbolAliases[switch]
             self.node_strrep[alias] = switch
@@ -29,7 +28,7 @@ class AbstractNetwork(object):
             self.class_pcrep[idx] = pc
             idx += 1
 
-        for src, dst in topo.iteredges():
+        for src, dst in self.concrete_network.iteredges():
             # end host or external node
             if src not in self.node_intrep.keys() or \
                dst not in self.node_intrep.keys():
@@ -59,7 +58,8 @@ class AbstractNetwork(object):
         self.immutable = [self.node_intrep[s] for s in spec.immutables]
 
         # TODO: filter sources from sinks - is this correct?
-        self.sinks = [self.node_intrep[s] for s in topo.egresses()
+        self.sinks = [self.node_intrep[s] for s in
+                      self.concrete_network.egresses
                       if s not in spec.sources]
 
     @property

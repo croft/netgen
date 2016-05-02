@@ -8,19 +8,33 @@ import trie
 import network
 import spec
 import synthesis
+from network import NetworkConfig
 from topos import (StanfordTopo, Internet2Topo,
                    FattreeTopo, DiamondTopo,
                    DiamondExtendedTopo, ThintreeTopo)
 
 from network import HeaderField
 
-TOPOS = { "stanford" : StanfordTopo,
-          "internet2" : Internet2Topo,
+TOPOS = { #"stanford" : StanfordTopo,
+          #"internet2" : Internet2Topo,
           "fattree" : FattreeTopo,
           "diamond" : DiamondTopo,
           "diamondext" : DiamondExtendedTopo,
           "thintree" : ThintreeTopo
       }
+
+CONFIGS = { "diamond" : NetworkConfig(egresses=['s4'],
+                                      paths=[('s1', 's4',
+                                              ['s1', 's2', 's4'])]),
+            "diamondext" : NetworkConfig(egresses=['s6'],
+                                         paths=[('s1', 's6',
+                                                 ['s1', 's2', 's3', 's5', 's6'])]),
+            "thintree" : NetworkConfig(egresses=['s10', 's11', 's1'],
+                                       paths=[('s1', 's10',
+                                               ['s1', 's2', 's4', 's8', 's10'])]),
+            "fattree" : NetworkConfig(params=[4, 1],
+                                      paths=[('h25', 'h34', None)])
+        }
 
 def main():
     prog = os.path.basename(sys.argv[0])
@@ -46,33 +60,34 @@ def main():
 
     args = parser.parse_args()
 
-    if args.topo not in TOPOS.keys():
-        print "Invalid topology {0}, must be one of: {1}".format(args.topo, topos)
+    tokens = args.topo.split(",")
+    toponame = tokens[0]
+    topoargs = []
+    if len(tokens) > 1:
+        topoargs = tokens[1:]
+
+    if toponame not in TOPOS.keys():
+        print "Invalid topology {0}, must be one of: {1}".format(toponame, topos)
         return
 
     if not os.path.isfile(args.spec):
         print "Specification file {0} does not exist!".format(args.spec)
         return
 
-    # TODO: better way of handling *params
-    if args.topo == "fattree":
-        topo = TOPOS[args.topo](4,1)
-    else:
-        topo = TOPOS[args.topo]()
-
-    net = network.Network(topo)
+    topo = TOPOS[toponame](*topoargs)
+    topo.apply_config(CONFIGS[toponame])
 
     s = spec.Specification(args.spec)
-    s.parse(net)
+    s.parse(topo)
 
     if args.debug:
         if not os.path.isdir(args.dest):
             os.makedirs(args.dest)
 
         topo.write_debug_output(args.dest)
-        s.write_debug_output(net, args.dest)
+        s.write_debug_output(topo, args.dest)
 
-    solver = synthesis.Synthesizer(net, s)
+    solver = synthesis.Synthesizer(topo, s)
     solver.solve()
 
 if __name__ == "__main__":
