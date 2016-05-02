@@ -138,9 +138,13 @@ class PacketClass(object):
                 e.append((src, dst))
         return e
 
-    def original_dest(self, network):
+    def original_dest(self, network, sources=None):
+        if sources is None:
+            sources = []
+
         dest = {}
-        egress = network.topo.egresses()
+        egress = [e for e in network.topo.egresses()
+                  if e not in sources]
         for src in network.topo.switches.keys():
             if src in egress:
                 dest[src] = src

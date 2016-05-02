@@ -57,7 +57,10 @@ class AbstractNetwork(object):
 
         self.sources = [self.node_intrep[s] for s in spec.sources]
         self.immutable = [self.node_intrep[s] for s in spec.immutables]
-        self.sinks = [self.node_intrep[s] for s in topo.egresses()]
+
+        # TODO: filter sources from sinks - is this correct?
+        self.sinks = [self.node_intrep[s] for s in topo.egresses()
+                      if s not in spec.sources]
 
     @property
     def nodes(self):
@@ -98,7 +101,6 @@ class Synthesizer(object):
 
     def solve(self):
         for i in range(len(self.network.nodes)):
-        # for i in range(2,3):
             print "-------------------------------------------"
             print "        Phase:", i+1
             print "-------------------------------------------"
@@ -313,8 +315,9 @@ class ComputeDestination(RecursiveDefinition):
             for src in self.network.sources:
                 # TODO: cleanup original_dest syntax, awkward ()[]
                 srcname = self.network.node_strrep[src]
+                srcnames = [self.network.node_strrep[src] for src in self.network.sources]
                 pcobj = self.network.class_pcrep[pc]
-                odname = pcobj.original_dest(self.network.concrete_network)[srcname]
+                odname = pcobj.original_dest(self.network.concrete_network, srcnames)[srcname]
                 odint = self.network.node_intrep[odname]
                 query = And(query,
                             self.dest(src, pc) == odint)
