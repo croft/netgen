@@ -12,7 +12,7 @@ import trie
 
 # TODO: replace with actual OF values
 OFPFC_ADD = 0
-OFPFC_DELETE_STRICT = 1
+OFPFC_DELETE_STRICT = 4
 
 def ip2int(ip):
     # handle default value
