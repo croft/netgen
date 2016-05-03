@@ -4,16 +4,13 @@ import argparse
 import os
 import sys
 
-import trie
-import network
 import spec
 import synthesis
+import trie
 from network import NetworkConfig
 from topos import (StanfordTopo, Internet2Topo,
                    FattreeTopo, DiamondTopo,
                    DiamondExtendedTopo, ThintreeTopo)
-
-from network import HeaderField
 
 TOPOS = { #"stanford" : StanfordTopo,
           #"internet2" : Internet2Topo,

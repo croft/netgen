@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import abc
-import argparse
 import os
 import re
 import shutil
