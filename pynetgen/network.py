@@ -213,7 +213,7 @@ class NetworkConfig(object):
             for src in self.paths:
                 for dst in self.paths[src]:
                     if self.paths[src][dst] is None:
-                        self.paths[src][dst] = topo_instance.make_path(src, dst)
+                        self.paths[src][dst] = topo_instance.add_path(src, dst)
 
         for e in self.egresses:
             if e not in topo_instance.switches:
@@ -345,17 +345,6 @@ class Topology(object):
         config.apply_config(self)
         self.make_flowtable()
 
-    def add_path(self, src, dst, path):
-        if src not in self.paths.keys():
-            self.paths[src] = {}
-
-        self.paths[src][dst] = path
-
-        # assume paths are bidirectional
-        # if dst not in self.paths.keys():
-        #     self.paths[dst] = {}
-        # self.paths[dst][src] = path
-
     def _compute_classes(self):
         mtrie = trie.MultilevelTrie()
         for switch in self.switches.values():
@@ -391,12 +380,26 @@ class Topology(object):
 
         return sorted(matches, key=int)
 
-    def make_path(self, src, dst):
-        if len(self.distances) == 0:
-            self._compute_distances()
+    def add_path(self, src, dst, path=None, bidirectional=False):
+        # do we need to compute the path?
+        if path is None:
+            # has distances been initialized?
+            if len(self.distances) == 0:
+                self._compute_distances()
 
-        path = dijkstra.shortestPath(self.distances, src, dst)
-        self.add_path(src, dst, path)
+            path = dijkstra.shortestPath(self.distances, src, dst)
+
+        if src not in self.paths.keys():
+            self.paths[src] = {}
+
+        self.paths[src][dst] = path
+
+        if bidirectional:
+            if dst not in self.paths.keys():
+                self.paths[dst] = {}
+
+            self.paths[dst][src] = path
+
         return path
 
     def alt_path(self, src, dst):

@@ -317,11 +317,11 @@ class FattreeTopo(Topology):
         # pairs = list(itertools.combinations(instance.hosts.keys(), 2))
         # for p in random.sample(pairs, count):
         #     print p[0], p[1]
-        #     instance.make_path(p[0], p[1])
+        #     instance.add_path(p[0], p[1])
         count = int(density * len(instance.hosts.keys()))
         for p,v in pairwise(random.sample(instance.hosts.keys(), count)):
             print p,v
-            instance.make_path(p,v)
+            instance.add_path(p,v)
 
     def _make_topo(self):
         g = self._generate_graph()
