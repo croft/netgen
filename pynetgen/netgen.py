@@ -73,8 +73,7 @@ def main():
     topo = TOPOS[toponame](*topoargs)
     topo.apply_config(CONFIGS[toponame])
 
-    s = spec.Specification(args.spec)
-    s.parse(topo)
+    s = spec.Specification.parseFile(topo, args.spec)
 
     if args.debug:
         if not os.path.isdir(args.dest):

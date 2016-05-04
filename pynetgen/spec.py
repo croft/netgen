@@ -283,11 +283,10 @@ class TrafficSpec(object):
         return " ".join(str(term) for term in self.terms)
 
 class Specification(object):
-    def __init__(self, spec_file):
-        self.spec_file = spec_file
+    def __init__(self):
         self.spec_str = None
         self.ts = None
-        self.sources = None
+        self.sources = []
         self.immutables = []
         self.od = True
         self.lhs = None
@@ -298,39 +297,37 @@ class Specification(object):
 
     @classmethod
     def parseString(cls, topo, spec_str):
-        sp = Specification(None)
-        sp.spec_str = spec_str
-        parsed = SpecGrammar.parseString(spec_str)
-        sp.sources = [str(s) for s in parsed[1]]
-        sp.lhs = " ".join(parsed[2])
-        sp.rhs = " ".join(parsed[3])
-        sp.od = len(parsed[4]) > 0
-        sp.immutables = [str(s) for s in parsed[5]]
+        spec = Specification()
+        spec.spec_str = spec_str
+        spec._parse(topo)
+        return spec
 
-        sp._parse_lhs(topo)
-        sp._parse_rhs(topo)
-        return sp
-
-    def parse(self, topo):
+    @classmethod
+    def parseFile(cls, topo, spec_file):
+        spec = Specification()
         cfg = ConfigParser.ConfigParser()
-        cfg.read(self.spec_file)
+        cfg.read(spec_file)
 
         for name, value in cfg.items("aliases"):
-            if name not in self.aliases:
-                self.aliases[name] = []
-            self.aliases[name].extend([v.strip() for v in value.split(",")])
+            if name not in spec.aliases:
+                spec.aliases[name] = []
+            spec.aliases[name].extend([v.strip() for v in value.split(",")])
 
         if len(cfg.items("change")) == 0:
             raise Exception("Missing required section [change]")
 
         change_re = re.search(r"\[change\]([\s\S]+)(\[\w+]|$)",
-                              open(self.spec_file, 'r').read(),
+                              open(spec_file, 'r').read(),
                               re.MULTILINE)
         if change_re:
-            self.spec_str = change_re.group(1).replace("\n", "").strip()
+            spec.spec_str = change_re.group(1).replace("\n", "").strip()
         else:
             raise Exception("Unable to parse [change] section")
 
+        spec._parse(topo)
+        return spec
+
+    def _parse(self, topo):
         parsed = SpecGrammar.parseString(self.spec_str)
         # TODO: process traffic spec
 
@@ -343,6 +340,7 @@ class Specification(object):
 
         self._parse_lhs(topo)
         self._parse_rhs(topo)
+        self.validate(topo)
 
     def _parse_lhs(self, topo):
         # clean select dir
@@ -350,7 +348,7 @@ class Specification(object):
         print "Lhs expanded:", regex
 
         self.matched_classes = topo.match_classes(regex)
-        for c in self.matched_classes:
+        for c in self.matched_classes.keys():
             print "Matched packet class:", c
 
     def _parse_rhs(self, topo):
@@ -372,6 +370,16 @@ class Specification(object):
         destination = os.path.join(data_dir, "automata.txt")
         with open(destination, 'w') as f:
             f.write(str(self.fsa))
+
+    def validate(self, topo):
+        # TODO: validate lhs/rhs terms
+        for src in self.sources:
+            if src not in topo.switches.keys():
+                raise Exception("Source node {0} not in topology".format(src))
+
+        for imm in self.immutables:
+            if imm not in topo.switches.keys():
+                raise Exception("Immutable node {0} not in topology".format(imm))
 
     def __repr__(self):
         return str(self)

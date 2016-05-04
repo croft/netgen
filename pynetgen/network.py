@@ -294,14 +294,14 @@ class Topology(object):
             self.distances[e2][e1] = 2
 
     def match_classes(self, regex):
-        matches = []
+        matches = {}
         for p, pc in self.classes.iteritems():
             for pathstr in pc.construct_strings():
                 if re.match(regex, pathstr) is not None:
-                    matches.append(p)
+                    matches[p] = pc
                     break
 
-        return sorted(matches, key=int)
+        return matches
 
     def add_path(self, src, dst, path=None, bidirectional=False):
         # do we need to compute the path?

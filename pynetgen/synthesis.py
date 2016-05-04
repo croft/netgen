@@ -6,7 +6,7 @@ from z3 import *
 class AbstractNetwork(object):
     def __init__(self, concrete_network, spec):
         self.concrete_network = concrete_network
-        classes = concrete_network.classes.values()
+        classes = spec.matched_classes.values()
 
         self.edges = []
         self.rules = {}
