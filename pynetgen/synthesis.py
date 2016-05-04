@@ -138,8 +138,7 @@ class Synthesizer(object):
                 # print model[rho]
                 # print model[cycle]
                 # print model[delta]
-                break
-
+                return path
 
 class SmtQuery(object):
     def __init__(self, fsa, network, k, spec):

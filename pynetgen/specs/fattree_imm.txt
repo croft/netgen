@@ -4,11 +4,11 @@ lb = s2
 
 # FATTREE 4
 # installed: h25 -> s14 -> s6 -> s0 -> s10 -> s19 -> h34
-# reroute to a differeng aggregate switch (s11 instead of s10) but keep s3
+# reroute to a different aggregate switch (s11 instead of s10) but keep s3
 # immutable - should force Z3 to choose core s2
 # try running with NM: s2 OR s3
 # not match(ip_src=a.b.c.d); s14: .* s10 .* => (N-s10)* s11 (N-s10)* od NM:{s3}
 # not match(ip_src=a.b.c.d); s14: .* s10 .* => (N-s10)* s11 (N-s10)* od NM:{s2}
 
 [change]
-not match(ip_src=a.b.c.d); s14: .* s10 .* => (N-s10)* s11 (N-s10)* od NM:{s2}
+not match(ip_src=a.b.c.d); s14: .* s10 .* => (N-s10)* s11 (N-s10)* od NM:{s3}

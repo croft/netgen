@@ -295,7 +295,21 @@ class Specification(object):
         self.aliases = {}
         self.matched_classes = []
         self.fsa = None
-        print "Found aliases:", self.aliases.keys()
+
+    @classmethod
+    def parseString(cls, topo, spec_str):
+        sp = Specification(None)
+        sp.spec_str = spec_str
+        parsed = SpecGrammar.parseString(spec_str)
+        sp.sources = [str(s) for s in parsed[1]]
+        sp.lhs = " ".join(parsed[2])
+        sp.rhs = " ".join(parsed[3])
+        sp.od = len(parsed[4]) > 0
+        sp.immutables = [str(s) for s in parsed[5]]
+
+        sp._parse_lhs(topo)
+        sp._parse_rhs(topo)
+        return sp
 
     def parse(self, topo):
         cfg = ConfigParser.ConfigParser()
@@ -318,7 +332,7 @@ class Specification(object):
             raise Exception("Unable to parse [change] section")
 
         parsed = SpecGrammar.parseString(self.spec_str)
-        # TODO: process traffic spec, sources
+        # TODO: process traffic spec
 
         # without converting to str, node names won't match "node in sources"
         self.sources = [str(s) for s in parsed[1]]
@@ -364,8 +378,3 @@ class Specification(object):
 
     def __str__(self):
         return self.spec_str
-
-if __name__ == "__main__":
-    parsed = SpecGrammar.parseString("not match(ip_src=a.b.c.d); h1, h2: .* s1 .* => (N-s1) s2 (N-s1)")
-    for i, p in enumerate(parsed):
-        print i, p
