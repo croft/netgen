@@ -97,6 +97,8 @@ class PacketClass(object):
             s = []
             term = key
             while term in self.edges.keys():
+                if term in s:
+                    raise Exception("Loop in packet classes: {0}".format(s))
                 s.append(term)
                 term = self.edges[term]
 
