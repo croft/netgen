@@ -28,7 +28,7 @@ class NetGenLogger(Logger, object):
     __metaclass__ = Singleton
 
     def __init__(self):
-        Logger.__init__(self, "ravel")
+        Logger.__init__(self, "netgen")
         ch = logging.StreamHandler()
         formatter = logging.Formatter(MSG_FORMAT)
         ch.setFormatter(formatter)
