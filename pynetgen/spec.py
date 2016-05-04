@@ -69,13 +69,14 @@ def expand_regex(expr, topo, aliases):
                           expr,
                           re.IGNORECASE|re.MULTILINE)
     for m in matches:
-        if m.group(1).strip() != "N":
-            logger.error("Invalid syntax: {0} in {1}".format(m.group(1),
-                                                             m.group(0)))
+        alias = m.group(1).strip()
+        if alias not in aliases.keys():
+            raise Exception("Invalid syntax: {0} in {1}".format(m.group(1),
+                                                                m.group(0)))
             return None
 
-        diff = topo.switch_diff(m.group(2))
-        expr = expr.replace(m.group(0), "|".join(diff))
+        diff = topo.switch_diff(m.group(2), aliases[alias])
+        expr = expr.replace(m.group(0), "|".join(sorted(diff)))
 
     for alias, values in aliases.iteritems():
         expr = expr.replace(alias, "({0})".format("|".join(values)))
@@ -334,6 +335,7 @@ class Specification(object):
         self.rhs = " ".join(parsed[3])
         self.od = len(parsed[4]) > 0
         self.immutables = [str(s) for s in parsed[5]]
+        self.aliases["N"] = topo.switches.keys()
 
         self._parse_lhs(topo)
         self._parse_rhs(topo)

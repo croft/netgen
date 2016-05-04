@@ -394,11 +394,14 @@ class Topology(object):
 
         g.render(os.path.join(dest_dir, graphfile))
 
-    def switch_diff(self, diff):
-        if not isinstance(diff, list):
-            diff = [diff]
+    def switch_diff(self, subset, superset=None):
+        if superset is None:
+            superset = self.switches.keys()
 
-        return [s for s in self.switches.keys() if s not in diff]
+        if not isinstance(subset, list):
+            subset = [subset]
+
+        return [s for s in superset if s not in subset]
 
     def make_flowtable(self):
         for src in self.paths.keys():
