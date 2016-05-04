@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from network import OFPFC_ADD, OFPFC_DELETE_STRICT, HeaderField
+from fields import OFPFC_ADD, OFPFC_DELETE_STRICT, HeaderField
 
 class ForwardingLink(object):
     def __init__(self, rule, isGateway=False):

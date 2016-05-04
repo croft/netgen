@@ -29,8 +29,7 @@ CONFIGS = { "diamond" : NetworkConfig(egresses=['s4'],
             "thintree" : NetworkConfig(egresses=['s10', 's11', 's1'],
                                        paths=[('s1', 's10',
                                                ['s1', 's2', 's4', 's8', 's10'])]),
-            "fattree" : NetworkConfig(params=[4, 1],
-                                      paths=[('h25', 'h34', None)])
+            "fattree" : NetworkConfig(paths=[('h25', 'h34', None)])
         }
 
 def main():

@@ -13,7 +13,8 @@ from config_parser.cisco_router_parser import ciscoRouter
 from config_parser.juniper_parser import juniperRouter
 from config_parser.transfer_function_to_openflow import OpenFlow_Rule_Generator
 
-from network import Topology, Switch, Host, FlowEntry, int2mac, pairwise
+from network import Topology, Switch, Host, FlowEntry, pairwise
+from fields import int2mac
 
 class TfTopology(Topology):
     def __init__(self, definition, ntf, ttf, port_ids, router):
