@@ -34,8 +34,10 @@ def ft2rules(loc, ft):
         r.priority = flow.priority
 
         # TODO: how to handle multiple next hops?
-        r.nextHop = flow.nexthops[0]
+        if len(flow.nexthops) > 1:
+            raise Exception("Not implemented: multiple next hops")
 
+        r.nextHop = flow.nexthops[0]
         r.location = loc
         rules.append(r)
 

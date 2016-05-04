@@ -6,7 +6,7 @@ import sys
 
 import spec
 import synthesis
-import trie
+from log import logger
 from network import NetworkConfig
 from topos import (StanfordTopo, Internet2Topo,
                    FattreeTopo, DiamondTopo,
@@ -52,9 +52,16 @@ def main():
                         help="specification file (default: %s)" % default_spec)
     parser.add_argument("--debug", "-d", action="store_true", dest="debug",
                         default=False,
-                        help="Debug output, files")
+                        help="Save files (packet classes, automata) for debugging")
+    parser.add_argument("--verbose", "-v", dest="verbose", action="store_true",
+                        help="Enable verbose log output")
 
     args = parser.parse_args()
+
+    if args.verbose:
+        logger.setLogLevel("debug")
+    else:
+        logger.setLogLevel("info")
 
     tokens = args.topo.split(",")
     toponame = tokens[0]

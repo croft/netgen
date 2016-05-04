@@ -2,6 +2,7 @@
 
 import abc
 from z3 import *
+from log import logger
 
 class AbstractNetwork(object):
     def __init__(self, concrete_network, spec):
@@ -78,11 +79,6 @@ class Synthesizer(object):
         self.network = AbstractNetwork(network, spec)
         self.spec = spec
         self.fsa = spec.fsa
-        # print "Nodes: ", self.network.node_strrep.keys()
-        # print "Rules: ", self.network.rules
-        # print "Classes: ", self.network.classes
-        # print "Sources: ", self.nework.sources
-        # raise Exception("blah")
 
     def path_solution(self, model):
         varnames = {}
@@ -104,9 +100,10 @@ class Synthesizer(object):
 
     def solve(self):
         for i in range(len(self.network.nodes)):
-            print "-------------------------------------------"
-            print "        Phase:", i+1
-            print "-------------------------------------------"
+            logger.info("Starting phase %d", i+1)
+            logger.debug("-------------------------------------------")
+            logger.debug("        Phase: %d", i+1)
+            logger.debug("-------------------------------------------")
             query = SmtQuery(self.fsa, self.network, i+1, self.spec)
             query.define_k_rules()
             query.define_immutability()
@@ -128,16 +125,10 @@ class Synthesizer(object):
             query.accept_automata(rho)
             model = query.solve()
             if model is not None:
-                print "\n**********************************"
-                print "*  MODEL FOUND"
-                print "**********************************"
                 path = self.path_solution(model)
-                print path
-                # print model
-                # print model[dest]
-                # print model[rho]
-                # print model[cycle]
-                # print model[delta]
+                logger.debug(model)
+                logger.debug("Node mapping: %s", self.network.node_strrep)
+                logger.info("Model found: %s", path)
                 return path
 
 class SmtQuery(object):
@@ -157,7 +148,7 @@ class SmtQuery(object):
 
     def solve(self):
         self.solver.add(self.query)
-        print self.solver.sexpr()
+        logger.debug(self.solver.sexpr())
         if self.solver.check() == sat:
             return self.solver.model()
         else:
@@ -185,7 +176,7 @@ class SmtQuery(object):
             topostr += "\n (declare-const {0} Int)".format(self.n1[i])
             topostr += "\n (assert (topology {0} {1}))".format(self.n[i], self.n1[i])
 
-        print topostr
+        logger.debug(topostr)
         self.query = And(self.query, parse_smt2_string(topostr, ctx=main_ctx()))
 
     def define_k_rules(self):

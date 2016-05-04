@@ -9,6 +9,7 @@ import ConfigParser
 from FAdo.reex import *
 
 from grammar import SpecGrammar
+from log import logger
 
 # create a parse class with a custom alphabet as the lexer id rule
 def parser_factory(sigma):
@@ -69,8 +70,8 @@ def expand_regex(expr, topo, aliases):
                           re.IGNORECASE|re.MULTILINE)
     for m in matches:
         if m.group(1).strip() != "N":
-            print "Invalid syntax: {0} in {1}".format(m.group(1),
-                                                      m.group(0))
+            logger.error("Invalid syntax: {0} in {1}".format(m.group(1),
+                                                             m.group(0)))
             return None
 
         diff = topo.switch_diff(m.group(2))
@@ -130,10 +131,6 @@ class FSA(object):
         #         if dfa.Delta(f, s) is not None:
         #             dfa.delTransition(f, s, dfa.Delta(f,s))
         #         dfa.addTransition(f, s, dfa.stateIndex(0))
-
-        print dfa.succintTransitions()
-        print dfa.States[dfa.Initial]
-        print map(lambda x:dfa.States[x], dfa.Final)
         return dfa
 
     def __repr__(self):
@@ -345,17 +342,17 @@ class Specification(object):
     def _parse_lhs(self, topo):
         # clean select dir
         regex = expand_regex(self.lhs, topo, self.aliases)
-        print "Lhs expanded:", regex
+        logger.debug("Lhs expanded: %s", regex)
 
         self.matched_classes = topo.match_classes(regex)
         for c in self.matched_classes.keys():
-            print "Matched packet class:", c
+            logger.debug("Matched packet class: %s", c)
 
     def _parse_rhs(self, topo):
         regex = expand_regex(self.rhs, topo, self.aliases)
-        print "Rhs expanded:", regex
+        logger.debug("Rhs expanded: %s", regex)
         self.fsa = FSA(regex, topo.switches)
-        print str(self.fsa)
+        logger.debug(self.fsa)
 
     def write_debug_output(self, topo, data_dir="output"):
         select_dir = os.path.join(data_dir, "selected")

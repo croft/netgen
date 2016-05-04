@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from fields import OFPFC_ADD, OFPFC_DELETE_STRICT, HeaderField
+from log import logger
 
 class ForwardingLink(object):
     def __init__(self, rule, isGateway=False):
@@ -316,8 +317,7 @@ class Trie(object):
         graph = ForwardingGraph()
 
         if currentIndex + 1 != HeaderField.End:
-            print "getForwardingTable() called on wrong trie"
-            return
+            raise Exception("getForwardingTable() called on wrong trie")
 
         fieldValue = eqclass.lowerBound[currentIndex]
         fieldMask = HeaderField.MaxValue[currentIndex]
@@ -813,8 +813,8 @@ class MultilevelTrie(object):
                 if leaf.ruleSet is None:
                     leaf.ruleSet = []
                 else:
-                    if rule in leaf.ruleSet:  # already exists
-                        #print "Rule already exists"
+                    if rule in leaf.ruleSet:
+                        logger.warning("Rule already exists")
                         return False
 
                 leaf.ruleSet.append(rule)
@@ -885,7 +885,7 @@ class MultilevelTrie(object):
 
                 if len(classes) == 0:
                     field = HeaderField.fieldName(curIndex+1)
-                    print "Error: {0} packet classes".format(field)
+                    raise Exception("Error: 0 {0} packet classes".format(field))
                 else:
                     ret = []
                     for c in classes:
@@ -908,12 +908,11 @@ class MultilevelTrie(object):
         if command == OFPFC_ADD:
             result = self.addRule(rule)
             if not result:
-                print "ERROR in addRule()"
-                return
+                raise Exception("Error in addRule()")
         elif command == OFPFC_DELETE_STRICT:
             result = self.delRule(rule)
             if not result:
-                print "ERROR in delRule()"
+                raise Exception("Error in delRule()")
                 return
 
             self.addRule(dummyRule)

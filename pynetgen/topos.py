@@ -13,8 +13,9 @@ from config_parser.cisco_router_parser import ciscoRouter
 from config_parser.juniper_parser import juniperRouter
 from config_parser.transfer_function_to_openflow import OpenFlow_Rule_Generator
 
-from network import Topology, Switch, Host, FlowEntry, pairwise
 from fields import int2mac
+from log import logger
+from network import Topology, Switch, Host, FlowEntry, pairwise
 
 class TfTopology(Topology):
     def __init__(self, definition, ntf, ttf, port_ids, router):
@@ -321,7 +322,7 @@ class FattreeTopo(Topology):
         #     instance.add_path(p[0], p[1])
         count = int(density * len(instance.hosts.keys()))
         for p,v in pairwise(random.sample(instance.hosts.keys(), count)):
-            print p,v
+            logger.debug("Creating connection (src, dst) = (%s, %s)", p, v)
             instance.add_path(p,v)
 
     def _make_topo(self):
