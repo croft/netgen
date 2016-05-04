@@ -16,16 +16,20 @@
 # n ::= alpha
 # ----------------------------------------------------------
 
-from pyparsing import Word, alphas, Literal, Group, alphanums, ZeroOrMore
+from pyparsing import *
 
 ARROW = Literal("=>")
 EQUAL = Literal("=")
 LPAREN = Literal("(")
 RPAREN = Literal(")")
+LBRACKET = Literal("{")
+RBRACKET = Literal("}")
 COMMA = Literal(",")
 SEMICOLON = Literal(";")
 COLON = Literal(":")
-MATCH = Literal("match")
+MATCH = Keyword("match")
+OD = Keyword("od")
+NM = Keyword("NM")
 
 HEADER_WORDS = Word(alphanums+"_.")
 
@@ -54,14 +58,28 @@ TRAFFIC = Group(TRAFFIC_CORE + Literal("&") + TRAFFIC_CORE |
            Literal("not") + TRAFFIC_CORE |
            TRAFFIC_CORE)
 
-PATH = Group(Word(alphanums+"()_.*- "))
+LHS_PATH = Group(OneOrMore(Word(alphanums+"()_.*-")))
+
+RHS_PATH = Group(ZeroOrMore(~OD + ~NM + Word(alphanums+"()_.*-")) + \
+                 (Optional(FollowedBy(OD))) | Optional(FollowedBy(NM)))
 
 SOURCES = Group(Word(alphanums+"_.") + ZeroOrMore(COMMA.suppress() + Word(alphanums+"_.")))
+
+ORIG_DEST = Group(Optional(OD))
+
+IMMUTABLE_CORE = NM.suppress() + COLON.suppress() + LBRACKET.suppress() + \
+                 Word(alphanums+"_.") + \
+                 ZeroOrMore(COMMA.suppress() + Word(alphanums+"_.")) + \
+                 RBRACKET.suppress()
+
+IMMUTABLES = Group(Optional(IMMUTABLE_CORE))
 
 SpecGrammar = (TRAFFIC +
                SEMICOLON.suppress() +
                SOURCES +
                COLON.suppress() +
-               PATH +
+               LHS_PATH +
                ARROW.suppress() +
-               PATH)
+               RHS_PATH +
+               ORIG_DEST +
+               IMMUTABLES)

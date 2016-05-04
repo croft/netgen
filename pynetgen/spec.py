@@ -288,7 +288,8 @@ class Specification(object):
         self.spec_str = None
         self.ts = None
         self.sources = None
-        self.immutables = []  # TODO: parse immutable nodes
+        self.immutables = []
+        self.od = True
         self.lhs = None
         self.rhs = None
         self.aliases = {}
@@ -321,14 +322,10 @@ class Specification(object):
 
         # without converting to str, node names won't match "node in sources"
         self.sources = [str(s) for s in parsed[1]]
-
-        if len(parsed[2]) > 1:
-            raise Exception("lhs error")
-        if len(parsed[3]) > 1:
-            raise Exception("rhs error")
-
-        self.lhs = parsed[2][0].strip()
-        self.rhs = parsed[3][0].strip()
+        self.lhs = " ".join(parsed[2])
+        self.rhs = " ".join(parsed[3])
+        self.od = len(parsed[4]) > 0
+        self.immutables = [str(s) for s in parsed[5]]
 
         self._parse_lhs(topo)
         self._parse_rhs(topo)

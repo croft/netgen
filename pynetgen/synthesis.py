@@ -55,12 +55,15 @@ class AbstractNetwork(object):
                 self.rules[src_int][pcid] = dst_int
 
         self.sources = [self.node_intrep[s] for s in spec.sources]
-        self.immutable = [self.node_intrep[s] for s in spec.immutables]
 
         # TODO: filter sources from sinks - is this correct?
         self.sinks = [self.node_intrep[s] for s in
                       self.concrete_network.egresses
                       if s not in spec.sources]
+
+        self.immutables = [self.node_intrep[s] for s in spec.immutables]
+                           # if s not in spec.sources and
+                           # s not in self.concrete_network.egresses]
 
     @property
     def nodes(self):
@@ -106,6 +109,7 @@ class Synthesizer(object):
             print "-------------------------------------------"
             query = SmtQuery(self.fsa, self.network, i+1, self.spec)
             query.define_k_rules()
+            query.define_immutability()
             query.delta_sat_topo()
 
             cycle = Function("cycle", IntSort(), IntSort(), IntSort())
@@ -160,9 +164,10 @@ class SmtQuery(object):
         else:
             return None
 
-    def enforce_immutability(self):
-        # TODO: rules for immutable nodes and classes not in specpc
-        pass
+    def define_immutability(self):
+        for i in range(self.k):
+            for imm in self.network.immutables:
+                self.query = And(self.query, self.n[i] != imm)
 
     def delta_sat_topo(self):
         topostr = "(define-fun topology ((node_from Int) (node_to Int)) Bool \n"
