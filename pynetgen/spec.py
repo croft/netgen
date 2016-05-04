@@ -346,7 +346,7 @@ class Specification(object):
         regex = expand_regex(self.lhs, topo, self.aliases)
         logger.debug("Lhs expanded: %s", regex)
 
-        self.matched_classes = topo.match_classes(regex)
+        self.matched_classes = topo.match_classes(regex, self.sources)
         for c in self.matched_classes.keys():
             logger.debug("Matched packet class: %s", c)
 

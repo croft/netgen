@@ -297,12 +297,19 @@ class Topology(object):
             self.distances[e1][e2] = 2
             self.distances[e2][e1] = 2
 
-    def match_classes(self, regex):
+    def match_classes(self, regex, sources=None):
         matches = {}
         for p, pc in self.classes.iteritems():
             for pathstr in pc.construct_strings():
                 if re.match(regex, pathstr) is not None:
-                    matches[p] = pc
+                    if sources is None:
+                        matches[p] = pc
+                        break
+                    else:
+                        for src in sources:
+                            if src in pc.edges.keys():
+                                matches[p] = pc
+                                break
                     break
 
         return matches
