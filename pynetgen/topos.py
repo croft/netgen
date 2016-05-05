@@ -406,3 +406,39 @@ class FattreeTopo(Topology):
                     self.pods_rev["h%d"%hnum] = (pod, len(self.pods[pod]))
 
         return g
+
+class SosrTopo(Topology):
+    def __init__(self):
+        super(SosrTopo, self).__init__()
+        self._make_topo()
+
+    def _make_topo(self):
+        g = igraph.Graph()
+        for i, sw in enumerate(['A', 'B', 'C', 'F1', 'F2', 'X', 'Y', 'Z']):
+            self.switches[sw] = Switch(name=sw, ip='10.0.0.{0}'.format(i+1))
+            g.add_vertices(sw)
+
+        g.add_edges([('A', 'F1'),
+                     ('A', 'F2'),
+                     ('B', 'F1'),
+                     ('B', 'F2'),
+                     ('C', 'F1'),
+                     ('C', 'F2'),
+                     ('F1', 'X'),
+                     ('F2', 'Y'),
+                     ('Y', 'Z'),
+                     ('X', 'Z')])
+
+        edges = g.get_edgelist()
+        for e in edges:
+            e0 = g.vs[e[0]].attributes()['name']
+            e1 = g.vs[e[1]].attributes()['name']
+
+            if e0 not in self.edges:
+                self.edges[e0] = []
+
+            if e1 not in self.edges:
+                self.edges[e1] = []
+
+            self.edges[e0].append(e1)
+            self.edges[e1].append(e0)

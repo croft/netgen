@@ -1,0 +1,4 @@
+[aliases]
+
+[change]
+match(tcp_src_port=80); A,B,C: .* F1 .* => (N-F1)* F2 (N-F1)* od NM:{F1,F2}

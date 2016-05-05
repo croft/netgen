@@ -10,14 +10,16 @@ from log import logger
 from network import NetworkConfig
 from topos import (StanfordTopo, Internet2Topo,
                    FattreeTopo, DiamondTopo,
-                   DiamondExtendedTopo, ThintreeTopo)
+                   DiamondExtendedTopo, ThintreeTopo,
+                   SosrTopo)
 
-TOPOS = { #"stanford" : StanfordTopo,
-          #"internet2" : Internet2Topo,
-          "fattree" : FattreeTopo,
+#"stanford" : StanfordTopo,
+#"internet2" : Internet2Topo,
+TOPOS = { "fattree" : FattreeTopo,
           "diamond" : DiamondTopo,
           "diamondext" : DiamondExtendedTopo,
-          "thintree" : ThintreeTopo
+          "thintree" : ThintreeTopo,
+          "sosr" : SosrTopo
       }
 
 CONFIGS = { "diamond" : NetworkConfig(egresses=['s4'],
@@ -30,8 +32,14 @@ CONFIGS = { "diamond" : NetworkConfig(egresses=['s4'],
                                        paths=[('s1', 's10',
                                                ['s1', 's2', 's4', 's8', 's10'])]),
             "fattree" : NetworkConfig(paths=[('h25', 'h34', None),
-                                             ('h30', 'h32', None)])
-
+                                             ('h30', 'h32', None)]),
+            "sosr" : NetworkConfig(egresses=['Z'],
+                                   flowtable=[('A', '10.0.1.1', 'Z', 'F1'),
+                                              ('B', '10.0.1.1', 'Z', 'F1'),
+                                              ('C', '10.0.1.1', 'Z', 'F1'),
+                                              ('F1', '10.0.1.1', 'Z', 'X'),
+                                              ('X', '10.0.1.1', 'Z', 'Z'),
+                                              ('F2', '10.0.1.1', 'Z', 'Y')])
         }
 
 def main():
