@@ -7,9 +7,10 @@ addPath()
 
 from grammar import SpecGrammar
 from network import NetworkConfig
-from topos import DiamondTopo, DiamondExtendedTopo, ThintreeTopo, FattreeTopo
 from spec import Specification
 from synthesis import Synthesizer
+from topos import (DiamondTopo, DiamondExtendedTopo,
+                   ThintreeTopo, FattreeTopo, SosrTopo)
 
 def runSynthesis(topo, config, spec, expected):
     topo.apply_config(config)
@@ -63,3 +64,18 @@ class testDiamond(unittest.TestCase):
         spec = "not match(ip_src=a.b.c.d); s4: .* s2 .* => (N-s2) s3 (N-s2)"
         expected = [('s4', 's3'), ('s3', 's1')]
         runSynthesis(DiamondTopo(), config, spec, expected)
+
+class testSosr(unittest.TestCase):
+
+    def testSosrFigure3(self):
+        config = NetworkConfig(egresses=['Z'],
+                               flowtable=[('A', '10.0.1.1', 'Z', 'F1'),
+                                          ('B', '10.0.1.1', 'Z', 'F1'),
+                                          ('C', '10.0.1.1', 'Z', 'F1'),
+                                          ('F1', '10.0.1.1', 'Z', 'X'),
+                                          ('X', '10.0.1.1', 'Z', 'Z'),
+                                          ('F2', '10.0.1.1', 'Z', 'Y')])
+
+        spec = "match(tcp_src_port=80); A,B,C: .* F1 .* => (N-F1)* F2 (N-F1)* od NM:{F1,F2}"
+        expected = [('Y', 'Z'), ('B', 'F2'), ('C', 'F2'), ('A', 'F2')]
+        runSynthesis(SosrTopo(), config, spec, expected)
