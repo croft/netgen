@@ -312,10 +312,14 @@ class ComputeDestination(RecursiveDefinition):
                 srcname = self.network.node_strrep[src]
                 srcnames = [self.network.node_strrep[src] for src in self.network.sources]
                 pcobj = self.network.class_pcrep[pc]
-                odname = pcobj.original_dest(self.network.concrete_network, srcnames)[srcname]
-                odint = self.network.node_intrep[odname]
-                query = And(query,
-                            self.dest(src, pc) == odint)
+
+                ods = pcobj.original_dest(self.network.concrete_network, srcnames)
+                if srcname in ods.keys():
+                    #odname = pcobj.original_dest(self.network.concrete_network, srcnames)[srcname]
+                    odname = ods[srcname]
+                    odint = self.network.node_intrep[odname]
+                    query = And(query,
+                                self.dest(src, pc) == odint)
 
         return query
 

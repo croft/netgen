@@ -337,6 +337,11 @@ class Specification(object):
         self.immutables = [str(s) for s in parsed[5]]
         self.aliases["N"] = topo.switches.keys()
 
+        logger.debug("Sources: %s", self.sources)
+        logger.debug("od: %s", self.od)
+        logger.debug("Immutables: %s", self.immutables)
+        logger.debug("Aliases: %s", self.aliases)
+
         self._parse_lhs(topo)
         self._parse_rhs(topo)
         self.validate(topo)
