@@ -114,59 +114,84 @@ class PacketClass(object):
         return "\n".join("{0} {1} {2}".format(self.idx, k,v) for k,v in self.edges.iteritems())
 
 class NetworkConfig(object):
-    def __init__(self, paths=None, egresses=None, pathfunc=None, params=None):
+    def __init__(self, paths=None, egresses=None, pathfunc=None, flowtable=None, params=None):
         self.egresses = egresses
         self.pathfunc = pathfunc
+        self.flowtable = flowtable
         self.paths = {}
 
         if egresses is None:
             self.egresses = []
 
-        for src, dst, path in paths:
-            if src not in self.paths:
-                self.paths[src] = {}
+        if paths is not None:
+            for src, dst, path in paths:
+                if src not in self.paths:
+                    self.paths[src] = {}
 
-            self.paths[src][dst] = path
+                self.paths[src][dst] = path
 
-        if len(paths) > 0 and pathfunc is not None:
-            raise Exception("Path generator function and explicit paths "
-                            "supplied!  Use only one!")
+            if len(paths) > 0 and pathfunc is not None:
+                raise Exception("Path generator function and explicit paths "
+                                "supplied!  Use only one!")
 
-    def apply_config(self, topo_instance):
+    def _make_flowtable(self, topo):
+        for location, src, dst, nexthop in self.flowtable:
+            src_ip = None
+            dst_ip = None
+            wc = "255.255.255.255"
+
+            if src is not None and src in topo.nodes.keys():
+                src_ip = topo.nodes[src].ip
+
+            if dst is not None and dst in topo.nodes.keys():
+                dst_ip = topo.nodes[dst].ip
+
+            flow = FlowEntry(dest=dst_ip,
+                             wildcard=wc,
+                             location=location,
+                             nexthops=nexthop,
+                             src=src_ip)
+
+            topo.switches[location].ft.append(flow)
+
+    def _make_paths(self, topo):
         if self.pathfunc is not None:
-            self.paths = self.pathfunc(topo_instance)
+            self.paths = self.pathfunc(topo)
         else:
             # look for paths with src,dst but no path specified
             for src in self.paths:
                 for dst in self.paths[src]:
                     if self.paths[src][dst] is None:
-                        self.paths[src][dst] = topo_instance.add_path(src, dst)
+                        self.paths[src][dst] = topo.add_path(src, dst)
 
         for e in self.egresses:
-            if e not in topo_instance.switches:
+            if e not in topo.switches:
                 raise Exception("Supplied egress not in topology: {0}"
                                 .format(e))
 
         for src in self.paths:
-            if src not in topo_instance.switches and \
-               src not in topo_instance.hosts:
+            if src not in topo.switches and src not in topo.hosts:
                 raise Exception("Supplied path src not in topology: {0}"
                                 .format(src))
 
             for dst in self.paths[src]:
-                if dst not in topo_instance.switches and \
-                   src not in topo_instance.hosts:
+                if dst not in topo.switches and src not in topo.hosts:
                     raise Exception("Supplied path dst not in topology: {0}"
                                     .format(dst))
 
                 for node in self.paths[src][dst]:
-                    if node not in topo_instance.switches and \
-                       node not in topo_instance.hosts:
+                    if node not in topo.switches and node not in topo.hosts:
                         raise Exception("Node in path not in topology: {0}"
                                         .format(node))
 
-        topo_instance.paths = self.paths
+        topo.paths = self.paths
+
+    def apply_config(self, topo_instance):
         topo_instance._egresses = self.egresses
+        if self.flowtable is not None:
+            self._make_flowtable(topo_instance)
+        else:
+            self._make_paths(topo_instance)
 
 class Node(object):
     def __init__(self, ip=None, mac=None, name=None):
