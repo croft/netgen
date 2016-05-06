@@ -99,6 +99,9 @@ class Synthesizer(object):
                 for (f, t) in links]
 
     def solve(self):
+        set_option("pp.min-alias-size", 1000000)
+        set_option("pp.max-depth", 1000000)
+
         for i in range(len(self.network.nodes)):
             logger.info("Starting phase %d", i+1)
             logger.debug("-------------------------------------------")
