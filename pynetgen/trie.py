@@ -927,7 +927,6 @@ class MultilevelTrie(object):
         return Trie.getForwardingGraph(HeaderField.End - 1, tries, eqclass)
 
     def getAllEquivalenceClasses(self):
-        classes = []
         dummyRule = Rule()
         dummyRule.ruleType = Rule.FORWARDING
         return self.getAffectedEquivalenceClasses(dummyRule, OFPFC_ADD)

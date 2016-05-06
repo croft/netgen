@@ -7,7 +7,7 @@ import re
 
 import dijkstra
 import trie
-from fields import HeaderField, ip2int
+from fields import HeaderField, ip2int, int2ip
 
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
@@ -43,24 +43,36 @@ def ft2rules(loc, ft):
 
     return rules
 
-# TODO: use one data structure for both
-def graph2pc(i, fg):
-    classes = []
-    pc = PacketClass(idx=i)
-    for name, link in fg.links.iteritems():
-        if len(link) > 1:
-            raise Exception("Don't know yet how to handle multiple links?")
-        pc.edges[name] = link[0].rule.nextHop
-
-    if len(pc.edges) == 0:
-        return None
-
-    return pc
-
 class PacketClass(object):
     def __init__(self, idx=None):
         self.idx = idx
         self.edges = {}
+        self.graph = None
+        self.rules = {}
+
+    # TODO: one data structure for equivalence class/packet class
+    @classmethod
+    def fromForwardingGraph(cls, fg, idx=0):
+        classes = []
+        pc = PacketClass(idx=idx)
+        pc.graph = fg
+        for name, link in fg.links.iteritems():
+            if len(link) > 1:
+                raise Exception("Don't know yet how to handle multiple links?")
+
+            pc.edges[name] = link[0].rule.nextHop
+            f = FlowEntry.fromTrieRule(link[0].rule)
+
+            if f.location not in pc.rules:
+                pc.rules[f.location] = {}
+
+            for nexthop in f.nexthops:
+                pc.rules[f.location][nexthop] = f
+
+        if len(pc.edges) == 0:
+            return None
+
+        return pc
 
     def iteredges(self):
         e = []
@@ -221,6 +233,20 @@ class FlowEntry(object):
         self.nexthops = nexthops
         self.priority = priority
 
+    # TODO: one data structure for both rules
+    @classmethod
+    def fromTrieRule(cls, rule):
+        # TODO support all fields?
+        src = int2ip(rule.fieldValue[HeaderField.Index["NW_SRC"]])
+        # TODO: add src mask?
+        dest = int2ip(rule.fieldValue[HeaderField.Index["NW_DST"]])
+        wc = int2ip(rule.fieldMask[HeaderField.Index["NW_DST"]])
+        return FlowEntry(dest=dest,
+                         src=src,
+                         wildcard=wc,
+                         nexthops=rule.nextHop,
+                         priority=rule.priority,
+                         location=rule.location)
     def __repr__(self):
         return str(self)
 
@@ -307,7 +333,7 @@ class Topology(object):
         for ptrie, pclass in eqclasses:
             idx = len(self._classes) + 1
             graph = mtrie.getForwardingGraph(ptrie, pclass)
-            pc = graph2pc(idx, graph)
+            pc = PacketClass.fromForwardingGraph(graph, idx)
             if pc is not None:
                 self._classes[idx] = pc
 
