@@ -2,12 +2,14 @@
 
 ### Setup and Requirements
 
-Z3 [[github.com](https://github.com/Z3Prover/z3#python)]  
-* Install Python bindings: `python scripts/mk_make.py --python`  
+Z3 [[github.com](https://github.com/Z3Prover/z3#python)]
+* Download z3: `git checkout http://github.com/z3prover/z3`
+* Generate Python bindings: `python scripts/mk_make.py --python`
+* Install: `cd build; make && sudo make install`
 
 Python libraries  
 * Install Python package manager `pip`: `sudo apt-get install pip`  
-* Install libraries: `sudo pip install fado ipaddr graphviz`  
+* Install libraries: `sudo pip install fado ipaddr graphviz pyparsing`  
 
 
 ### Walkthrough
