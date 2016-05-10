@@ -2,16 +2,17 @@
 
 import graphviz
 import itertools
+import networkx
 import os
 import re
 
 import dijkstra
 import trie
+from log import logger
 from fields import HeaderField, ip2int, int2ip
 from profiling import PerfCounter
 
 def pairwise(iterable):
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b = itertools.tee(iterable)
     next(b, None)
     return itertools.izip(a, b)
@@ -124,7 +125,8 @@ class PacketClass(object):
         return str(self)
 
     def __str__(self):
-        return "\n".join("{0} {1} {2}".format(self.idx, k,v) for k,v in self.edges.iteritems())
+        return "\n".join("{0} {1} {2}".format(self.idx, k,v)
+                         for k,v in self.edges.iteredges())
 
 class NetworkConfig(object):
     def __init__(self, paths=None, egresses=None, pathfunc=None, flowtable=None, params=None):
@@ -136,16 +138,12 @@ class NetworkConfig(object):
         if egresses is None:
             self.egresses = []
 
-        if paths is not None:
-            for src, dst, path in paths:
-                if src not in self.paths:
-                    self.paths[src] = {}
+        if self.paths is not None:
+            self.paths = paths
 
-                self.paths[src][dst] = path
-
-            if len(paths) > 0 and pathfunc is not None:
-                raise Exception("Path generator function and explicit paths "
-                                "supplied!  Use only one!")
+        if paths is not None and pathfunc is not None:
+            raise Exception("Path generator function and explicit paths "
+                            "supplied!  Use only one!")
 
     def _make_flowtable(self, topo):
         for location, src, dst, nexthop in self.flowtable:
@@ -170,34 +168,9 @@ class NetworkConfig(object):
     def _make_paths(self, topo):
         if self.pathfunc is not None:
             self.paths = self.pathfunc(topo)
-        else:
-            # look for paths with src,dst but no path specified
-            for src in self.paths:
-                for dst in self.paths[src]:
-                    if self.paths[src][dst] is None:
-                        self.paths[src][dst] = topo.add_path(src, dst)
 
-        for e in self.egresses:
-            if e not in topo.switches:
-                raise Exception("Supplied egress not in topology: {0}"
-                                .format(e))
-
-        for src in self.paths:
-            if src not in topo.switches and src not in topo.hosts:
-                raise Exception("Supplied path src not in topology: {0}"
-                                .format(src))
-
-            for dst in self.paths[src]:
-                if dst not in topo.switches and src not in topo.hosts:
-                    raise Exception("Supplied path dst not in topology: {0}"
-                                    .format(dst))
-
-                for node in self.paths[src][dst]:
-                    if node not in topo.switches and node not in topo.hosts:
-                        raise Exception("Node in path not in topology: {0}"
-                                        .format(node))
-
-        topo.paths = self.paths
+        for src, dst, path in self.paths:
+            topo.add_path(src, dst, path)
 
     def apply_config(self, topo_instance):
         topo_instance._egresses = self.egresses
@@ -269,7 +242,7 @@ class Topology(object):
         self.hosts = {}
         self.edges = {}
         self.paths = {}
-        self.distances = {}
+        self.graph = None
         self._egresses = []
         self._classes = {}
 
@@ -324,6 +297,35 @@ class Topology(object):
         config.apply_config(self)
         self.make_flowtable()
 
+    def build_from_graph(self, graph, hosts=None):
+        if hosts is None:
+            hosts = []
+
+        self.graph = graph
+        switches = [node for node in self.graph.nodes()
+                    if node not in hosts]
+
+        startip = ip2int("10.0.0.0")
+        for name in switches:
+            ip = startip + len(self.switches) + 1
+            self.switches[name] = Switch(name=name,
+                                         ip=int2ip(ip))
+
+        startip = ip2int("10.1.0.0")
+        for name in hosts:
+            ip = startip + len(self.hosts) + 1
+            self.hosts[name] = Host(name=name,
+                                    ip=int2ip(ip))
+
+        for e0, e1 in self.graph.edges():
+            if e0 not in self.edges:
+                self.edges[e0] = []
+            if e1 not in self.edges:
+                self.edges[e1] = []
+
+            self.edges[e0].append(e1)
+            self.edges[e1].append(e0)
+
     def _compute_classes(self):
         pc = PerfCounter("pkt class")
         pc.start()
@@ -341,17 +343,6 @@ class Topology(object):
             pc = PacketClass.fromForwardingGraph(graph, idx)
             if pc is not None:
                 self._classes[idx] = pc
-
-    def _compute_distances(self):
-        self.distances = {}
-        for e1, e2 in self.iteredges():
-            if e1 not in self.distances:
-                self.distances[e1] = {}
-            if e2 not in self.distances:
-                self.distances[e2] = {}
-
-            self.distances[e1][e2] = 2
-            self.distances[e2][e1] = 2
 
     def match_classes(self, regex, sources=None):
         matches = {}
@@ -371,13 +362,14 @@ class Topology(object):
         return matches
 
     def add_path(self, src, dst, path=None, bidirectional=False):
-        # do we need to compute the path?
         if path is None:
-            # has distances been initialized?
-            if len(self.distances) == 0:
-                self._compute_distances()
-
-            path = dijkstra.shortestPath(self.distances, src, dst)
+            path = networkx.shortest_path(self.graph, src, dst)
+        else:
+            # check nodes in path exist
+            errnodes = [node for node in path if node not in self.nodes]
+            if len(errnodes) > 0:
+                raise Exception("Nodes do not exist in topology {0}"
+                                .format(errnodes))
 
         if src not in self.paths.keys():
             self.paths[src] = {}
@@ -390,25 +382,19 @@ class Topology(object):
 
             self.paths[dst][src] = path
 
+        logger.info("added path {0}".format(path))
         return path
 
-    def alt_path(self, src, dst):
-        if len(self.distances) == 0:
-            self._compute_distances()
+    def add_multihop_path(self, hops, bidirectional=False):
+        path = []
+        for m, n in pairwise(hops):
+            segment = networkx.shortest_path(self.graph, m, n)
+            if len(path) > 0 and path[-1] == segment[0]:
+                path += segment[1:]
+            else:
+                path += segment
 
-        distances = self.distances.copy()
-        for k,v in pairwise(self.paths[src][dst]):
-            distances[k][v] = distances[k][v] + 1
-
-        path = dijkstra.shortestPath(self.distances, src, dst)
-        self.add_path(src, dst, path)
-        return path
-
-    def write_debug_output(self, data_dir="output"):
-        self.make_topofile(data_dir)
-        self.make_rocketfile(data_dir)
-        self.make_graph(data_dir)
-        self.make_configmap(data_dir)
+        return self.add_path(hops[0], hops[-1], path, bidirectional)
 
     def iteredges(self):
         e = []
@@ -418,53 +404,6 @@ class Topology(object):
             for dst in dsts:
                 e.append((src, dst))
         return e
-
-    def make_configmap(self, dest_dir, mapfile="config.map"):
-        out = []
-        for switch in self.switches.keys():
-            out.append("R R{0}\n".format(switch))
-        with open(os.path.join(dest_dir, mapfile), 'w') as f:
-            f.writelines(out)
-
-    def make_topofile(self, dest_dir, topofile="topo.txt"):
-        out = []
-        written = []
-        for src, dsts in self.edges.iteritems():
-            for dst in dsts:
-                if (dst,src) not in written:
-                    out.append("{0} {1}\n".format(dst, src))
-                    written.append((src, dst))
-
-        with open(os.path.join(dest_dir, topofile), 'w') as f:
-            f.writelines(out)
-
-    def make_rocketfile(self, dest_dir):
-        for sw in self.switches.values():
-            with open(os.path.join(dest_dir, "R_" + sw.name), 'w') as f:
-                f.write("\n".join([str(flow) for flow in sw.ft]))
-
-    def make_graph(self, dest_dir, graphfile="topo.gv"):
-        g = graphviz.Graph(format='svg')
-        for node in self.hosts.keys() + self.edges.keys():
-            g.node(node)
-
-        added = []
-        for src, dsts in self.edges.iteritems():
-            for dst in dsts:
-                if (src,dst) not in added:
-                    g.edge(src, dst)
-                    added.append((dst, src))
-
-        g.render(os.path.join(dest_dir, graphfile))
-
-    def switch_diff(self, subset, superset=None):
-        if superset is None:
-            superset = self.switches.keys()
-
-        if not isinstance(subset, list):
-            subset = [subset]
-
-        return [s for s in superset if s not in subset]
 
     def make_flowtable(self):
         for src in self.paths.keys():
@@ -489,3 +428,46 @@ class Topology(object):
                                      nexthops=nexthop,
                                      src=src_ip)
                     self.switches[location].ft.append(flow)
+
+    def make_configmap(self, dest_dir, mapfile="config.map"):
+        out = []
+        for switch in self.switches.keys():
+            out.append("R R{0}\n".format(switch))
+        with open(os.path.join(dest_dir, mapfile), 'w') as f:
+            f.writelines(out)
+
+    def make_topofile(self, dest_dir, topofile="topo.txt"):
+        out = []
+        written = []
+        for src, dst in self.edges.iteredges():
+            if (dst,src) not in written:
+                out.append("{0} {1}\n".format(dst, src))
+                written.append((src, dst))
+
+        with open(os.path.join(dest_dir, topofile), 'w') as f:
+            f.writelines(out)
+
+    def make_rocketfile(self, dest_dir):
+        for sw in self.switches.values():
+            with open(os.path.join(dest_dir, "R_" + sw.name), 'w') as f:
+                f.write("\n".join([str(flow) for flow in sw.ft]))
+
+    def make_graph(self, dest_dir, graphfile="topo.gv"):
+        g = graphviz.Graph(format='svg')
+        for node in self.hosts.keys() + self.edges.keys():
+            g.node(node)
+
+        added = []
+        for src, dsts in self.edges.iteredges():
+            for dst in dsts:
+                if (src,dst) not in added:
+                    g.edge(src, dst)
+                    added.append((dst, src))
+
+        g.render(os.path.join(dest_dir, graphfile))
+
+    def write_debug_output(self, data_dir="output"):
+        self.make_topofile(data_dir)
+        self.make_rocketfile(data_dir)
+        self.make_graph(data_dir)
+        self.make_configmap(data_dir)

@@ -21,33 +21,31 @@ def runSynthesis(topo, config, spec, expected):
         assert edge in result
 
 class testFattree(unittest.TestCase):
+    config = NetworkConfig(paths=[('h25', 'h34',  ['h25', 's14', 's6', 's0',
+                                                   's10', 's19', 'h34'])])
 
     def testSameCore(self):
         # different cores, different aggregates
-        config = NetworkConfig(paths=[('h25', 'h34', None)])
         spec = "not match(ip_src=a.b.c.d); s14: .* s0 .* => (N-s0)* s1 (N-s0)* od"
         expected = [('s6', 's1'), ('s1', 's10')]
-        runSynthesis(FattreeTopo(), config, spec, expected)
+        runSynthesis(FattreeTopo(), testFattree.config, spec, expected)
 
     def testDifferentCore(self):
         # different cores, different aggregates
-        config = NetworkConfig(paths=[('h25', 'h34', None)])
         spec = "not match(ip_src=a.b.c.d); s14: .* s0 .* => (N-s0)* s3 (N-s0)* od"
         expected = [('s14', 's7'), ('s7', 's3'), ('s11', 's19'), ('s3', 's11')]
-        runSynthesis(FattreeTopo(), config, spec, expected)
+        runSynthesis(FattreeTopo(), testFattree.config, spec, expected)
 
     def testImmutable(self):
         # different aggregate, but make core immutable
         # note: difference is core s2 and s3 between two tests
-        config = NetworkConfig(paths=[('h25', 'h34', None)])
         spec = "not match(ip_src=a.b.c.d); s14: .* s10 .* => (N-s10)* s11 (N-s10)* od NM:{s2}"
         expected = [('s7', 's3'), ('s14', 's7'), ('s3', 's11'), ('s11', 's19')]
-        runSynthesis(FattreeTopo(), config, spec, expected)
+        runSynthesis(FattreeTopo(), testFattree.config, spec, expected)
 
-        config = NetworkConfig(paths=[('h25', 'h34', None)])
         spec = "not match(ip_src=a.b.c.d); s14: .* s10 .* => (N-s10)* s11 (N-s10)* od NM:{s3}"
         expected = [('s7', 's2'), ('s14', 's7'), ('s11', 's19'), ('s2', 's11')]
-        runSynthesis(FattreeTopo(), config, spec, expected)
+        runSynthesis(FattreeTopo(), testFattree.config, spec, expected)
 
 class testDiamond(unittest.TestCase):
 

@@ -63,6 +63,15 @@ def str2regex_alpha(regex, alphabet):
                       sigma=set(alphabet),
                       strict=True)
 
+def node_diff(topo, subset, superset=None):
+    if superset is None:
+        superset = topo.switches.keys()
+
+    if not isinstance(subset, list):
+        subset = [subset]
+
+    return [s for s in superset if s not in subset]
+
 # convert set difference expression (eg, N-s0) into regex disjunction
 def expand_regex(expr, topo, aliases):
     matches = re.finditer(r"(\w+)\s*-\s*(\w+)",
@@ -75,7 +84,7 @@ def expand_regex(expr, topo, aliases):
                                                                 m.group(0)))
             return None
 
-        diff = topo.switch_diff(m.group(2), aliases[alias])
+        diff = node_diff(topo, m.group(2), aliases[alias])
         expr = expr.replace(m.group(0), "|".join(sorted(diff)))
 
     for alias, values in aliases.iteritems():

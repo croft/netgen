@@ -1,4 +1,5 @@
 ipaddr
 FAdo
 graphviz
+networkx
 pyparsing

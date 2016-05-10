@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import igraph
 import math
+import networkx
 import random
 
 from utils.load_stanford_backbone import *
@@ -13,7 +13,7 @@ from config_parser.cisco_router_parser import ciscoRouter
 from config_parser.juniper_parser import juniperRouter
 from config_parser.transfer_function_to_openflow import OpenFlow_Rule_Generator
 
-from fields import int2mac
+from fields import int2mac, ip2int, int2ip
 from log import logger
 from network import Topology, Switch, Host, FlowEntry, pairwise
 
@@ -175,136 +175,64 @@ class StanfordTopo(TfTopology):
 class DiamondTopo(Topology):
     def __init__(self):
         super(DiamondTopo, self).__init__()
-        self._make_topo()
+        g = networkx.Graph()
+        g.add_nodes_from(['s1', 's2', 's3', 's4'])
+        g.add_edges_from([('s1','s2'),
+                          ('s1','s3'),
+                          ('s2','s4'),
+                          ('s3','s4')])
 
-    def _make_topo(self):
-        g = igraph.Graph()
-        g.add_vertices(['s1', 's2', 's3', 's4'])
-        g.add_edges([('s1','s2'),
-                     ('s1','s3'),
-                     ('s2','s4'),
-                     ('s3','s4')])
-
-        nodes = []
-        for name in ['s1', 's2', 's3', 's4']:
-            nodes.append(name)
-            ip = "10.0.1.{0}".format(len(self.switches.keys()) + 1)
-            self.switches[name] = Switch(name=name ,ip=ip)
-
-        # for name in ['h1', 'h2']:
-        #     nodes.append(name)
-        #     ip = "10.0.0.{0}".format(len(self.hosts.keys()) + 1)
-        #     self.hosts[name] = Host(name=name, ip=ip)
-
-        edges = g.get_edgelist()
-        for e in edges:
-            e0 = g.vs[e[0]].attributes()['name']
-            e1 = g.vs[e[1]].attributes()['name']
-
-            if e0 not in self.edges:
-                self.edges[e0] = []
-
-            if e1 not in self.edges:
-                self.edges[e1] = []
-
-            self.edges[e0].append(e1)
-            self.edges[e1].append(e0)
+        self.build_from_graph(g)
 
 class DiamondExtendedTopo(Topology):
     def __init__(self):
         super(DiamondExtendedTopo, self).__init__()
-        self._make_topo()
+        g = networkx.Graph()
+        g.add_nodes_from(['s1', 's2', 's3', 's4', 's5', 's6'])
+        g.add_edges_from([('s1','s2'),
+                          ('s2','s3'),
+                          ('s3','s5'),
+                          ('s2','s4'),
+                          ('s4','s5'),
+                          ('s5','s6')])
 
-    def _make_topo(self):
-        g = igraph.Graph()
-        g.add_vertices(['s1', 's2', 's3', 's4', 's5', 's6'])
-        g.add_edges([('s1','s2'),
-                     ('s2','s3'),
-                     ('s3','s5'),
-                     ('s2','s4'),
-                     ('s4','s5'),
-                     ('s5','s6')])
-
-        nodes = []
-        for name in ['s1', 's2', 's3', 's4', 's5', 's6']:
-            nodes.append(name)
-            ip = "10.0.1.{0}".format(len(self.switches.keys()) + 1)
-            self.switches[name] = Switch(name=name ,ip=ip)
-
-        edges = g.get_edgelist()
-        for e in edges:
-            e0 = g.vs[e[0]].attributes()['name']
-            e1 = g.vs[e[1]].attributes()['name']
-
-            if e0 not in self.edges:
-                self.edges[e0] = []
-
-            if e1 not in self.edges:
-                self.edges[e1] = []
-
-            self.edges[e0].append(e1)
-            self.edges[e1].append(e0)
+        self.build_from_graph(g)
 
 class ThintreeTopo(Topology):
     def __init__(self):
         super(ThintreeTopo, self).__init__()
-        self._make_topo()
+        g = networkx.Graph()
+        g.add_nodes_from(['s1', 's2', 's3', 's4', 's5', 's6',
+                          's7', 's8', 's9', 's10', 's11'])
+        g.add_edges_from([('s1','s2'),
+                          ('s1','s3'),
+                          ('s2','s4'),
+                          ('s2','s5'),
+                          ('s2','s6'),
+                          ('s2','s7'),
+                          ('s3','s4'),
+                          ('s3','s5'),
+                          ('s3','s6'),
+                          ('s3','s7'),
+                          ('s8','s4'),
+                          ('s8','s5'),
+                          ('s8','s6'),
+                          ('s8','s7'),
+                          ('s9','s4'),
+                          ('s9','s5'),
+                          ('s9','s6'),
+                          ('s9','s7'),
+                          ('s8','s10'),
+                          ('s9','s10'),
+                          ('s8','s11'),
+                          ('s9','s11')])
 
-    def _make_topo(self):
-        g = igraph.Graph()
-        g.add_vertices(['s1', 's2', 's3', 's4', 's5', 's6',
-                        's7', 's8', 's9', 's10', 's11'])
-
-        g.add_edges([('s1','s2'),
-                     ('s1','s3'),
-                     ('s2','s4'),
-                     ('s2','s5'),
-                     ('s2','s6'),
-                     ('s2','s7'),
-                     ('s3','s4'),
-                     ('s3','s5'),
-                     ('s3','s6'),
-                     ('s3','s7'),
-                     ('s8','s4'),
-                     ('s8','s5'),
-                     ('s8','s6'),
-                     ('s8','s7'),
-                     ('s9','s4'),
-                     ('s9','s5'),
-                     ('s9','s6'),
-                     ('s9','s7'),
-                     ('s8','s10'),
-                     ('s9','s10'),
-                     ('s8','s11'),
-                     ('s9','s11'),
-                     ])
-
-        nodes = []
-        for name in ['s1', 's2', 's3', 's4', 's5', 's6',
-                     's7', 's8', 's9', 's10', 's11']:
-            nodes.append(name)
-            ip = "10.0.1.{0}".format(len(self.switches.keys()) + 1)
-            self.switches[name] = Switch(name=name ,ip=ip)
-
-        edges = g.get_edgelist()
-        for e in edges:
-            e0 = g.vs[e[0]].attributes()['name']
-            e1 = g.vs[e[1]].attributes()['name']
-
-            if e0 not in self.edges:
-                self.edges[e0] = []
-
-            if e1 not in self.edges:
-                self.edges[e1] = []
-
-            self.edges[e0].append(e1)
-            self.edges[e1].append(e0)
+        self.build_from_graph(g)
 
 class FattreeTopo(Topology):
     def __init__(self, k=4, density=1):
         super(FattreeTopo, self).__init__()
         self.size = k
-        self.distances = {}
         self.pods = {}
         self.pods_rev = {}
         self._make_topo()
@@ -326,42 +254,32 @@ class FattreeTopo(Topology):
             instance.add_path(p,v)
 
     def _make_topo(self):
-        g = self._generate_graph()
-        edges = g.get_edgelist()
+        self.graph = self._generate_graph()
+        switches = [node for node in self.graph.nodes() if node[0] == 's']
+        hosts = [node for node in self.graph.nodes() if node[0] == 'h']
 
-        switches = (self.size/2)**2 + self.size * self.size
-        nodes = {}
-        for i in range(switches):
-            name = "s%d" % i
-            nodes[i] = name
-            self.switches[name] = Switch(name=name)
+        startip = ip2int("10.1.0.0")
+        for name in switches:
+            ip = startip + len(self.switches) + 1
+            self.switches[name] = Switch(name=name,
+                                         ip=int2ip(ip))
 
-        for i in range(switches, switches + (self.size/2)**2 * self.size):
-            name = "h%d" % i
-            nodes[i] = name
-            self.hosts[name] = Host(name=name)
+        count = 0
+        for name in hosts:
+            podnum, idx = self.pods_rev[name]
+            ip = "10.0.{0}.{1}".format(podnum, idx)
+            mac = int2mac(count)
+            count += 1
+            self.hosts[name] = Host(name=name, ip=ip, mac=mac)
 
-        for e in edges:
-            e0 = nodes[e[0]]
-            e1 = nodes[e[1]]
-
+        for e0, e1 in self.graph.edges():
             if e0 not in self.edges:
                 self.edges[e0] = []
-
             if e1 not in self.edges:
                 self.edges[e1] = []
 
             self.edges[e0].append(e1)
             self.edges[e1].append(e0)
-
-        self._egresses = [nodes[e] for e in self._egresses]
-
-        count = 1
-        for h in self.hosts:
-            podnum, idx = self.pods_rev[h]
-            self.hosts[h].ip = "10.0.{0}.{1}".format(podnum, idx)
-            self.hosts[h].mac = int2mac(count)
-            count += 1
 
     def _generate_graph(self):
         cores = (self.size/2)**2
@@ -369,11 +287,7 @@ class FattreeTopo(Topology):
         edges = (self.size/2) * self.size
         hosts = (self.size/2)**2 * self.size
 
-        g = igraph.Graph()
-        g.add_vertices(cores + aggs + edges + hosts)
-        g.vs['type'] = ['core'] * cores + ['agg'] * aggs + ['edge'] * edges + \
-                       ['hosts'] * hosts
-
+        g = networkx.Graph()
         for pod in range(0, self.size):
             agg_offset = cores + self.size/2 * pod
             edge_offset = cores + aggs + self.size/2 * pod
@@ -382,63 +296,48 @@ class FattreeTopo(Topology):
             for agg in range(0, self.size/2):
                 core_offset = agg * self.size/2
 
-
                 # connect core and aggregate switches
                 for core in range(0, self.size/2):
-                    g.add_edge(agg_offset + agg, core_offset + core)
+                    aggname = "s{0}".format(agg_offset + agg)
+                    corename = "s{0}".format(core_offset + core)
+                    g.add_edge(aggname, corename)
 
                 # connect aggregate and edge switches
                 for edge in range(0, self.size/2):
-                    g.add_edge(agg_offset + agg, edge_offset + edge)
-                    self._egresses.append(edge_offset + edge)
+                    aggname = "s{0}".format(agg_offset + agg)
+                    edgename = "s{0}".format(edge_offset + edge)
+                    g.add_edge(aggname, edgename)
+                    self._egresses.append(edgename)
 
             # connect edge switches with hosts
             for edge in range(0, self.size/2):
                 for h in range(0, self.size/2):
-                    g.add_edge(edge_offset + edge,
-                               host_offset + self.size/2 * edge + h)
+                    edgename = "s{0}".format(edge_offset + edge)
+                    hostname = "h{0}".format(host_offset + self.size/2 * edge + h)
+                    g.add_edge(edgename, hostname)
 
                     if pod not in self.pods:
                         self.pods[pod] = []
 
-                    hnum = host_offset + self.size/2 * edge + h
-                    self.pods[pod].append("h%d"%hnum)
-                    self.pods_rev["h%d"%hnum] = (pod, len(self.pods[pod]))
+                    self.pods[pod].append(hostname)
+                    self.pods_rev[hostname] = (pod, len(self.pods[pod]))
 
         return g
 
 class SosrTopo(Topology):
     def __init__(self):
         super(SosrTopo, self).__init__()
-        self._make_topo()
+        g = networkx.Graph()
+        g.add_nodes_from(['A', 'B', 'C', 'F1', 'F2', 'X', 'Y', 'Z'])
+        g.add_edges_from([('A', 'F1'),
+                          ('A', 'F2'),
+                          ('B', 'F1'),
+                          ('B', 'F2'),
+                          ('C', 'F1'),
+                          ('C', 'F2'),
+                          ('F1', 'X'),
+                          ('F2', 'Y'),
+                          ('Y', 'Z'),
+                          ('X', 'Z')])
 
-    def _make_topo(self):
-        g = igraph.Graph()
-        for i, sw in enumerate(['A', 'B', 'C', 'F1', 'F2', 'X', 'Y', 'Z']):
-            self.switches[sw] = Switch(name=sw, ip='10.0.0.{0}'.format(i+1))
-            g.add_vertices(sw)
-
-        g.add_edges([('A', 'F1'),
-                     ('A', 'F2'),
-                     ('B', 'F1'),
-                     ('B', 'F2'),
-                     ('C', 'F1'),
-                     ('C', 'F2'),
-                     ('F1', 'X'),
-                     ('F2', 'Y'),
-                     ('Y', 'Z'),
-                     ('X', 'Z')])
-
-        edges = g.get_edgelist()
-        for e in edges:
-            e0 = g.vs[e[0]].attributes()['name']
-            e1 = g.vs[e[1]].attributes()['name']
-
-            if e0 not in self.edges:
-                self.edges[e0] = []
-
-            if e1 not in self.edges:
-                self.edges[e1] = []
-
-            self.edges[e0].append(e1)
-            self.edges[e1].append(e0)
+        self.build_from_graph(g)
