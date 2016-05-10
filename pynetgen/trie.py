@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from collections import deque
+
 from fields import OFPFC_ADD, OFPFC_DELETE_STRICT, HeaderField
 from log import logger
 
@@ -56,7 +58,7 @@ class ForwardingGraph(object):
 
 
 class EquivalenceRange(object):
-    def __init__(self, lowerBound = 0, upperBound = 0):
+    def __init__(self, lowerBound=0, upperBound=0):
         self.lowerBound = lowerBound
         self.upperBound = upperBound
 
@@ -70,19 +72,19 @@ class EquivalenceRange(object):
         return "[{0},{1}]".format(self.lowerBound, self.upperBound)
 
 class EquivalenceClass(object):
-    def __init__(self, lowerBound = None, upperBound = None):
+    def __init__(self, lowerBound=None, upperBound=None):
+        if lowerBound is not None and upperBound is not None:
+            assert len(lowerBound) == len(upperBound)
+            for i in range(len(lowerBound)):
+                assert lowerBound[i] <= upperBound[i]
 
         if lowerBound is None:
             lowerBound = [0] * HeaderField.End
         if upperBound is None:
             upperBound = [0] * HeaderField.End
 
-        assert len(lowerBound) == len(upperBound)
-        for i in range(len(lowerBound)):
-            assert lowerBound[i] <= upperBound[i]
-
-        self.lowerBound = list(lowerBound)
-        self.upperBound = list(upperBound)
+        self.lowerBound = deque(lowerBound)
+        self.upperBound = deque(upperBound)
 
     def getRange(self, findex):
         assert findex <= len(self.lowerBound)
@@ -250,7 +252,6 @@ class Trie(object):
 
         return curnode
 
-    # XXX: not incrementing totalRuleCount?
     def addRule(self, rule):
         if self.root is None:
             self.root = TrieNode()
@@ -421,9 +422,9 @@ class Trie(object):
             else:  # wildcard bit
                 break
 
-        self.lowerBoundList = []
+        self.lowerBoundList = deque()
         self.lowerBoundMap = {}
-        self.upperBoundList = []
+        self.upperBoundList = deque()
         self.upperBoundMap = {}
 
         # perform dfs
@@ -476,8 +477,8 @@ class Trie(object):
                 self.addToBoundList(temprange.lowerBound,
                                     temprange.upperBound)
 
-        self.lowerBoundList.sort()
-        self.upperBoundList.sort()
+        self.lowerBoundList = deque(sorted(self.lowerBoundList))
+        self.upperBoundList = deque(sorted(self.upperBoundList))
 
         lb = 0
         ub = 0
@@ -496,7 +497,7 @@ class Trie(object):
                         ub = self.lowerBoundList[0] - 1
                     else:
                         ub = self.upperBoundList[0]
-                        self.upperBoundList = self.upperBoundList[1:]
+                        self.upperBoundList.popleft()
 
                     pktclass = EquivalenceClass()
                     pktclass.lowerBound[self.fieldIndex] = lb
@@ -505,7 +506,7 @@ class Trie(object):
                     packetClasses.append(pktclass)
                     continue
                 else:
-                    self.lowerBoundList = self.lowerBoundList[1:]
+                    self.lowerBoundList.popleft()
             else:
                 lb = ub + 1
 
@@ -514,10 +515,10 @@ class Trie(object):
                     ub = self.lowerBoundList[0] - 1
                 else:
                     ub = self.upperBoundList[0]
-                    self.upperBoundList = self.upperBoundList[1:]
+                    self.upperBoundList.popleft()
             else:
                 ub = self.upperBoundList[0]
-                self.upperBoundList = self.upperBoundList[1:]
+                self.upperBoundList.popleft()
 
             pktclass = EquivalenceClass()
             pktclass.lowerBound[self.fieldIndex] = lb
@@ -543,8 +544,8 @@ class Trie(object):
             if inputTrie.totalRuleCount == 0:
                 continue
 
-            curLevelNodes = []
-            nextLevelNodes = []
+            curLevelNodes = deque()
+            nextLevelNodes = deque()
             curLevelNodes.append(inputTrie.root)
             curnode = None
 
@@ -552,7 +553,7 @@ class Trie(object):
             for i in range(width):
                 while len(curLevelNodes) > 0:
                     curnode = curLevelNodes[0]
-                    curLevelNodes = curLevelNodes[1:]
+                    curLevelNodes.popleft()
 
                     if curnode is None:
                         raise Exception("invalid node")
@@ -578,7 +579,7 @@ class Trie(object):
                                 nextLevelNodes.append(curnode.wildcardBranch)
 
                 curLevelNodes = nextLevelNodes
-                nextLevelNodes = []
+                nextLevelNodes = deque()
 
             for i in range(len(curLevelNodes)):
                 node = curLevelNodes[i]
@@ -588,8 +589,8 @@ class Trie(object):
                     raise Exception("invalid node")
 
         # found next level tries, now compute equivalence classes
-        lblist = []
-        ublist = []
+        lblist = deque()
+        ublist = deque()
         lbmap = {}
         ubmap = {}
 
@@ -625,7 +626,6 @@ class Trie(object):
                             curnode = curnode.oneBranch
                         else:
                             matchFound = False
-
 
                     eqrange.lowerBound <<= 1
                     eqrange.upperBound <<= 1
@@ -685,8 +685,9 @@ class Trie(object):
                 else:
                     pass
 
-        lblist.sort()
-        ublist.sort()
+        # use deque for efficient popleft (faster than list[1:])
+        lblist = deque(sorted(lblist))
+        ublist = deque(sorted(ublist))
 
         lb = 0
         ub = 0
@@ -705,7 +706,7 @@ class Trie(object):
                         ub = lblist[0] - 1
                     else:
                         ub = ublist[0]
-                        ublist = ublist[1:]
+                        ublist.popleft()
 
                     pktclass = EquivalenceClass()
                     pktclass.lowerBound[nextIndex] = lb
@@ -713,7 +714,7 @@ class Trie(object):
                     packetClasses.append(pktclass)
                     continue
                 else:
-                    lblist = lblist[1:]
+                    lblist.popleft()
             else:
                 lb = ub + 1
 
@@ -722,10 +723,10 @@ class Trie(object):
                     ub = lblist[0] - 1
                 else:
                     ub = ublist[0]
-                    ublist = ublist[1:]
+                    ublist.popleft()
             else:
                 ub = ublist[0]
-                ublist = ublist[1:]
+                ublist.popleft()
 
             pktclass = EquivalenceClass()
             pktclass.lowerBound[nextIndex] = lb
@@ -736,31 +737,30 @@ class Trie(object):
 
     def addToBoundList(self, lb, ub):
         if lb not in self.lowerBoundMap:
-            self.lowerBoundList.insert(0, lb)
+            self.lowerBoundList.appendleft(lb)
             self.lowerBoundMap[lb] = ub
         else:
             if self.lowerBoundMap[lb] < ub:
                 self.lowerBoundMap[lb] = ub
 
         if ub not in self.upperBoundMap:
-            self.upperBoundList.insert(0, ub)
+            self.upperBoundList.appendleft(ub)
             self.upperBoundMap[ub] = lb
         else:
             if self.upperBoundMap[ub] > lb:
                 self.upperBoundMap[ub] = lb
 
-
     @classmethod
     def addToBoundListEx(cls, lb, ub, lblist, ublist, lbmap, ubmap):
         if lb not in lbmap:
-            lblist.insert(0, lb)
+            lblist.appendleft(lb)
             lbmap[lb] = ub
         else:
             if lbmap[lb] < ub:
                 lbmap[lb] = ub
 
         if ub not in ubmap:
-            ublist.insert(0, ub)
+            ublist.appendleft(ub)
             ubmap[ub] = lb
         else:
             if ubmap[ub] > lb:

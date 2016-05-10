@@ -65,6 +65,8 @@ class FieldDefinition(object):
         return self.count
 
     def intValue(self, index, value):
+        if isinstance(value, int):
+            return value
         return self.intConverter[index](value)
 
 class PacketField(FieldDefinition):
