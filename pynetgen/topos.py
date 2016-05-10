@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
+import fnss
 import math
 import networkx
+import os
 import random
 
 from utils.load_stanford_backbone import *
@@ -198,6 +200,68 @@ class DiamondExtendedTopo(Topology):
 
         self.build_from_graph(g)
 
+class DoubleDiamondTopo(Topology):
+    def __init__(self):
+        super(DoubleDiamondTopo, self).__init__()
+        self._make_topo()
+        g = networkx.Graph()
+        g.add_edges_from([('s1', 's2'),
+                          ('s2', 's3'),
+                          ('s2', 's4'),
+                          ('s4', 's5'),
+                          ('s5', 's6'),
+                          ('s6', 's8'),
+                          ('s8', 's10'),
+                          ('s3', 's5'),
+                          ('s5', 's7'),
+                          ('s7', 's9'),
+                          ('s9', 's10')])
+
+        self.build_from_graph(g)
+
+class DiamondClusterTopo(Topology):
+    def __init__(self):
+        super(DiamondClusterTopo, self).__init__()
+        g = networkx.Graph()
+        g.add_edges_from([('Src', 's0'),
+                          ('s0', 's1'),
+                          ('s1', 's2'),
+                          ('s2', 's3'),
+                          ('s3', 's4'),
+                          ('s4', 'Fw1'),
+                          ('Fw1', 's5'),
+                          ('s5', 's6'),
+                          ('s6', 'Dst'),
+                          ('Src', 's7'),
+                          ('s7', 's8'),
+                          ('s8', 's9'),
+                          ('s9', 'Fw2'),
+                          ('Fw2', 's10'),
+                          ('s10', 's11'),
+                          ('s11', 's12'),
+                          ('s12', 's13'),
+                          ('s13', 'Dst'),
+                          ('Src', 's14'),
+                          ('s14', 'Core'),
+                          ('Core', 's15'),
+                          ('s15', 'Dst'),
+                          ('s14', 's16'),
+                          ('s16', 'Core'),
+                          ('s16', 'Fw1'),
+                          ('s18', 'Fw1'),
+                          ('s18', 'Core'),
+                          ('s18', 's15'),
+                          ('s14', 's17'),
+                          ('s17', 'Core'),
+                          ('s17', 'Fw2'),
+                          ('s19', 'Fw2'),
+                          ('s19', 'Core'),
+                          ('s19', 's15'),
+                          ('Core', 'Fw1'),
+                          ('Core', 'Fw2')])
+
+        self.build_from_graph(g)
+
 class ThintreeTopo(Topology):
     def __init__(self):
         super(ThintreeTopo, self).__init__()
@@ -339,5 +403,26 @@ class SosrTopo(Topology):
                           ('F2', 'Y'),
                           ('Y', 'Z'),
                           ('X', 'Z')])
+
+        self.build_from_graph(g)
+
+class RocketfuelTopo(Topology):
+    def __init__(self, asnum=1755):
+        super(RocketfuelTopo, self).__init__()
+        fname = os.path.join("rocketfuel_maps", "{0}.cch".format(asnum))
+        if not os.path.isfile(fname):
+            raise Exception("Invalid AS number: {0} does not exist"
+                            .format(fname))
+
+        topo = fnss.parse_rocketfuel_isp_map(fname)
+
+        # TODO: support directed topologies
+        renames = {}
+        for node in sorted(topo.nodes()):
+            renames[node] = "s{0}".format(len(renames))
+
+        g = networkx.Graph()
+        for m, n in topo.edges():
+            g.add_edge(renames[m], renames[n])
 
         self.build_from_graph(g)

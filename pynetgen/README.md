@@ -9,7 +9,7 @@ Z3 [[github.com](https://github.com/Z3Prover/z3#python)]
 
 Python libraries  
 * Install Python package manager `pip`: `sudo apt-get install pip`  
-* Install libraries: `sudo pip install fado ipaddr graphviz pyparsing networkx`  
+* Install libraries: `sudo pip install fado ipaddr graphviz pyparsing networkx fnss`  
 
 
 ### Walkthrough

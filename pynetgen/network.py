@@ -6,7 +6,6 @@ import networkx
 import os
 import re
 
-import dijkstra
 import trie
 from log import logger
 from fields import HeaderField, ip2int, int2ip
@@ -120,6 +119,13 @@ class PacketClass(object):
             strings.append(" ".join(s))
 
         return strings
+
+    def to_networkx(self):
+        g = networkx.Graph()
+        for m, n in self.iteredges():
+            g.add_edge(m, n)
+
+        return g
 
     def __repr__(self):
         return str(self)
@@ -382,7 +388,7 @@ class Topology(object):
 
             self.paths[dst][src] = path
 
-        logger.info("added path {0}".format(path))
+        logger.debug("added path {0}".format(path))
         return path
 
     def add_multihop_path(self, hops, bidirectional=False):
@@ -404,6 +410,16 @@ class Topology(object):
             for dst in dsts:
                 e.append((src, dst))
         return e
+
+    def to_networkx(self):
+        if self.graph is not None:
+            return self.graph
+
+        g = networkx.Graph()
+        for m, n in self.iteredges():
+            g.add_edge(m, n)
+
+        return g
 
     def make_flowtable(self):
         for src in self.paths.keys():

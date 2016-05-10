@@ -3,3 +3,4 @@ FAdo
 graphviz
 networkx
 pyparsing
+fnss
