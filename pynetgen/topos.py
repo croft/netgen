@@ -15,7 +15,7 @@ from config_parser.cisco_router_parser import ciscoRouter
 from config_parser.juniper_parser import juniperRouter
 from config_parser.transfer_function_to_openflow import OpenFlow_Rule_Generator
 
-from fields import int2mac, ip2int, int2ip
+from fields import int2mac, ip2int, int2ip, wc2ip
 from log import logger
 from network import Topology, Switch, Host, FlowEntry, pairwise
 
@@ -203,7 +203,6 @@ class DiamondExtendedTopo(Topology):
 class DoubleDiamondTopo(Topology):
     def __init__(self):
         super(DoubleDiamondTopo, self).__init__()
-        self._make_topo()
         g = networkx.Graph()
         g.add_edges_from([('s1', 's2'),
                           ('s2', 's3'),

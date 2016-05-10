@@ -275,7 +275,7 @@ class Topology(object):
     @property
     def classes(self):
         if len(self._classes) == 0:
-            self._compute_classes()
+            self.compute_classes()
         return self._classes
 
     @property
@@ -332,7 +332,7 @@ class Topology(object):
             self.edges[e0].append(e1)
             self.edges[e1].append(e0)
 
-    def _compute_classes(self):
+    def compute_classes(self):
         pc = PerfCounter("pkt class")
         pc.start()
         mtrie = trie.MultilevelTrie()
