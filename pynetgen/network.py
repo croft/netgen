@@ -19,7 +19,6 @@ def pairwise(iterable):
 # TODO: use one data structure for both
 # TODO: add mask to flowtable
 def ft2rules(loc, ft):
-    rules = []
     for flow in ft:
         r = trie.Rule()
         r.ruleType = trie.Rule.FORWARDING
@@ -40,9 +39,8 @@ def ft2rules(loc, ft):
 
         r.nextHop = flow.nexthops[0]
         r.location = loc
-        rules.append(r)
 
-    return rules
+        yield r
 
 class PacketClass(object):
     def __init__(self, idx=None):
@@ -57,18 +55,20 @@ class PacketClass(object):
         classes = []
         pc = PacketClass(idx=idx)
         pc.graph = fg
-        for name, link in fg.links.iteritems():
-            if len(link) > 1:
-                raise Exception("Don't know yet how to handle multiple links?")
 
-            pc.edges[name] = link[0].rule.nextHop
-            f = FlowEntry.fromTrieRule(link[0].rule)
+        for name, links in fg.links.iteritems():
+            if name not in pc.edges:
+                pc.edges[name] = []
 
-            if f.location not in pc.rules:
-                pc.rules[f.location] = {}
+            for link in links:
+                pc.edges[name].append(link.rule.nextHop)
 
-            for nexthop in f.nexthops:
-                pc.rules[f.location][nexthop] = f
+                f = FlowEntry.fromTrieRule(link.rule)
+                if f.location not in pc.rules:
+                    pc.rules[f.location] = {}
+
+                for nexthop in f.nexthops:
+                    pc.rules[f.location][nexthop] = f
 
         if len(pc.edges) == 0:
             return None
@@ -91,34 +91,47 @@ class PacketClass(object):
         dest = {}
         egress = [e for e in topo.egresses
                   if e not in sources]
+
+        paths = self.powerset_paths()
         for src in topo.switches.keys():
             if src in egress:
                 dest[src] = src
                 continue
 
-            temp = src
-            while temp in self.edges:
-                temp = self.edges[temp]
-                if temp in egress:
-                    dest[src] = temp
+            src_paths = [p for p in paths if p[0] == src]
+            dests = list(set([p[-1] for p in src_paths]))
+            if len(dests) > 1:
+                raise Exception("Can't handle multiple destinations yet")
+
+            if len(dests) > 0:
+                dest[src] = dests[0]
 
         return dest
 
+    def powerset_paths(self):
+        def rec_construct_paths(paths, path, node):
+            if node in path:
+                raise Exception("Loop in packet classes: {0}".format(path))
+
+            if node not in self.edges:
+                path.append(node)
+                paths.append(path)
+                return paths
+
+            path.append(node)
+            for nexthop in self.edges[node]:
+                paths = rec_construct_paths(paths, list(path), nexthop)
+
+            return paths
+
+        paths = []
+        for source in self.edges.keys():
+            paths = rec_construct_paths(paths, [], source)
+
+        return paths
+
     def construct_strings(self):
-        strings = []
-        for key in self.edges.keys():
-            s = []
-            term = key
-            while term in self.edges.keys():
-                if term in s:
-                    raise Exception("Loop in packet classes: {0}".format(s))
-                s.append(term)
-                term = self.edges[term]
-
-            s.append(term)
-            strings.append(" ".join(s))
-
-        return strings
+        return [" ".join(path) for path in self.powerset_paths()]
 
     def to_networkx(self):
         g = networkx.Graph()
