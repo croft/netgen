@@ -8,6 +8,7 @@ import re
 import dijkstra
 import trie
 from fields import HeaderField, ip2int, int2ip
+from profiling import PerfCounter
 
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
@@ -324,12 +325,16 @@ class Topology(object):
         self.make_flowtable()
 
     def _compute_classes(self):
+        pc = PerfCounter("pkt class")
+        pc.start()
         mtrie = trie.MultilevelTrie()
         for switch in self.switches.values():
             for rule in ft2rules(switch.name, switch.ft):
                 mtrie.addRule(rule)
 
         eqclasses = mtrie.getAllEquivalenceClasses()
+        pc.stop()
+
         for ptrie, pclass in eqclasses:
             idx = len(self._classes) + 1
             graph = mtrie.getForwardingGraph(ptrie, pclass)

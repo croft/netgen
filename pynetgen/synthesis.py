@@ -2,7 +2,9 @@
 
 import abc
 from z3 import *
+
 from log import logger
+from profiling import PerfCounter
 
 class AbstractNetwork(object):
     def __init__(self, concrete_network, spec):
@@ -76,7 +78,11 @@ class AbstractNetwork(object):
 
 class Synthesizer(object):
     def __init__(self, network, spec):
+        pc = PerfCounter("absnet creation")
+        pc.start()
         self.network = AbstractNetwork(network, spec)
+        pc.stop()
+
         self.spec = spec
         self.fsa = spec.fsa
 
@@ -107,6 +113,10 @@ class Synthesizer(object):
             logger.debug("-------------------------------------------")
             logger.debug("        Phase: %d", i+1)
             logger.debug("-------------------------------------------")
+
+            query_pc = PerfCounter("query constr k={0}".format(i))
+            query_pc.start()
+
             query = SmtQuery(self.fsa, self.network, i+1, self.spec)
             query.define_k_rules()
             query.define_immutability()
@@ -126,7 +136,11 @@ class Synthesizer(object):
                                                        self.network.nodes))
 
             query.accept_automata(rho)
+            query_pc.stop()
+            solve_pc = PerfCounter("z3 solve k={0}".format(i))
+            solve_pc.start()
             model = query.solve()
+            solve_pc.stop()
             if model is not None:
                 path = self.path_solution(model)
                 logger.debug(model)
