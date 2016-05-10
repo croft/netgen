@@ -2,8 +2,10 @@
 
 import fnss
 import math
+import multiprocessing
 import networkx
 import os
+import pickle
 import random
 
 from utils.load_stanford_backbone import *
@@ -15,9 +17,10 @@ from config_parser.cisco_router_parser import ciscoRouter
 from config_parser.juniper_parser import juniperRouter
 from config_parser.transfer_function_to_openflow import OpenFlow_Rule_Generator
 
-from fields import int2mac, ip2int, int2ip, wc2ip
+import trie
+from fields import HeaderField, int2mac, ip2int, int2ip, wc2ip
 from log import logger
-from network import Topology, Switch, Host, FlowEntry, pairwise
+from network import Topology, Switch, Host, FlowEntry, pairwise, PacketClass
 
 class TfTopology(Topology):
     def __init__(self, definition, ntf, ttf, port_ids, router):
@@ -425,3 +428,86 @@ class RocketfuelTopo(Topology):
             g.add_edge(renames[m], renames[n])
 
         self.build_from_graph(g)
+
+def mp_parse_switch((topo, fname)):
+    return topo.parse_switch_file(fname)
+
+class As1755Topo(Topology):
+    def __init__(self, mp=True, mp_procs=12):
+        super(As1755Topo, self).__init__()
+        path = "../data_set/RocketFuel/AS-1755"
+        files = [os.path.join(path, f) for f in os.listdir(path)
+                 if os.path.isfile(os.path.join(path, f))
+                 and f[0] == 'R']
+
+        if mp:
+            import time
+            pool = multiprocessing.Pool(processes=mp_procs)
+            args = [(self, fname) for fname in files]
+            for sw, ft in pool.imap(mp_parse_switch, args):
+                self.switches[sw] = Switch(name=sw, ip=sw)
+                self.switches[sw].ft = ft
+            pool.close()
+        else:
+            for fname in files:
+                for sw, ft in self._parse_switch_file(fname):
+                    self.switches[sw] = Switch(name=sw, ip=sw)
+                    self.switches[sw].ft = ft
+
+    def cache(self, fname="as1755.p"):
+        pickle.dump(self, open(fname, 'wb'))
+
+    def compute_classes(self):
+        mtrie = trie.MultilevelTrie()
+        for switch in self.switches.values():
+            print "processing switch", switch.name, len(switch.ft)
+            for rule in switch.ft:
+                mtrie.addRule(rule)
+
+        print "total rules:", mtrie.primaryTrie.totalRuleCount
+        print "getting equivalence classes"
+        eqclasses = mtrie.getAllEquivalenceClasses()
+
+        print len(eqclasses)
+        print "getting forwarding graphs"
+        for ptrie, pclass in eqclasses:
+            idx = len(self._classes) + 1
+            graph = mtrie.getForwardingGraph(ptrie, pclass)
+            pc = PacketClass.fromForwardingGraph(graph, idx)
+            if pc is not None:
+                self._classes[idx] = pc
+
+    def parse_switch_file(self, fname):
+        switch = os.path.basename(fname)[1:]
+        print "parsing switch", switch
+        rules = []
+        with open(fname) as f:
+            for line in f.readlines():
+                tokens = line.split()
+                dst = tokens[2]
+                wc = tokens[3]
+                nexthop = tokens[5]
+                priority = int(tokens[7])
+
+                if '/' in dst:
+                    dst_tokens = dst.split('/')
+                    block = int(dst_tokens[1])
+                    dst = dst_tokens[0]
+
+                    if wc2ip(32-block) != wc:
+                        raise Exception("Error: inconsistency in wildcard")
+
+                if tokens[4] != switch:
+                    print fname, switch, tokens[4]
+                    raise Exception("Location != switch name")
+
+                r = trie.Rule()
+                r.ruleType = trie.Rule.FORWARDING
+                r.fieldValue[HeaderField.Index["NW_DST"]] = ip2int(dst)
+                r.fieldMask[HeaderField.Index["NW_DST"]] = ip2int(wc)
+                r.priority = priority
+                r.nextHop = nexthop
+                r.location = switch
+                rules.append(r)
+
+        return (switch, rules)
