@@ -312,6 +312,12 @@ class Topology(object):
 
         return e
 
+    def is_directed(self):
+        if self.graph is None:
+            return False
+        else:
+            return isinstance(self.graph, networkx.DiGraph)
+
     def apply_config(self, config):
         config.apply_config(self)
         self.make_flowtable()
@@ -428,7 +434,11 @@ class Topology(object):
         if self.graph is not None:
             return self.graph
 
-        g = networkx.Graph()
+        if self.is_directed():
+            g = networkx.DiGraph()
+        else:
+            g = networkx.Graph()
+
         for m, n in self.iteredges():
             g.add_edge(m, n)
 

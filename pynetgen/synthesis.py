@@ -9,6 +9,7 @@ from profiling import PerfCounter
 class AbstractNetwork(object):
     def __init__(self, concrete_network, spec):
         self.concrete_network = concrete_network
+        self.fsa = spec.fsa
         classes = spec.matched_classes.values()
 
         self.edges = []

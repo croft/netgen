@@ -409,9 +409,12 @@ class SosrTopo(Topology):
         self.build_from_graph(g)
 
 class RocketfuelTopo(Topology):
+    dataset_path = "rocketfuel_maps"
+
     def __init__(self, asnum=1755):
         super(RocketfuelTopo, self).__init__()
-        fname = os.path.join("rocketfuel_maps", "{0}.cch".format(asnum))
+        fname = os.path.join(RocketfuelTopo.dataset_path,
+                             "{0}.cch".format(asnum))
         if not os.path.isfile(fname):
             raise Exception("Invalid AS number: {0} does not exist"
                             .format(fname))
@@ -423,11 +426,21 @@ class RocketfuelTopo(Topology):
         for node in sorted(topo.nodes()):
             renames[node] = "s{0}".format(len(renames))
 
-        g = networkx.Graph()
+        if topo.is_directed():
+            g = networkx.DiGraph()
+        else:
+            g = networkx.Graph()
+
         for m, n in topo.edges():
             g.add_edge(renames[m], renames[n])
 
         self.build_from_graph(g)
+
+    @classmethod
+    def ASes(cls):
+        return [os.path.splitext(cch)[0] for cch in
+                os.listdir(RocketfuelTopo.dataset_path)
+                if cch[0].isdigit() and os.path.splitext(cch)[1] == '.cch']
 
 def mp_parse_switch((topo, fname)):
     return topo.parse_switch_file(fname)
