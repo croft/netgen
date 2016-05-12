@@ -17,7 +17,6 @@ def pairwise(iterable):
     return itertools.izip(a, b)
 
 # TODO: use one data structure for both
-# TODO: add mask to flowtable
 def ft2rules(loc, ft):
     for flow in ft:
         r = trie.Rule()
@@ -72,6 +71,20 @@ class PacketClass(object):
 
         if len(pc.edges) == 0:
             return None
+
+        return pc
+
+    @classmethod
+    def fromFile(cls, fname, idx):
+        pc = PacketClass(idx=idx)
+        with open(fname) as f:
+            for line in f.readlines():
+                tokens = line.split()
+                if tokens[1] not in pc.edges:
+                    pc.edges[tokens[1]] = []
+
+                if tokens[2] not in pc.edges[tokens[1]]:
+                    pc.edges[tokens[1]].append(tokens[2])
 
         return pc
 
@@ -263,7 +276,7 @@ class Topology(object):
         self.paths = {}
         self.graph = None
         self._egresses = []
-        self._classes = {}
+        self._classes = None
 
     @property
     def strrepr(self):
@@ -287,7 +300,7 @@ class Topology(object):
 
     @property
     def classes(self):
-        if len(self._classes) == 0:
+        if self._classes is None:
             self.compute_classes()
         return self._classes
 
@@ -352,22 +365,44 @@ class Topology(object):
             self.edges[e1].append(e0)
 
     def compute_classes(self):
-        pc = PerfCounter("pkt class")
-        pc.start()
+        self._classes = {}
+        pc_eq = PerfCounter("pkt class")
+        pc_rules = PerfCounter("add rules")
+        pc_fg = PerfCounter("forwarding graph")
+        pc_rules.start()
+
+        pc_rules.start()
         mtrie = trie.MultilevelTrie()
         for switch in self.switches.values():
-            for rule in ft2rules(switch.name, switch.ft):
+            # TODO: cleanup
+            # do we need to convert the ft rules to trie.Rules?
+            if len(switch.ft) > 0 and isinstance(switch.ft[0], FlowEntry):
+                ft = ft2rules(switch.name, switch.ft)
+            else:
+                ft = switch.ft
+
+            for rule in ft:
                 mtrie.addRule(rule)
 
-        eqclasses = mtrie.getAllEquivalenceClasses()
-        pc.stop()
+        pc_rules.stop()
+        logger.debug("added {0} rules to trie"
+                  .format(mtrie.primaryTrie.totalRuleCount))
 
+        pc_eq.start()
+        eqclasses = mtrie.getAllEquivalenceClasses()
+        pc_eq.stop()
+        logger.debug("discovered {0} equivalence classes".format(len(eqclasses)))
+
+        pc_fg.start()
         for ptrie, pclass in eqclasses:
             idx = len(self._classes) + 1
             graph = mtrie.getForwardingGraph(ptrie, pclass)
             pc = PacketClass.fromForwardingGraph(graph, idx)
             if pc is not None:
                 self._classes[idx] = pc
+
+        pc_fg.stop()
+        return self._classes
 
     def match_classes(self, regex, sources=None):
         matches = {}

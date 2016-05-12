@@ -63,8 +63,8 @@ class TfTopology(Topology):
             swname = tf.prefix_id
 
             for rule in rules:
-                dest = int2ip(rule['ip_dst_match'])
-                wc = wc2ip(rule['ip_dst_wc'])
+                #dest = int2ip(rule['ip_dst_match'])
+                #wc = wc2ip(rule['ip_dst_wc'])
                 outports = rule['out_ports']
                 location = tf.prefix_id
                 nexthops = []
@@ -84,13 +84,40 @@ class TfTopology(Topology):
                                 # TODO
                                 pass
 
-                flow = FlowEntry(dest=dest,
-                                 wildcard=wc,
-                                 location=location,
-                                 nexthops=nexthops)
+                r = trie.Rule()
+                r.ruleType = trie.Rule.FORWARDING
+                r.location = location
+                r.priority = 1
+
+                # TODO: handle multipath
+                if len(nexthops) > 1:
+                    r.nextHop = nexthops[0]
+
+                nw_dst_match = rule['ip_dst_match']
+                nw_dst_wc = ip2int(wc2ip(rule['ip_dst_wc']))
+                nw_src_match = rule['ip_src_match']
+                nw_src_wc = ip2int(wc2ip(rule['ip_src_wc']))
+
+                r.fieldValue[HeaderField.Index["NW_DST"]] = nw_dst_match
+                r.fieldMask[HeaderField.Index["NW_DST"]] = nw_dst_wc
+                r.fieldValue[HeaderField.Index["NW_SRC"]] = nw_src_match
+                r.fieldMask[HeaderField.Index["NW_SRC"]] = nw_src_wc
+
+                # TODO: handle vlan rewrite?
+                # r.fieldValue[HeaderField.Index["DL_VLAN"]] = rule['vlan_match']
+                # r.fieldValue[HeaderField.Index["IN_PORT"]] = rule['in_ports']
+
+                # flow = FlowEntry(dest=dest,
+                #                  wildcard=wc,
+                #                  location=location,
+                #                  nexthops=nexthops)
+
+                if len(nexthops) > 1:
+                    print "Can't handle multiple next hops", nexthops
 
                 if len(nexthops) > 0:
-                    self.switches[swname].ft.append(flow)
+                    # self.switches[swname].ft.append(flow)
+                    self.switches[swname].ft.append(r)
 
 class Internet2Topo(TfTopology):
     Definition = [("chic","xe-0/1/0","newy32aoa","xe-0/1/3"), #05667
@@ -449,6 +476,22 @@ class As1755Topo(Topology):
     def __init__(self, mp=True, mp_procs=12):
         super(As1755Topo, self).__init__()
         path = "../data_set/RocketFuel/AS-1755"
+        self.read_flowtable(path, mp, mp_procs)
+        self.read_links(path)
+
+    def read_links(self, path):
+        topofile = os.path.join(path, "as1755.topo")
+        self.graph = networkx.DiGraph()
+
+        with open(topofile) as f:
+            for line in f.readlines():
+                tokens = line.split()
+                if len(tokens) != 2:
+                    raise Exception("Invalid line in topo: {0}".format(line))
+
+                self.graph.add_edge(tokens[0], tokens[1])
+
+    def read_flowtable(self, path, mp, mp_procs):
         files = [os.path.join(path, f) for f in os.listdir(path)
                  if os.path.isfile(os.path.join(path, f))
                  and f[0] == 'R']
@@ -467,32 +510,9 @@ class As1755Topo(Topology):
                     self.switches[sw] = Switch(name=sw, ip=sw)
                     self.switches[sw].ft = ft
 
-    def cache(self, fname="as1755.p"):
-        pickle.dump(self, open(fname, 'wb'))
-
-    def compute_classes(self):
-        mtrie = trie.MultilevelTrie()
-        for switch in self.switches.values():
-            print "processing switch", switch.name, len(switch.ft)
-            for rule in switch.ft:
-                mtrie.addRule(rule)
-
-        print "total rules:", mtrie.primaryTrie.totalRuleCount
-        print "getting equivalence classes"
-        eqclasses = mtrie.getAllEquivalenceClasses()
-
-        print len(eqclasses)
-        print "getting forwarding graphs"
-        for ptrie, pclass in eqclasses:
-            idx = len(self._classes) + 1
-            graph = mtrie.getForwardingGraph(ptrie, pclass)
-            pc = PacketClass.fromForwardingGraph(graph, idx)
-            if pc is not None:
-                self._classes[idx] = pc
-
     def parse_switch_file(self, fname):
         switch = os.path.basename(fname)[1:]
-        print "parsing switch", switch
+        logger.debug("Parsing rules in switch {0}".format(switch))
         rules = []
         with open(fname) as f:
             for line in f.readlines():
@@ -511,7 +531,6 @@ class As1755Topo(Topology):
                         raise Exception("Error: inconsistency in wildcard")
 
                 if tokens[4] != switch:
-                    print fname, switch, tokens[4]
                     raise Exception("Location != switch name")
 
                 r = trie.Rule()
@@ -524,3 +543,39 @@ class As1755Topo(Topology):
                 rules.append(r)
 
         return (switch, rules)
+
+    def load_cached_classes(self, class_file_path):
+        self._classes = {}
+        files = [os.path.join(class_file_path, f) for f in
+                 os.listdir(class_file_path)]
+
+        for idx, fname in enumerate(files):
+            pc = PacketClass.fromFile(fname, idx+1)
+            self._classes[idx] = pc
+
+    @classmethod
+    def write_topo(cls, class_file_path, dest="as1755.topo"):
+        files = [os.path.join(class_file_path, f) for f in
+                 os.listdir(class_file_path)]
+
+        links = {}
+        for fname in files:
+            with open(fname) as f:
+                for line in f.readlines():
+                    tokens = line.split()
+                    if tokens[1] == tokens[2]:
+                        continue
+
+                    if tokens[1] not in links:
+                        links[tokens[1]] = []
+
+                    if tokens[2] not in links[tokens[1]]:
+                        links[tokens[1]].append(tokens[2])
+
+        s = []
+        for src, dsts in links.iteritems():
+            for dst in dsts:
+                s += "{0} {1}\n".format(src, dst)
+
+        with open(dest, 'w') as f:
+            f.writelines(s)
