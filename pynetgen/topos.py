@@ -90,7 +90,7 @@ class TfTopology(Topology):
                 r.priority = 1
 
                 # TODO: handle multipath
-                if len(nexthops) > 1:
+                if len(nexthops) > 0:
                     r.nextHop = nexthops[0]
 
                 nw_dst_match = rule['ip_dst_match']
