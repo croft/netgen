@@ -74,7 +74,7 @@ def node_diff(topo, subset, superset=None):
 
 # convert set difference expression (eg, N-s0) into regex disjunction
 def expand_regex(expr, topo, aliases):
-    matches = re.finditer(r"(\w+)\s*-\s*(\w+)",
+    matches = re.finditer(r"([\w\.]+)\s*-\s*([\w\.]+)",
                           expr,
                           re.IGNORECASE|re.MULTILINE)
     for m in matches:
@@ -363,6 +363,9 @@ class Specification(object):
         self.matched_classes = topo.match_classes(regex, self.sources)
         for c in self.matched_classes.keys():
             logger.debug("Matched packet class: %s", c)
+
+        logger.info("Total matched classes: {0}"
+                    .format(len(self.matched_classes)))
 
     def _parse_rhs(self, topo):
         regex = expand_regex(self.rhs, topo, self.aliases)
