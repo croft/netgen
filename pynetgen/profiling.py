@@ -32,14 +32,15 @@ class PerfCounter(object):
 
     def start(self):
         "Start recording execution time of an operation"
-        if is_profiled():
-            self.start_time = time.time()
+        self.start_time = time.time()
 
     def stop(self):
         "Stop recording execution time of an operation"
         if self.start_time is not None:
             self.time_ms = round((time.time() - self.start_time) * 1000, 3)
             self.report()
+
+        return self.time_ms
 
     def report(self):
         "Report the performance counter by adding it to the message queue"

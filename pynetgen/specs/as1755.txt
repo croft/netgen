@@ -1,0 +1,4 @@
+[aliases]
+
+[change]
+not match(ip_src=a.b.c.d); 10.0.0.234: .* 10.0.0.150 .* => (N-10.0.0.150)* od

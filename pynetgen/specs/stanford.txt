@@ -1,0 +1,4 @@
+[aliases]
+
+[change]
+not match(ip_src=a.b.c.d); coza_rtr: .* bbra_rtr .* => (N - bbra_rtr)* bbrb_rtr (N - bbra_rtr)* od

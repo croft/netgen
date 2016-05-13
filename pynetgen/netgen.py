@@ -8,18 +8,20 @@ import spec
 import synthesis
 from log import logger
 from network import NetworkConfig
+from profiling import ProfiledExecution
 from topos import (StanfordTopo, Internet2Topo,
                    FattreeTopo, DiamondTopo,
                    DiamondExtendedTopo, ThintreeTopo,
-                   SosrTopo)
+                   SosrTopo, As1755Topo)
 
-#"stanford" : StanfordTopo,
-#"internet2" : Internet2Topo,
-TOPOS = { "fattree" : FattreeTopo,
+TOPOS = { "stanford" : StanfordTopo,
+          "internet2" : Internet2Topo,
+          "fattree" : FattreeTopo,
           "diamond" : DiamondTopo,
           "diamondext" : DiamondExtendedTopo,
           "thintree" : ThintreeTopo,
-          "sosr" : SosrTopo
+          "sosr" : SosrTopo,
+          "as1755" : As1755Topo
       }
 
 CONFIGS = { "diamond" : NetworkConfig(egresses=['s4'],
@@ -65,6 +67,8 @@ def main():
                         help="Save files (packet classes, automata) for debugging")
     parser.add_argument("--verbose", "-v", dest="verbose", action="store_true",
                         help="Enable verbose log output")
+    parser.add_argument("--profile", "-p", dest="profile", action="store_true",
+                        help="Enable performance profiling")
 
     args = parser.parse_args()
 
@@ -87,8 +91,16 @@ def main():
         print "Specification file {0} does not exist!".format(args.spec)
         return
 
+    if args.profile:
+        pe = ProfiledExecution("netgen")
+        pe.start()
+
     topo = TOPOS[toponame](*topoargs)
-    topo.apply_config(CONFIGS[toponame])
+    if toponame in CONFIGS:
+        topo.apply_config(CONFIGS[toponame])
+
+    if toponame == "as1755":
+        topo.load_cached_classes("../data_set/RocketFuel/classes")
 
     s = spec.Specification.parseFile(topo, args.spec)
 
@@ -101,6 +113,10 @@ def main():
 
     solver = synthesis.Synthesizer(topo, s)
     solver.solve()
+
+    if args.profile:
+        pe.stop()
+        pe.print_summary()
 
 if __name__ == "__main__":
     main()
