@@ -47,6 +47,7 @@ class PacketClass(object):
         self.edges = {}
         self.graph = None
         self.rules = {}
+        self._powerset = None
 
     # TODO: one data structure for equivalence class/packet class
     @classmethod
@@ -80,6 +81,11 @@ class PacketClass(object):
         with open(fname) as f:
             for line in f.readlines():
                 tokens = line.split()
+
+                # skip self loops
+                if tokens[1] == tokens[2]:
+                    continue
+
                 if tokens[1] not in pc.edges:
                     pc.edges[tokens[1]] = []
 
@@ -122,9 +128,14 @@ class PacketClass(object):
         return dest
 
     def powerset_paths(self):
+        if self._powerset is not None:
+            return self._powerset
+
         def rec_construct_paths(paths, path, node):
             if node in path:
-                raise Exception("Loop in packet classes: {0}".format(path))
+                loop = path + [node]
+                raise Exception("Loop in packet classes {0}: {1}"
+                            .format(self.idx, loop))
 
             if node not in self.edges:
                 path.append(node)
@@ -141,6 +152,7 @@ class PacketClass(object):
         for source in self.edges.keys():
             paths = rec_construct_paths(paths, [], source)
 
+        self._powerset = paths
         return paths
 
     def construct_strings(self):
@@ -158,7 +170,7 @@ class PacketClass(object):
 
     def __str__(self):
         return "\n".join("{0} {1} {2}".format(self.idx, k,v)
-                         for k,v in self.edges.iteredges())
+                         for k,v in self.iteredges())
 
 class NetworkConfig(object):
     def __init__(self, paths=None, egresses=None, pathfunc=None, flowtable=None, params=None):
@@ -314,6 +326,10 @@ class Topology(object):
         # any switch connected to a host
         e = []
         for s in self.switches.keys():
+            # if digraph, switch might only have incoming edge
+            if s not in self.edges:
+                continue
+
             if len(self.edges[s]) == 1:
                 e.append(s)
                 continue
@@ -385,13 +401,13 @@ class Topology(object):
                 mtrie.addRule(rule)
 
         pc_rules.stop()
-        logger.debug("added {0} rules to trie"
+        logger.debug("Added {0} rules to trie"
                   .format(mtrie.primaryTrie.totalRuleCount))
 
         pc_eq.start()
         eqclasses = mtrie.getAllEquivalenceClasses()
         pc_eq.stop()
-        logger.debug("discovered {0} equivalence classes".format(len(eqclasses)))
+        logger.debug("Discovered {0} equivalence classes".format(len(eqclasses)))
 
         pc_fg.start()
         for ptrie, pclass in eqclasses:
@@ -442,7 +458,7 @@ class Topology(object):
 
             self.paths[dst][src] = path
 
-        logger.debug("added path {0}".format(path))
+        logger.debug("Added path {0}".format(path))
         return path
 
     def add_multihop_path(self, hops, bidirectional=False):
@@ -513,7 +529,7 @@ class Topology(object):
     def make_topofile(self, dest_dir, topofile="topo.txt"):
         out = []
         written = []
-        for src, dst in self.edges.iteredges():
+        for src, dst in self.iteredges():
             if (dst,src) not in written:
                 out.append("{0} {1}\n".format(dst, src))
                 written.append((src, dst))
@@ -532,7 +548,7 @@ class Topology(object):
             g.node(node)
 
         added = []
-        for src, dsts in self.edges.iteredges():
+        for src, dsts in self.iteredges():
             for dst in dsts:
                 if (src,dst) not in added:
                     g.edge(src, dst)
