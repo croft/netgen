@@ -77,3 +77,6 @@ class testSosr(unittest.TestCase):
         spec = "match(tcp_src_port=80); A,B,C: .* F1 .* => (N-F1)* F2 (N-F1)* od NM:{F1,F2}"
         expected = [('Y', 'Z'), ('B', 'F2'), ('C', 'F2'), ('A', 'F2')]
         runSynthesis(SosrTopo(), config, spec, expected)
+
+if __name__ == "__main__":
+    unittest.main()

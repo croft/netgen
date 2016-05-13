@@ -42,3 +42,16 @@ class testSpecification(unittest.TestCase):
 
         with self.assertRaises(Exception):
             expanded = expand_regex("FW2-s1", topo, aliases)
+
+    def testRegexExpansionIpNaming(self):
+        class FakeTopo(object):
+            def __init__(self, sw):
+                self.switches = dict((k, None) for k in sw)
+
+        aliases = { 'N' : ['10.0.0.1', '10.0.0.150']}
+        topo = FakeTopo(aliases['N'])
+        expanded = expand_regex("(N-10.0.0.150)*", topo, aliases)
+        assert expanded == "(10.0.0.1)*"
+
+if __name__ == "__main__":
+    unittest.main()

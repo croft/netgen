@@ -48,3 +48,6 @@ class testTrie(unittest.TestCase):
 
             eqclasses = tr.getAllEquivalenceClasses()
             assert len(eqclasses) == numclasses
+
+if __name__ == "__main__":
+    unittest.main()

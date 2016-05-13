@@ -20,3 +20,6 @@ class testPacketClass(unittest.TestCase):
         assert len(paths) == len(expected)
         for e in expected:
             assert e in paths
+
+if __name__ == "__main__":
+    unittest.main()
