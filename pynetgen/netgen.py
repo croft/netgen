@@ -12,7 +12,7 @@ from profiling import ProfiledExecution
 from topos import (StanfordTopo, Internet2Topo,
                    FattreeTopo, DiamondTopo,
                    DiamondExtendedTopo, ThintreeTopo,
-                   SosrTopo, As1755Topo)
+                   SosrTopo, As1755Topo, DiamondClusterTopo)
 
 TOPOS = { "stanford" : StanfordTopo,
           "internet2" : Internet2Topo,
@@ -21,7 +21,8 @@ TOPOS = { "stanford" : StanfordTopo,
           "diamondext" : DiamondExtendedTopo,
           "thintree" : ThintreeTopo,
           "sosr" : SosrTopo,
-          "as1755" : As1755Topo
+          "as1755" : As1755Topo,
+          "cluster" : DiamondClusterTopo
       }
 
 CONFIGS = { "diamond" : NetworkConfig(egresses=['s4'],
@@ -41,7 +42,10 @@ CONFIGS = { "diamond" : NetworkConfig(egresses=['s4'],
                                               ('C', '10.0.1.1', 'Z', 'F1'),
                                               ('F1', '10.0.1.1', 'Z', 'X'),
                                               ('X', '10.0.1.1', 'Z', 'Z'),
-                                              ('F2', '10.0.1.1', 'Z', 'Y')])
+                                              ('F2', '10.0.1.1', 'Z', 'Y')]),
+            "cluster" : NetworkConfig(egresses=['Dst'],
+                                      paths=[('Src', 'Dst',
+                                              ['Src', 's14', 'Core', 's15', 'Dst'])])
         }
 
 def main():

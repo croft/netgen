@@ -10,7 +10,8 @@ from network import NetworkConfig
 from spec import Specification
 from synthesis import Synthesizer
 from topos import (DiamondTopo, DiamondExtendedTopo,
-                   ThintreeTopo, FattreeTopo, SosrTopo)
+                   ThintreeTopo, FattreeTopo, SosrTopo,
+                   DiamondClusterTopo)
 
 def runSynthesis(topo, config, spec, expected):
     topo.apply_config(config)
@@ -77,6 +78,17 @@ class testSosr(unittest.TestCase):
         spec = "match(tcp_src_port=80); A,B,C: .* F1 .* => (N-F1)* F2 (N-F1)* od NM:{F1,F2}"
         expected = [('Y', 'Z'), ('B', 'F2'), ('C', 'F2'), ('A', 'F2')]
         runSynthesis(SosrTopo(), config, spec, expected)
+
+
+class testCluster(unittest.TestCase):
+
+    def testCluster(self):
+        config = NetworkConfig(egresses=['Dst'],
+                               paths=[('Src', 'Dst',
+                                       ['Src', 's14', 'Core', 's15', 'Dst'])])
+        spec = "not match(ip_src=a.b.c.d); Src: .* Core .* => N* Fw1 N* od"
+        expected = [('Fw1', 's18'), ('Core', 'Fw1'), ('s18', 's15')]
+        runSynthesis(DiamondClusterTopo(), config, spec, expected)
 
 if __name__ == "__main__":
     unittest.main()
