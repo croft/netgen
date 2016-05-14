@@ -131,6 +131,10 @@ class FSA(object):
                 self.renameCount += 1
                 dfa.renameState(i, self.renameCount)
 
+        if 0 not in dfa.States:
+            logger.warning("Dead state not in FSA, adding")
+            dfa.addState(0)
+
         # add transitions: (dead, any, dead)
         for i in range(len(dfa.States)):
             dfa.addTransition(i, 0, dfa.stateIndex(0))
