@@ -95,13 +95,11 @@ class PacketClass(object):
         return pc
 
     def iteredges(self):
-        e = []
         for src, dsts in self.edges.iteritems():
             if not isinstance(dsts, list):
-                dsts = [dsts]
+                raise Exception("Invalid edge type: expect key -> list")
             for dst in dsts:
-                e.append((src, dst))
-        return e
+                yield (src, dst)
 
     def original_dest(self, topo, sources=None):
         if sources is None:
@@ -473,13 +471,11 @@ class Topology(object):
         return self.add_path(hops[0], hops[-1], path, bidirectional)
 
     def iteredges(self):
-        e = []
         for src, dsts in self.edges.iteritems():
             if not isinstance(dsts, list):
-                dsts = [dsts]
+                raise Exception("Invalid edge type: expect key -> list")
             for dst in dsts:
-                e.append((src, dst))
-        return e
+                yield (src, dst)
 
     def to_networkx(self):
         if self.graph is not None:
@@ -548,11 +544,10 @@ class Topology(object):
             g.node(node)
 
         added = []
-        for src, dsts in self.iteredges():
-            for dst in dsts:
-                if (src,dst) not in added:
-                    g.edge(src, dst)
-                    added.append((dst, src))
+        for src, dst in self.iteredges():
+            if (src,dst) not in added:
+                g.edge(src, dst)
+                added.append((dst, src))
 
         g.render(os.path.join(dest_dir, graphfile))
 
