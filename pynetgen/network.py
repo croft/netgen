@@ -4,6 +4,7 @@ import graphviz
 import itertools
 import networkx
 import os
+import cPickle as pickle
 import re
 
 import trie
@@ -46,15 +47,17 @@ class PacketClass(object):
         self.idx = idx
         self.edges = {}
         self.graph = None
+        self.eqclass = None
         self.rules = {}
         self._powerset = None
 
     # TODO: one data structure for equivalence class/packet class
     @classmethod
-    def fromForwardingGraph(cls, fg, idx=0):
+    def fromForwardingGraph(cls, eqclass, fg, idx=0):
         classes = []
         pc = PacketClass(idx=idx)
         pc.graph = fg
+        pc.eqclass = eqclass
 
         for name, links in fg.links.iteritems():
             if name not in pc.edges:
@@ -411,7 +414,7 @@ class Topology(object):
         for ptrie, pclass in eqclasses:
             idx = len(self._classes) + 1
             graph = mtrie.getForwardingGraph(ptrie, pclass)
-            pc = PacketClass.fromForwardingGraph(graph, idx)
+            pc = PacketClass.fromForwardingGraph(pclass, graph, idx)
             if pc is not None:
                 self._classes[idx] = pc
 
@@ -556,3 +559,17 @@ class Topology(object):
         self.make_rocketfile(data_dir)
         self.make_graph(data_dir)
         self.make_configmap(data_dir)
+
+    def serialize(self, outfile=None):
+        if outfile is None:
+            outfile = "{0}.p".format(self.__class__.__name__)
+
+        pickle.dump(self, open(outfile, 'wb'))
+
+    @classmethod
+    def deserialize(cls, infile=None):
+        if infile is None:
+            outfile = "{0}.p".format(self.__class__.__name__)
+
+        topo = pickle.load(open(outfile, 'rb'))
+        return topo
