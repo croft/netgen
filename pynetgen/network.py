@@ -569,7 +569,7 @@ class Topology(object):
     @classmethod
     def deserialize(cls, infile=None):
         if infile is None:
-            outfile = "{0}.p".format(self.__class__.__name__)
+            infile = "{0}.p".format(self.__class__.__name__)
 
-        topo = pickle.load(open(outfile, 'rb'))
+        topo = pickle.load(open(infile, 'rb'))
         return topo
