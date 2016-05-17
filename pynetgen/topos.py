@@ -58,7 +58,7 @@ class TfTopology(Topology):
                                     self.router.OUTPUT_PORT_TYPE_CONST)
 
         for tf in self.ntf.tf_list:
-            ofg = OpenFlow_Rule_Generator( tf, self.router.HS_FORMAT())
+            ofg = OpenFlow_Rule_Generator(tf, self.router.HS_FORMAT())
             rules = ofg.generate_of_rules()
             swname = tf.prefix_id
 

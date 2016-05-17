@@ -160,11 +160,19 @@ class PacketClass(object):
         return [" ".join(path) for path in self.powerset_paths()]
 
     def to_networkx(self):
-        g = networkx.Graph()
+        g = networkx.DiGraph()
         for m, n in self.iteredges():
             g.add_edge(m, n)
 
         return g
+
+    def check_loops(self):
+        g = self.to_networkx()
+        return list(networkx.simple_cycles(g))
+
+    def check_connectivity(self):
+        g = self.to_networkx()
+        return networkx.is_weakly_connected(g)
 
     def __repr__(self):
         return str(self)
@@ -559,6 +567,34 @@ class Topology(object):
         self.make_rocketfile(data_dir)
         self.make_graph(data_dir)
         self.make_configmap(data_dir)
+
+    def serialize_classes(self, outdir="classes"):
+        if not os.path.isdir(outdir):
+            logger.debug("Serialized class directory {0} does not exist, "
+                         "creating".format(outdir))
+            os.makedirs(outdir)
+
+        for pcid, pc in self.classes.iteritems():
+            logger.debug("Serializing packet class {0}".format(pcid))
+            fname = os.path.join(outdir, "{0}.p".format(pcid))
+            pickle.dump(pc, open(fname, 'wb'))
+
+    def deserialize_classes(self, indir="classes"):
+        if not os.path.isdir(indir):
+            raise Exception("Serialized class directory {0} does not exist!"
+                            .format(indir))
+
+        self._classes = {}
+        files = [os.path.join(indir, f) for f in
+                 os.listdir(indir)]
+        for f in files:
+            try:
+                pcid = os.path.splitext(os.path.basename(f))[0]
+                pcid = int(pcid)
+                pc = pickle.load(open(f, 'rb'))
+                self._classes[pcid] = pc
+            except Exception, e:
+                logger.warning("Could not deserialize file {0}".format(f))
 
     def serialize(self, outfile=None):
         if outfile is None:
