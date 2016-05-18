@@ -473,10 +473,12 @@ def mp_parse_switch((topo, fname)):
     return topo.parse_switch_file(fname)
 
 class As1755Topo(Topology):
-    def __init__(self, mp=True, mp_procs=12):
+    def __init__(self, mp=True, mp_procs=12, no_ft=False):
         super(As1755Topo, self).__init__()
         path = "../data_set/RocketFuel/AS-1755"
-        self.read_flowtable(path, mp, mp_procs)
+
+        if not no_ft:
+            self.read_flowtable(path, mp, mp_procs)
         self.read_links(path)
 
     def read_links(self, path):

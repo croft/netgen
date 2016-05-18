@@ -48,7 +48,6 @@ class PacketClass(object):
         self.edges = {}
         self.graph = None
         self.eqclass = None
-        self.rules = {}
         self._powerset = None
 
     # TODO: one data structure for equivalence class/packet class
@@ -579,7 +578,7 @@ class Topology(object):
             fname = os.path.join(outdir, "{0}.p".format(pcid))
             pickle.dump(pc, open(fname, 'wb'))
 
-    def deserialize_classes(self, indir="classes"):
+    def deserialize_classes(self, indir="classes", limit=None):
         if not os.path.isdir(indir):
             raise Exception("Serialized class directory {0} does not exist!"
                             .format(indir))
@@ -587,6 +586,10 @@ class Topology(object):
         self._classes = {}
         files = [os.path.join(indir, f) for f in
                  os.listdir(indir)]
+
+        if limit is not None and len(files) > limit:
+            files = files[:limit]
+
         for f in files:
             try:
                 pcid = os.path.splitext(os.path.basename(f))[0]
