@@ -48,6 +48,7 @@ class PacketClass(object):
         self.edges = {}
         self.graph = None
         self.eqclass = None
+        self.rules = {}
         self._powerset = None
 
     # TODO: one data structure for equivalence class/packet class
