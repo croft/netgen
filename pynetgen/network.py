@@ -43,66 +43,33 @@ def ft2rules(loc, ft):
         yield r
 
 class PacketClass(object):
-    def __init__(self, idx=None):
+    def __init__(self, fwd_graph, eqclass, idx=0):
+        self.graph = fwd_graph
+        self.eqclass = eqclass
         self.idx = idx
-        self.edges = {}
-        self.graph = None
-        self.eqclass = None
-        self.rules = {}
         self._powerset = None
 
-    # TODO: one data structure for equivalence class/packet class
-    @classmethod
-    def fromForwardingGraph(cls, eqclass, fg, idx=0):
-        classes = []
-        pc = PacketClass(idx=idx)
-        pc.graph = fg
-        pc.eqclass = eqclass
+    @property
+    def edges(self):
+        e = {}
+        for m, n in self.iteredges():
+            if m not in e:
+                e[m] = []
+            e[m].append(n)
 
-        for name, links in fg.links.iteritems():
-            if name not in pc.edges:
-                pc.edges[name] = []
-
-            for link in links:
-                pc.edges[name].append(link.rule.nextHop)
-
-                f = FlowEntry.fromTrieRule(link.rule)
-                if f.location not in pc.rules:
-                    pc.rules[f.location] = {}
-
-                for nexthop in f.nexthops:
-                    pc.rules[f.location][nexthop] = f
-
-        if len(pc.edges) == 0:
-            return None
-
-        return pc
-
-    @classmethod
-    def fromFile(cls, fname, idx):
-        pc = PacketClass(idx=idx)
-        with open(fname) as f:
-            for line in f.readlines():
-                tokens = line.split()
-
-                # skip self loops
-                if tokens[1] == tokens[2]:
-                    continue
-
-                if tokens[1] not in pc.edges:
-                    pc.edges[tokens[1]] = []
-
-                if tokens[2] not in pc.edges[tokens[1]]:
-                    pc.edges[tokens[1]].append(tokens[2])
-
-        return pc
+        return e
 
     def iteredges(self):
-        for src, dsts in self.edges.iteritems():
-            if not isinstance(dsts, list):
-                raise Exception("Invalid edge type: expect key -> list")
-            for dst in dsts:
-                yield (src, dst)
+        for location, links in self.graph.links.iteritems():
+            for link in links:
+                yield location, link.rule.nextHop
+
+    def to_networkx(self):
+        g = networkx.DiGraph()
+        for m, n in self.iteredges():
+            g.add_edge(m, n)
+
+        return g
 
     def original_dest(self, topo, sources=None):
         if sources is None:
@@ -158,13 +125,6 @@ class PacketClass(object):
 
     def construct_strings(self):
         return [" ".join(path) for path in self.powerset_paths()]
-
-    def to_networkx(self):
-        g = networkx.DiGraph()
-        for m, n in self.iteredges():
-            g.add_edge(m, n)
-
-        return g
 
     def check_loops(self):
         g = self.to_networkx()
@@ -350,6 +310,12 @@ class Topology(object):
 
         return e
 
+    def get_pc_ingress(self, pc):
+        raise Exception("not implemented")
+
+    def get_pc_egress(self, pc):
+        raise Exception("not implemented")
+
     def is_directed(self):
         if self.graph is None:
             return False
@@ -422,8 +388,8 @@ class Topology(object):
         for ptrie, pclass in eqclasses:
             idx = len(self._classes) + 1
             graph = mtrie.getForwardingGraph(ptrie, pclass)
-            pc = PacketClass.fromForwardingGraph(pclass, graph, idx)
-            if pc is not None:
+            if len(graph.links) > 0:
+                pc = PacketClass(graph, pclass, idx)
                 self._classes[idx] = pc
 
         pc_fg.stop()

@@ -32,6 +32,12 @@ class TfTopology(Topology):
         self.router = router(1)
         self.edge_ports = set()
         self.intfs = {}
+        edge_port_ips = {}
+        start_ip = ip2int("10.0.0.1")
+
+        # keys (ports) should be ints
+        self.port_reverse_map = dict((int(k), v) for (k, v) in
+                                     self.port_reverse_map.iteritems())
 
         for rtr1, intf1, rtr2, intf2 in self.definition:
             if rtr1 not in self.intfs:
@@ -57,6 +63,9 @@ class TfTopology(Topology):
                                     self.router.PORT_TYPE_MULTIPLIER *
                                     self.router.OUTPUT_PORT_TYPE_CONST)
 
+        for port in sorted(self.edge_ports):
+            edge_port_ips[port] = int2ip(start_ip + len(edge_port_ips))
+
         for tf in self.ntf.tf_list:
             ofg = OpenFlow_Rule_Generator(tf, self.router.HS_FORMAT())
             rules = ofg.generate_of_rules()
@@ -71,10 +80,10 @@ class TfTopology(Topology):
 
                 for port in outports:
                     if port in self.edge_ports:
-                        # TODO
+                        nexthops.append(edge_port_ips[port])
                         pass
                     else:
-                        p = str(port - self.router.PORT_TYPE_MULTIPLIER)
+                        p = port - self.router.PORT_TYPE_MULTIPLIER
                         if p in self.port_reverse_map.keys():
                             portname = self.port_reverse_map[p].split("-")[1]
                             if portname in self.intfs[location].keys():
@@ -103,10 +112,17 @@ class TfTopology(Topology):
                 r.fieldValue[HeaderField.Index["NW_SRC"]] = nw_src_match
                 r.fieldMask[HeaderField.Index["NW_SRC"]] = nw_src_wc
 
+                # filter inports - only add edge inports
+                inports = [(p + router.PORT_TYPE_MULTIPLIER) for p
+                           in rule['in_ports']
+                           if (p + router.PORT_TYPE_MULTIPLIER)
+                           in self.edge_ports]
+
+                if len(inports) > 0:
+                    r.fieldValue[HeaderField.Index["IN_PORT"]] = sorted(inports)[0]
+
                 # TODO: handle vlan rewrite?
                 # r.fieldValue[HeaderField.Index["DL_VLAN"]] = rule['vlan_match']
-                # r.fieldValue[HeaderField.Index["IN_PORT"]] = rule['in_ports']
-
                 # flow = FlowEntry(dest=dest,
                 #                  wildcard=wc,
                 #                  location=location,
@@ -118,6 +134,27 @@ class TfTopology(Topology):
                 if len(nexthops) > 0:
                     # self.switches[swname].ft.append(flow)
                     self.switches[swname].ft.append(r)
+
+    def get_pc_ingress(self, pc):
+        ingress = []
+        for location, links in pc.graph.links.iteritems():
+            for link in links:
+                inport = link.rule.fieldValue[HeaderField.Index["IN_PORT"]]
+                if inport in self.edge_ports:
+                    ingress.append(location)
+                    break
+
+        return ingress
+
+    def get_pc_egress(self, pc):
+        egress = []
+        for location, links in pc.graph.links.iteritems():
+            for link in links:
+                if link.rule.nextHop not in self.nodes:
+                    egress.append(location)
+                    break
+
+        return egress
 
 class Internet2Topo(TfTopology):
     Definition = [("chic","xe-0/1/0","newy32aoa","xe-0/1/3"), #05667
@@ -545,15 +582,6 @@ class As1755Topo(Topology):
                 rules.append(r)
 
         return (switch, rules)
-
-    def load_cached_classes(self, class_file_path):
-        self._classes = {}
-        files = [os.path.join(class_file_path, f) for f in
-                 os.listdir(class_file_path)]
-
-        for idx, fname in enumerate(files):
-            pc = PacketClass.fromFile(fname, idx+1)
-            self._classes[idx] = pc
 
     @classmethod
     def write_topo(cls, class_file_path, dest="as1755.topo"):
