@@ -14,6 +14,7 @@
 
 using namespace std;
 namespace py = boost::python;
+using namespace z3;
 
 
 // -----------------------------------------------------------------------------
@@ -160,21 +161,21 @@ AbstractNetwork::AbstractNetwork(py::list _nodes,
     n1.abstract_source_nodes[1] = pylist_to_set<int>(_sources);
     n1.abstract_pc_map["1"] = 1; 
     
-    std::cout << "\n\nNetwork";
-    std::cout << "\nNodes : " << n1.abstract_nodes;
-    std::cout << "\nTopology : " << n1.abstract_topology;
-    std::cout << "\nRules : " << n1.abstract_rules;
-    std::cout << "\nImmutable Nodes : " << n1.abstract_immutable_nodes[1];
-    std::cout << "\nEgress Nodes : " << n1.abstract_egress_nodes[1];
-    std::cout << "\nSource Nodes : " << n1.abstract_source_nodes[1];
-    
-    std::cout << "\n\nAutomata";
-    std::cout << "\nStates : " << a1.states; 
-    std::cout << "\nSymbols : " << a1.symbols; 
-    std::cout << "\nTransitions : " << a1.transitions; 
-    std::cout << "\nFinal States : " << a1.final_states; 
-    std::cout << "\nStart State : " << a1.start_state; 
-    std::cout << "\nDead State : " << a1.dead_state; 
+    // std::cout << "\n\nNetwork";
+    // std::cout << "\nNodes : " << n1.abstract_nodes;
+    // std::cout << "\nTopology : " << n1.abstract_topology;
+    // std::cout << "\nRules : " << n1.abstract_rules;
+    // std::cout << "\nImmutable Nodes : " << n1.abstract_immutable_nodes[1];
+    // std::cout << "\nEgress Nodes : " << n1.abstract_egress_nodes[1];
+    // std::cout << "\nSource Nodes : " << n1.abstract_source_nodes[1];
+    // 
+    // std::cout << "\n\nAutomata";
+    // std::cout << "\nStates : " << a1.states; 
+    // std::cout << "\nSymbols : " << a1.symbols; 
+    // std::cout << "\nTransitions : " << a1.transitions; 
+    // std::cout << "\nFinal States : " << a1.final_states; 
+    // std::cout << "\nStart State : " << a1.start_state; 
+    // std::cout << "\nDead State : " << a1.dead_state; 
 
 }
 
@@ -200,7 +201,8 @@ CPPSolver::CPPSolver(AbstractNetwork _network) {
 
 
 
-py::list CPPSolver::solve() {
+py::list CPPSolver::solve() 
+{
     py::list ret;
 
     try
@@ -209,7 +211,7 @@ py::list CPPSolver::solve() {
         std::cout << "\n\nOriginal Destination : " << network.n1.abstract_od; 
         
 
-        for(int k=1; k <= 2  ; k++)//n1.abstract_nodes.size()
+        for(int k=1; k <= network.n1.abstract_nodes.size() ; k++)
         {
             cout << "\n\n Phase " << k << "\n";  
             context ctx;
@@ -223,8 +225,7 @@ py::list CPPSolver::solve() {
             s1.delta_satisfies_not_egress();
             s1.delta_satisfies_not_existing(); 
           
-            s1.print_query(); 
-            
+                        
             func_decl cycle = z3::function("cycle", ctx.int_sort(), ctx.int_sort(), ctx.int_sort()); 
             s1.execute_recursive(Cyclicity(ctx,cycle));
             
@@ -240,39 +241,37 @@ py::list CPPSolver::solve() {
             s1.execute_recursive(Modified_Functionality(ctx,rho,delta,network.a1,network.n1.abstract_nodes));   
             s1.accept_automata(rho,network.a1);
             
-            
-            
+            //s1.print_query(); 
+
             Z3_model m = s1.solve_z3();
             if(m)
             {
                 model m1(ctx, m);
-                cout << "\n\nModel\n" << m1;
-                break;
+                //cout << "\n\nModel\n" << m1;
+                
+                for( int index = 1; index <= k ; index++)
+                {
+                    int from = m1.eval(s1.n[index]);
+                    int to =  m1.eval(s1.n1[index]); 
+                    ret.append(py::make_tuple(from, to));
+                }    
+                
+                return ret;
+                
             }
         }
 
     }
     catch(...)  
-    {   std::cout << "Exception Caught";
+    {   std::cout << "\nException Caught\n";
+        return ret;
     }
         
+    return ret;    
         
-
-    // cout << "IN solve module";
-    // cout << "Solver:solve() was invoked" << endl;
-    // // add code here
-    // cout << network.topology;
-    // // << "\n" << network.nodes << "\n" << network.sources << "\n" << network.egresses << "\n" << network.immutables << "\n" << network.classes 
-    // cout     << "\n" << network.fsa << "\n" << network.symbols << "\n" << network.states << "\n" << network.finals << "\n" << network.initial ; 
-    // cout     << "\n" << network.dead << "\n" ; 
-         
-    
-    
-    ret.append(py::make_tuple(1, 2));
-    return ret;
 }
 
-BOOST_PYTHON_MODULE(solver){
+BOOST_PYTHON_MODULE(cppsolver){
     py::class_<AbstractNetwork>("AbstractNetwork",
 				py::init<py::list,
 				py::list,

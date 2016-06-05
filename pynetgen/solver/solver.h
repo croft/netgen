@@ -32,7 +32,7 @@ class Network;
 
 class Solver
 {
-private:
+public:
 	int k; 
 	int num_nodes;
 	int num_pc;
@@ -48,7 +48,7 @@ private:
 	Z3_model model;
 	check_result status; 
 
-public:
+
 	Solver(context & ctx_i, Network &n_i, int k_i) :
 	ctx(ctx_i), network(n_i), k{k_i} , n(ctx), pc(ctx), n1(ctx), query(ctx)
 	{
