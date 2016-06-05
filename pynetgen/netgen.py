@@ -103,8 +103,9 @@ def main():
     if toponame in CONFIGS:
         topo.apply_config(CONFIGS[toponame])
 
-    if toponame == "as1755":
-        topo.load_cached_classes("../data_set/RocketFuel/classes")
+    # TODO: new way to load classes
+    # if toponame == "as1755":
+    #     topo.load_cached_classes("../data_set/RocketFuel/classes")
 
     s = spec.Specification.parseFile(topo, args.spec)
 
