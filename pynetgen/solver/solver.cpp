@@ -208,12 +208,12 @@ py::list CPPSolver::solve()
     try
     {
         network.n1.Compute_OD();
-        std::cout << "\n\nOriginal Destination : " << network.n1.abstract_od; 
+        //std::cout << "\n\nOriginal Destination : " << network.n1.abstract_od; 
         
 
         for(int k=1; k <= network.n1.abstract_nodes.size() ; k++)
         {
-            cout << "\n\n Phase " << k << "\n";  
+            cout << "\n\nPhase " << k << "\n";  
             context ctx;
             
             
