@@ -249,10 +249,13 @@ py::list CPPSolver::solve()
                 model m1(ctx, m);
                 //cout << "\n\nModel\n" << m1;
                 
-                for( int index = 1; index <= k ; index++)
-                {
-                    int from = m1.eval(s1.n[index]);
-                    int to =  m1.eval(s1.n1[index]); 
+                for( int index = 0; index < k ; index++)
+                {   
+                    //cout << "\n" << s1.n[index] << " -> " << s1.n1[index] ; 
+                    int from, to;
+                    Z3_get_numeral_int(ctx, m1.eval(s1.n[index], true), &from);
+                    Z3_get_numeral_int(ctx, m1.eval(s1.n1[index], true), &to);
+                    
                     ret.append(py::make_tuple(from, to));
                 }    
                 
