@@ -1,0 +1,15 @@
+1192 bozb_rtr bbra_rtr
+1192 yoza_rtr yozb_rtr
+1192 cozb_rtr bbra_rtr
+1192 coza_rtr bbra_rtr
+1192 pozb_rtr bbra_rtr
+1192 roza_rtr bbra_rtr
+1192 gozb_rtr goza_rtr
+1192 boza_rtr bbra_rtr
+1192 goza_rtr gozb_rtr
+1192 yozb_rtr bbra_rtr
+1192 soza_rtr bbra_rtr
+1192 sozb_rtr bbra_rtr
+1192 bbrb_rtr bbra_rtr
+1192 rozb_rtr bbra_rtr
+1192 poza_rtr bbra_rtr

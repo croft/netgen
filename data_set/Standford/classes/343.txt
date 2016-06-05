@@ -1,0 +1,16 @@
+343 bozb_rtr bbra_rtr
+343 bbra_rtr pozb_rtr
+343 yoza_rtr yozb_rtr
+343 cozb_rtr bbra_rtr
+343 coza_rtr bbra_rtr
+343 pozb_rtr bbra_rtr
+343 roza_rtr bbra_rtr
+343 gozb_rtr goza_rtr
+343 boza_rtr bbra_rtr
+343 goza_rtr gozb_rtr
+343 yozb_rtr bbra_rtr
+343 soza_rtr bbra_rtr
+343 sozb_rtr bbra_rtr
+343 bbrb_rtr pozb_rtr
+343 rozb_rtr bbra_rtr
+343 poza_rtr bbra_rtr

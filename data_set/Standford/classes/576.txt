@@ -1,0 +1,16 @@
+576 bozb_rtr bbra_rtr
+576 bbra_rtr pozb_rtr
+576 yoza_rtr yozb_rtr
+576 cozb_rtr bbra_rtr
+576 coza_rtr bbra_rtr
+576 pozb_rtr bbra_rtr
+576 roza_rtr bbra_rtr
+576 gozb_rtr goza_rtr
+576 boza_rtr bbra_rtr
+576 goza_rtr gozb_rtr
+576 yozb_rtr bbra_rtr
+576 soza_rtr bbra_rtr
+576 sozb_rtr bbra_rtr
+576 bbrb_rtr pozb_rtr
+576 rozb_rtr bbra_rtr
+576 poza_rtr bbra_rtr

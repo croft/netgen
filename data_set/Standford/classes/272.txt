@@ -1,0 +1,16 @@
+272 bozb_rtr bbra_rtr
+272 bbra_rtr yoza_rtr
+272 yoza_rtr yozb_rtr
+272 cozb_rtr bbra_rtr
+272 coza_rtr bbra_rtr
+272 pozb_rtr bbra_rtr
+272 roza_rtr bbra_rtr
+272 gozb_rtr goza_rtr
+272 boza_rtr bbra_rtr
+272 goza_rtr gozb_rtr
+272 yozb_rtr yoza_rtr
+272 soza_rtr bbra_rtr
+272 sozb_rtr bbra_rtr
+272 bbrb_rtr yoza_rtr
+272 rozb_rtr bbra_rtr
+272 poza_rtr bbra_rtr

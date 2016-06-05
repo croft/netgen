@@ -1,0 +1,16 @@
+784 bozb_rtr bbra_rtr
+784 bbra_rtr sozb_rtr
+784 yoza_rtr yozb_rtr
+784 cozb_rtr coza_rtr
+784 coza_rtr cozb_rtr
+784 pozb_rtr bbra_rtr
+784 roza_rtr bbra_rtr
+784 gozb_rtr goza_rtr
+784 boza_rtr bbra_rtr
+784 goza_rtr gozb_rtr
+784 yozb_rtr bbra_rtr
+784 soza_rtr bbra_rtr
+784 sozb_rtr bbra_rtr
+784 bbrb_rtr sozb_rtr
+784 rozb_rtr bbra_rtr
+784 poza_rtr bbra_rtr

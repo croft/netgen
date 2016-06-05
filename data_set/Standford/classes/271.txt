@@ -1,0 +1,16 @@
+271 bozb_rtr bbra_rtr
+271 bbra_rtr yoza_rtr
+271 yoza_rtr yozb_rtr
+271 cozb_rtr bbra_rtr
+271 coza_rtr bbra_rtr
+271 pozb_rtr bbra_rtr
+271 roza_rtr bbra_rtr
+271 gozb_rtr goza_rtr
+271 boza_rtr bbra_rtr
+271 goza_rtr gozb_rtr
+271 yozb_rtr yoza_rtr
+271 soza_rtr bbra_rtr
+271 sozb_rtr bbra_rtr
+271 bbrb_rtr yoza_rtr
+271 rozb_rtr bbra_rtr
+271 poza_rtr bbra_rtr

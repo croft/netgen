@@ -1,0 +1,16 @@
+647 bozb_rtr bbra_rtr
+647 bbra_rtr soza_rtr
+647 yoza_rtr yozb_rtr
+647 cozb_rtr bbra_rtr
+647 coza_rtr bbra_rtr
+647 pozb_rtr poza_rtr
+647 roza_rtr bbra_rtr
+647 gozb_rtr goza_rtr
+647 boza_rtr bbra_rtr
+647 goza_rtr gozb_rtr
+647 yozb_rtr bbra_rtr
+647 soza_rtr bbra_rtr
+647 sozb_rtr bbra_rtr
+647 bbrb_rtr soza_rtr
+647 rozb_rtr bbra_rtr
+647 poza_rtr pozb_rtr

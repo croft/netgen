@@ -1,0 +1,16 @@
+643 bozb_rtr bbra_rtr
+643 bbra_rtr soza_rtr
+643 yoza_rtr yozb_rtr
+643 cozb_rtr bbra_rtr
+643 coza_rtr bbra_rtr
+643 pozb_rtr poza_rtr
+643 roza_rtr bbra_rtr
+643 gozb_rtr goza_rtr
+643 boza_rtr bbra_rtr
+643 goza_rtr gozb_rtr
+643 yozb_rtr bbra_rtr
+643 soza_rtr bbra_rtr
+643 sozb_rtr bbra_rtr
+643 bbrb_rtr soza_rtr
+643 rozb_rtr bbra_rtr
+643 poza_rtr bbra_rtr

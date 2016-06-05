@@ -1,0 +1,16 @@
+657 bozb_rtr bbra_rtr
+657 bbra_rtr yoza_rtr
+657 yoza_rtr yozb_rtr
+657 cozb_rtr bbra_rtr
+657 coza_rtr bbra_rtr
+657 pozb_rtr bbra_rtr
+657 roza_rtr bbra_rtr
+657 gozb_rtr goza_rtr
+657 boza_rtr bbra_rtr
+657 goza_rtr gozb_rtr
+657 yozb_rtr yoza_rtr
+657 soza_rtr bbra_rtr
+657 sozb_rtr bbra_rtr
+657 bbrb_rtr yoza_rtr
+657 rozb_rtr bbra_rtr
+657 poza_rtr bbra_rtr

@@ -1,0 +1,16 @@
+695 bozb_rtr bbra_rtr
+695 bbra_rtr soza_rtr
+695 yoza_rtr yozb_rtr
+695 cozb_rtr bbra_rtr
+695 coza_rtr bbra_rtr
+695 pozb_rtr bbra_rtr
+695 roza_rtr bbra_rtr
+695 gozb_rtr goza_rtr
+695 boza_rtr bbra_rtr
+695 goza_rtr gozb_rtr
+695 yozb_rtr bbra_rtr
+695 soza_rtr bbra_rtr
+695 sozb_rtr bbra_rtr
+695 bbrb_rtr soza_rtr
+695 rozb_rtr bbra_rtr
+695 poza_rtr bbra_rtr

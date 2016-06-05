@@ -1,0 +1,15 @@
+479 bozb_rtr bbra_rtr
+479 yoza_rtr yozb_rtr
+479 cozb_rtr bbra_rtr
+479 coza_rtr bbra_rtr
+479 pozb_rtr bbra_rtr
+479 roza_rtr bbra_rtr
+479 gozb_rtr goza_rtr
+479 boza_rtr bbra_rtr
+479 goza_rtr gozb_rtr
+479 yozb_rtr bbra_rtr
+479 soza_rtr bbra_rtr
+479 sozb_rtr bbra_rtr
+479 bbrb_rtr bbra_rtr
+479 rozb_rtr bbra_rtr
+479 poza_rtr bbra_rtr

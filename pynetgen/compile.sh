@@ -1,0 +1,1 @@
+cd solver/ ; make clean ; make all ; cd ..

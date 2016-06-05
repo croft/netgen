@@ -1,0 +1,16 @@
+745 bozb_rtr bbra_rtr
+745 bbra_rtr sozb_rtr
+745 yoza_rtr yozb_rtr
+745 cozb_rtr coza_rtr
+745 coza_rtr cozb_rtr
+745 pozb_rtr bbra_rtr
+745 roza_rtr bbra_rtr
+745 gozb_rtr goza_rtr
+745 boza_rtr bbra_rtr
+745 goza_rtr gozb_rtr
+745 yozb_rtr bbra_rtr
+745 soza_rtr bbra_rtr
+745 sozb_rtr bbra_rtr
+745 bbrb_rtr sozb_rtr
+745 rozb_rtr bbra_rtr
+745 poza_rtr bbra_rtr

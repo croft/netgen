@@ -1,0 +1,15 @@
+482 bozb_rtr bbra_rtr
+482 yoza_rtr yozb_rtr
+482 cozb_rtr bbra_rtr
+482 coza_rtr bbra_rtr
+482 pozb_rtr bbra_rtr
+482 roza_rtr bbra_rtr
+482 gozb_rtr goza_rtr
+482 boza_rtr bbra_rtr
+482 goza_rtr gozb_rtr
+482 yozb_rtr bbra_rtr
+482 soza_rtr bbra_rtr
+482 sozb_rtr bbra_rtr
+482 bbrb_rtr bbra_rtr
+482 rozb_rtr bbra_rtr
+482 poza_rtr bbra_rtr

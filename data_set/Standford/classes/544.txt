@@ -1,0 +1,15 @@
+544 bozb_rtr bbra_rtr
+544 yoza_rtr yozb_rtr
+544 cozb_rtr bbra_rtr
+544 coza_rtr bbra_rtr
+544 pozb_rtr bbra_rtr
+544 roza_rtr bbra_rtr
+544 gozb_rtr goza_rtr
+544 boza_rtr bbra_rtr
+544 goza_rtr gozb_rtr
+544 yozb_rtr bbra_rtr
+544 soza_rtr bbra_rtr
+544 sozb_rtr bbra_rtr
+544 bbrb_rtr bbra_rtr
+544 rozb_rtr bbra_rtr
+544 poza_rtr bbra_rtr

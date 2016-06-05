@@ -1,0 +1,16 @@
+970 bozb_rtr bbra_rtr
+970 bbra_rtr soza_rtr
+970 yoza_rtr yozb_rtr
+970 cozb_rtr bbra_rtr
+970 coza_rtr bbra_rtr
+970 pozb_rtr poza_rtr
+970 roza_rtr bbra_rtr
+970 gozb_rtr goza_rtr
+970 boza_rtr bbra_rtr
+970 goza_rtr gozb_rtr
+970 yozb_rtr bbra_rtr
+970 soza_rtr bbra_rtr
+970 sozb_rtr bbra_rtr
+970 bbrb_rtr soza_rtr
+970 rozb_rtr bbra_rtr
+970 poza_rtr bbra_rtr

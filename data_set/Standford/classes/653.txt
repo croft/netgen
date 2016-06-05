@@ -1,0 +1,16 @@
+653 bozb_rtr bbra_rtr
+653 bbra_rtr roza_rtr
+653 yoza_rtr yozb_rtr
+653 cozb_rtr bbra_rtr
+653 coza_rtr bbra_rtr
+653 pozb_rtr bbra_rtr
+653 roza_rtr bbra_rtr
+653 gozb_rtr goza_rtr
+653 boza_rtr bbra_rtr
+653 goza_rtr gozb_rtr
+653 yozb_rtr bbra_rtr
+653 soza_rtr bbra_rtr
+653 sozb_rtr bbra_rtr
+653 bbrb_rtr yozb_rtr
+653 rozb_rtr roza_rtr
+653 poza_rtr bbra_rtr

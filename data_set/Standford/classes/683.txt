@@ -1,0 +1,16 @@
+683 bozb_rtr bbra_rtr
+683 bbra_rtr soza_rtr
+683 yoza_rtr yozb_rtr
+683 cozb_rtr bbra_rtr
+683 coza_rtr bbra_rtr
+683 pozb_rtr bbra_rtr
+683 roza_rtr bbra_rtr
+683 gozb_rtr goza_rtr
+683 boza_rtr bbra_rtr
+683 goza_rtr gozb_rtr
+683 yozb_rtr bbra_rtr
+683 soza_rtr sozb_rtr
+683 sozb_rtr soza_rtr
+683 bbrb_rtr soza_rtr
+683 rozb_rtr bbra_rtr
+683 poza_rtr bbra_rtr

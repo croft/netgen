@@ -1,0 +1,15 @@
+621 bozb_rtr bbra_rtr
+621 yoza_rtr yozb_rtr
+621 cozb_rtr bbra_rtr
+621 coza_rtr bbra_rtr
+621 pozb_rtr bbra_rtr
+621 roza_rtr bbra_rtr
+621 gozb_rtr goza_rtr
+621 boza_rtr bbra_rtr
+621 goza_rtr gozb_rtr
+621 yozb_rtr bbra_rtr
+621 soza_rtr bbra_rtr
+621 sozb_rtr bbra_rtr
+621 bbrb_rtr bbra_rtr
+621 rozb_rtr bbra_rtr
+621 poza_rtr bbra_rtr

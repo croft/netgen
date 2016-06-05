@@ -1,0 +1,16 @@
+769 bozb_rtr bbra_rtr
+769 bbra_rtr sozb_rtr
+769 yoza_rtr yozb_rtr
+769 cozb_rtr coza_rtr
+769 coza_rtr cozb_rtr
+769 pozb_rtr bbra_rtr
+769 roza_rtr bbra_rtr
+769 gozb_rtr goza_rtr
+769 boza_rtr bbra_rtr
+769 goza_rtr gozb_rtr
+769 yozb_rtr bbra_rtr
+769 soza_rtr bbra_rtr
+769 sozb_rtr bbra_rtr
+769 bbrb_rtr sozb_rtr
+769 rozb_rtr bbra_rtr
+769 poza_rtr bbra_rtr

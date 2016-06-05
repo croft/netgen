@@ -1,0 +1,16 @@
+741 bozb_rtr bbra_rtr
+741 bbra_rtr sozb_rtr
+741 yoza_rtr yozb_rtr
+741 cozb_rtr coza_rtr
+741 coza_rtr cozb_rtr
+741 pozb_rtr bbra_rtr
+741 roza_rtr bbra_rtr
+741 gozb_rtr goza_rtr
+741 boza_rtr bbra_rtr
+741 goza_rtr gozb_rtr
+741 yozb_rtr bbra_rtr
+741 soza_rtr bbra_rtr
+741 sozb_rtr bbra_rtr
+741 bbrb_rtr sozb_rtr
+741 rozb_rtr bbra_rtr
+741 poza_rtr bbra_rtr

@@ -1,0 +1,15 @@
+180 bozb_rtr bbra_rtr
+180 yoza_rtr yozb_rtr
+180 cozb_rtr bbra_rtr
+180 coza_rtr bbra_rtr
+180 pozb_rtr bbra_rtr
+180 roza_rtr bbra_rtr
+180 gozb_rtr goza_rtr
+180 boza_rtr bbra_rtr
+180 goza_rtr gozb_rtr
+180 yozb_rtr bbra_rtr
+180 soza_rtr bbra_rtr
+180 sozb_rtr bbra_rtr
+180 bbrb_rtr bbra_rtr
+180 rozb_rtr bbra_rtr
+180 poza_rtr bbra_rtr

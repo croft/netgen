@@ -1,0 +1,16 @@
+396 bozb_rtr boza_rtr
+396 bbra_rtr rozb_rtr
+396 yoza_rtr yozb_rtr
+396 cozb_rtr bbra_rtr
+396 coza_rtr bbra_rtr
+396 pozb_rtr bbra_rtr
+396 roza_rtr bbra_rtr
+396 gozb_rtr goza_rtr
+396 boza_rtr bozb_rtr
+396 goza_rtr gozb_rtr
+396 yozb_rtr bbra_rtr
+396 soza_rtr bbra_rtr
+396 sozb_rtr bbra_rtr
+396 bbrb_rtr rozb_rtr
+396 rozb_rtr bbra_rtr
+396 poza_rtr bbra_rtr

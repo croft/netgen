@@ -1,0 +1,16 @@
+727 bozb_rtr bbra_rtr
+727 bbra_rtr soza_rtr
+727 yoza_rtr yozb_rtr
+727 cozb_rtr bbra_rtr
+727 coza_rtr bbra_rtr
+727 pozb_rtr bbra_rtr
+727 roza_rtr bbra_rtr
+727 gozb_rtr goza_rtr
+727 boza_rtr bbra_rtr
+727 goza_rtr gozb_rtr
+727 yozb_rtr bbra_rtr
+727 soza_rtr sozb_rtr
+727 sozb_rtr bbra_rtr
+727 bbrb_rtr soza_rtr
+727 rozb_rtr bbra_rtr
+727 poza_rtr bbra_rtr

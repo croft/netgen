@@ -1,0 +1,15 @@
+441 bozb_rtr bbra_rtr
+441 yoza_rtr yozb_rtr
+441 cozb_rtr bbra_rtr
+441 coza_rtr bbra_rtr
+441 pozb_rtr bbra_rtr
+441 roza_rtr bbra_rtr
+441 gozb_rtr goza_rtr
+441 boza_rtr bbra_rtr
+441 goza_rtr gozb_rtr
+441 yozb_rtr bbra_rtr
+441 soza_rtr bbra_rtr
+441 sozb_rtr bbra_rtr
+441 bbrb_rtr bbra_rtr
+441 rozb_rtr bbra_rtr
+441 poza_rtr bbra_rtr

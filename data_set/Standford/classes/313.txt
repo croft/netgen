@@ -1,0 +1,16 @@
+313 bozb_rtr bbra_rtr
+313 bbra_rtr pozb_rtr
+313 yoza_rtr yozb_rtr
+313 cozb_rtr bbra_rtr
+313 coza_rtr bbra_rtr
+313 pozb_rtr bbra_rtr
+313 roza_rtr bbra_rtr
+313 gozb_rtr goza_rtr
+313 boza_rtr bbra_rtr
+313 goza_rtr gozb_rtr
+313 yozb_rtr bbra_rtr
+313 soza_rtr bbra_rtr
+313 sozb_rtr bbra_rtr
+313 bbrb_rtr pozb_rtr
+313 rozb_rtr bbra_rtr
+313 poza_rtr bbra_rtr

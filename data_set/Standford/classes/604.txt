@@ -1,0 +1,15 @@
+604 bozb_rtr bbra_rtr
+604 yoza_rtr yozb_rtr
+604 cozb_rtr bbra_rtr
+604 coza_rtr bbra_rtr
+604 pozb_rtr bbra_rtr
+604 roza_rtr bbra_rtr
+604 gozb_rtr goza_rtr
+604 boza_rtr bbra_rtr
+604 goza_rtr gozb_rtr
+604 yozb_rtr bbra_rtr
+604 soza_rtr bbra_rtr
+604 sozb_rtr bbra_rtr
+604 bbrb_rtr bbra_rtr
+604 rozb_rtr bbra_rtr
+604 poza_rtr bbra_rtr

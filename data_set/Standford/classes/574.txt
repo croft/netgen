@@ -1,0 +1,16 @@
+574 bozb_rtr bbra_rtr
+574 bbra_rtr pozb_rtr
+574 yoza_rtr yozb_rtr
+574 cozb_rtr bbra_rtr
+574 coza_rtr bbra_rtr
+574 pozb_rtr bbra_rtr
+574 roza_rtr bbra_rtr
+574 gozb_rtr goza_rtr
+574 boza_rtr bbra_rtr
+574 goza_rtr gozb_rtr
+574 yozb_rtr bbra_rtr
+574 soza_rtr bbra_rtr
+574 sozb_rtr bbra_rtr
+574 bbrb_rtr pozb_rtr
+574 rozb_rtr bbra_rtr
+574 poza_rtr bbra_rtr

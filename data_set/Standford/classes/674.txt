@@ -1,0 +1,15 @@
+674 bozb_rtr bbra_rtr
+674 yoza_rtr yozb_rtr
+674 cozb_rtr bbra_rtr
+674 coza_rtr bbra_rtr
+674 pozb_rtr bbra_rtr
+674 roza_rtr bbra_rtr
+674 gozb_rtr goza_rtr
+674 boza_rtr bbra_rtr
+674 goza_rtr gozb_rtr
+674 yozb_rtr bbra_rtr
+674 soza_rtr bbra_rtr
+674 sozb_rtr bbra_rtr
+674 bbrb_rtr bbra_rtr
+674 rozb_rtr bbra_rtr
+674 poza_rtr bbra_rtr

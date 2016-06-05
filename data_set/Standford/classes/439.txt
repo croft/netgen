@@ -1,0 +1,16 @@
+439 bozb_rtr bbra_rtr
+439 bbra_rtr pozb_rtr
+439 yoza_rtr yozb_rtr
+439 cozb_rtr bbra_rtr
+439 coza_rtr bbra_rtr
+439 pozb_rtr bbra_rtr
+439 roza_rtr bbra_rtr
+439 gozb_rtr goza_rtr
+439 boza_rtr bbra_rtr
+439 goza_rtr gozb_rtr
+439 yozb_rtr bbra_rtr
+439 soza_rtr bbra_rtr
+439 sozb_rtr bbra_rtr
+439 bbrb_rtr pozb_rtr
+439 rozb_rtr bbra_rtr
+439 poza_rtr bbra_rtr

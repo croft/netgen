@@ -1,0 +1,15 @@
+487 bozb_rtr bbra_rtr
+487 yoza_rtr yozb_rtr
+487 cozb_rtr bbra_rtr
+487 coza_rtr bbra_rtr
+487 pozb_rtr bbra_rtr
+487 roza_rtr bbra_rtr
+487 gozb_rtr goza_rtr
+487 boza_rtr bbra_rtr
+487 goza_rtr gozb_rtr
+487 yozb_rtr bbra_rtr
+487 soza_rtr bbra_rtr
+487 sozb_rtr bbra_rtr
+487 bbrb_rtr bbra_rtr
+487 rozb_rtr bbra_rtr
+487 poza_rtr bbra_rtr

@@ -1,0 +1,16 @@
+1074 bozb_rtr bbra_rtr
+1074 bbra_rtr soza_rtr
+1074 yoza_rtr yozb_rtr
+1074 cozb_rtr bbra_rtr
+1074 coza_rtr bbra_rtr
+1074 pozb_rtr poza_rtr
+1074 roza_rtr bbra_rtr
+1074 gozb_rtr goza_rtr
+1074 boza_rtr bbra_rtr
+1074 goza_rtr gozb_rtr
+1074 yozb_rtr bbra_rtr
+1074 soza_rtr bbra_rtr
+1074 sozb_rtr bbra_rtr
+1074 bbrb_rtr soza_rtr
+1074 rozb_rtr bbra_rtr
+1074 poza_rtr bbra_rtr

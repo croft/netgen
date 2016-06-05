@@ -1,0 +1,15 @@
+567 bozb_rtr bbra_rtr
+567 yoza_rtr yozb_rtr
+567 cozb_rtr bbra_rtr
+567 coza_rtr bbra_rtr
+567 pozb_rtr bbra_rtr
+567 roza_rtr bbra_rtr
+567 gozb_rtr goza_rtr
+567 boza_rtr bbra_rtr
+567 goza_rtr gozb_rtr
+567 yozb_rtr bbra_rtr
+567 soza_rtr bbra_rtr
+567 sozb_rtr bbra_rtr
+567 bbrb_rtr bbra_rtr
+567 rozb_rtr bbra_rtr
+567 poza_rtr bbra_rtr

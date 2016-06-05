@@ -1,0 +1,16 @@
+639 bozb_rtr bbra_rtr
+639 bbra_rtr pozb_rtr
+639 yoza_rtr yozb_rtr
+639 cozb_rtr bbra_rtr
+639 coza_rtr bbra_rtr
+639 pozb_rtr bbra_rtr
+639 roza_rtr bbra_rtr
+639 gozb_rtr goza_rtr
+639 boza_rtr bbra_rtr
+639 goza_rtr gozb_rtr
+639 yozb_rtr bbra_rtr
+639 soza_rtr bbra_rtr
+639 sozb_rtr bbra_rtr
+639 bbrb_rtr pozb_rtr
+639 rozb_rtr bbra_rtr
+639 poza_rtr bbra_rtr

@@ -1,0 +1,16 @@
+277 bozb_rtr bbra_rtr
+277 bbra_rtr yoza_rtr
+277 yoza_rtr yozb_rtr
+277 cozb_rtr bbra_rtr
+277 coza_rtr bbra_rtr
+277 pozb_rtr bbra_rtr
+277 roza_rtr bbra_rtr
+277 gozb_rtr goza_rtr
+277 boza_rtr bbra_rtr
+277 goza_rtr gozb_rtr
+277 yozb_rtr yoza_rtr
+277 soza_rtr bbra_rtr
+277 sozb_rtr bbra_rtr
+277 bbrb_rtr yoza_rtr
+277 rozb_rtr bbra_rtr
+277 poza_rtr bbra_rtr

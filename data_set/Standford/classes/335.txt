@@ -1,0 +1,16 @@
+335 bozb_rtr bbra_rtr
+335 bbra_rtr soza_rtr
+335 yoza_rtr yozb_rtr
+335 cozb_rtr bbra_rtr
+335 coza_rtr bbra_rtr
+335 pozb_rtr poza_rtr
+335 roza_rtr bbra_rtr
+335 gozb_rtr goza_rtr
+335 boza_rtr bbra_rtr
+335 goza_rtr gozb_rtr
+335 yozb_rtr bbra_rtr
+335 soza_rtr bbra_rtr
+335 sozb_rtr bbra_rtr
+335 bbrb_rtr soza_rtr
+335 rozb_rtr bbra_rtr
+335 poza_rtr bbra_rtr

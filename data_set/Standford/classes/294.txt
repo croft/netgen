@@ -1,0 +1,16 @@
+294 bozb_rtr bbra_rtr
+294 bbra_rtr yoza_rtr
+294 yoza_rtr yozb_rtr
+294 cozb_rtr bbra_rtr
+294 coza_rtr bbra_rtr
+294 pozb_rtr bbra_rtr
+294 roza_rtr bbra_rtr
+294 gozb_rtr goza_rtr
+294 boza_rtr bbra_rtr
+294 goza_rtr gozb_rtr
+294 yozb_rtr bbra_rtr
+294 soza_rtr bbra_rtr
+294 sozb_rtr bbra_rtr
+294 bbrb_rtr yoza_rtr
+294 rozb_rtr bbra_rtr
+294 poza_rtr bbra_rtr

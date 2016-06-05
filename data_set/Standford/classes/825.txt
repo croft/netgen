@@ -1,0 +1,16 @@
+825 bozb_rtr bbra_rtr
+825 bbra_rtr roza_rtr
+825 yoza_rtr yozb_rtr
+825 cozb_rtr bbra_rtr
+825 coza_rtr bbra_rtr
+825 pozb_rtr bbra_rtr
+825 roza_rtr bbra_rtr
+825 gozb_rtr goza_rtr
+825 boza_rtr bbra_rtr
+825 goza_rtr gozb_rtr
+825 yozb_rtr bbra_rtr
+825 soza_rtr bbra_rtr
+825 sozb_rtr bbra_rtr
+825 bbrb_rtr yozb_rtr
+825 rozb_rtr bbra_rtr
+825 poza_rtr bbra_rtr

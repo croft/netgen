@@ -1,0 +1,16 @@
+568 bozb_rtr bbra_rtr
+568 bbra_rtr pozb_rtr
+568 yoza_rtr yozb_rtr
+568 cozb_rtr bbra_rtr
+568 coza_rtr bbra_rtr
+568 pozb_rtr bbra_rtr
+568 roza_rtr bbra_rtr
+568 gozb_rtr goza_rtr
+568 boza_rtr bbra_rtr
+568 goza_rtr gozb_rtr
+568 yozb_rtr bbra_rtr
+568 soza_rtr bbra_rtr
+568 sozb_rtr bbra_rtr
+568 bbrb_rtr pozb_rtr
+568 rozb_rtr bbra_rtr
+568 poza_rtr bbra_rtr

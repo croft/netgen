@@ -1,0 +1,16 @@
+650 bozb_rtr bbra_rtr
+650 bbra_rtr soza_rtr
+650 yoza_rtr yozb_rtr
+650 cozb_rtr bbra_rtr
+650 coza_rtr bbra_rtr
+650 pozb_rtr poza_rtr
+650 roza_rtr bbra_rtr
+650 gozb_rtr goza_rtr
+650 boza_rtr bbra_rtr
+650 goza_rtr gozb_rtr
+650 yozb_rtr bbra_rtr
+650 soza_rtr bbra_rtr
+650 sozb_rtr bbra_rtr
+650 bbrb_rtr soza_rtr
+650 rozb_rtr bbra_rtr
+650 poza_rtr bbra_rtr

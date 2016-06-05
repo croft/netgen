@@ -1,0 +1,15 @@
+708 bozb_rtr bbra_rtr
+708 yoza_rtr yozb_rtr
+708 cozb_rtr bbra_rtr
+708 coza_rtr bbra_rtr
+708 pozb_rtr bbra_rtr
+708 roza_rtr bbra_rtr
+708 gozb_rtr goza_rtr
+708 boza_rtr bbra_rtr
+708 goza_rtr gozb_rtr
+708 yozb_rtr bbra_rtr
+708 soza_rtr bbra_rtr
+708 sozb_rtr bbra_rtr
+708 bbrb_rtr bbra_rtr
+708 rozb_rtr bbra_rtr
+708 poza_rtr bbra_rtr

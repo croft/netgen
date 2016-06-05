@@ -1,0 +1,15 @@
+520 bozb_rtr bbra_rtr
+520 yoza_rtr yozb_rtr
+520 cozb_rtr bbra_rtr
+520 coza_rtr bbra_rtr
+520 pozb_rtr bbra_rtr
+520 roza_rtr bbra_rtr
+520 gozb_rtr goza_rtr
+520 boza_rtr bbra_rtr
+520 goza_rtr gozb_rtr
+520 yozb_rtr bbra_rtr
+520 soza_rtr bbra_rtr
+520 sozb_rtr bbra_rtr
+520 bbrb_rtr bbra_rtr
+520 rozb_rtr bbra_rtr
+520 poza_rtr bbra_rtr

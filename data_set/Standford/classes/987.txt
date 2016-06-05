@@ -1,0 +1,16 @@
+987 bozb_rtr bbra_rtr
+987 bbra_rtr yoza_rtr
+987 yoza_rtr yozb_rtr
+987 cozb_rtr bbra_rtr
+987 coza_rtr bbra_rtr
+987 pozb_rtr bbra_rtr
+987 roza_rtr bbra_rtr
+987 gozb_rtr goza_rtr
+987 boza_rtr bbra_rtr
+987 goza_rtr gozb_rtr
+987 yozb_rtr yoza_rtr
+987 soza_rtr bbra_rtr
+987 sozb_rtr bbra_rtr
+987 bbrb_rtr yoza_rtr
+987 rozb_rtr bbra_rtr
+987 poza_rtr bbra_rtr

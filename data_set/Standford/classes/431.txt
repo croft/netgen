@@ -1,0 +1,15 @@
+431 bozb_rtr bbra_rtr
+431 yoza_rtr yozb_rtr
+431 cozb_rtr bbra_rtr
+431 coza_rtr bbra_rtr
+431 pozb_rtr bbra_rtr
+431 roza_rtr bbra_rtr
+431 gozb_rtr goza_rtr
+431 boza_rtr bbra_rtr
+431 goza_rtr gozb_rtr
+431 yozb_rtr bbra_rtr
+431 soza_rtr bbra_rtr
+431 sozb_rtr bbra_rtr
+431 bbrb_rtr bbra_rtr
+431 rozb_rtr bbra_rtr
+431 poza_rtr bbra_rtr

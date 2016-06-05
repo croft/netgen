@@ -1,0 +1,15 @@
+205 bozb_rtr bbra_rtr
+205 yoza_rtr yozb_rtr
+205 cozb_rtr bbra_rtr
+205 coza_rtr bbra_rtr
+205 pozb_rtr bbra_rtr
+205 roza_rtr bbra_rtr
+205 gozb_rtr goza_rtr
+205 boza_rtr bbra_rtr
+205 goza_rtr gozb_rtr
+205 yozb_rtr bbra_rtr
+205 soza_rtr bbra_rtr
+205 sozb_rtr bbra_rtr
+205 bbrb_rtr bbra_rtr
+205 rozb_rtr bbra_rtr
+205 poza_rtr bbra_rtr

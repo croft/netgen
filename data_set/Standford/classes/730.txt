@@ -1,0 +1,16 @@
+730 bozb_rtr bbra_rtr
+730 bbra_rtr soza_rtr
+730 yoza_rtr yozb_rtr
+730 cozb_rtr bbra_rtr
+730 coza_rtr bbra_rtr
+730 pozb_rtr bbra_rtr
+730 roza_rtr bbra_rtr
+730 gozb_rtr goza_rtr
+730 boza_rtr bbra_rtr
+730 goza_rtr gozb_rtr
+730 yozb_rtr bbra_rtr
+730 soza_rtr sozb_rtr
+730 sozb_rtr bbra_rtr
+730 bbrb_rtr soza_rtr
+730 rozb_rtr bbra_rtr
+730 poza_rtr bbra_rtr

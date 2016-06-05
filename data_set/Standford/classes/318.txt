@@ -1,0 +1,16 @@
+318 bozb_rtr bbra_rtr
+318 bbra_rtr roza_rtr
+318 yoza_rtr yozb_rtr
+318 cozb_rtr bbra_rtr
+318 coza_rtr bbra_rtr
+318 pozb_rtr bbra_rtr
+318 roza_rtr bbra_rtr
+318 gozb_rtr goza_rtr
+318 boza_rtr bbra_rtr
+318 goza_rtr gozb_rtr
+318 yozb_rtr bbra_rtr
+318 soza_rtr bbra_rtr
+318 sozb_rtr bbra_rtr
+318 bbrb_rtr yozb_rtr
+318 rozb_rtr roza_rtr
+318 poza_rtr bbra_rtr

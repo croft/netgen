@@ -1,0 +1,16 @@
+266 bozb_rtr bbra_rtr
+266 bbra_rtr yoza_rtr
+266 yoza_rtr yozb_rtr
+266 cozb_rtr bbra_rtr
+266 coza_rtr bbra_rtr
+266 pozb_rtr bbra_rtr
+266 roza_rtr bbra_rtr
+266 gozb_rtr goza_rtr
+266 boza_rtr bbra_rtr
+266 goza_rtr gozb_rtr
+266 yozb_rtr yoza_rtr
+266 soza_rtr bbra_rtr
+266 sozb_rtr bbra_rtr
+266 bbrb_rtr yoza_rtr
+266 rozb_rtr bbra_rtr
+266 poza_rtr bbra_rtr

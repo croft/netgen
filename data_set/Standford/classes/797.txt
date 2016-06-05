@@ -1,0 +1,16 @@
+797 bozb_rtr bbra_rtr
+797 bbra_rtr soza_rtr
+797 yoza_rtr yozb_rtr
+797 cozb_rtr bbra_rtr
+797 coza_rtr bbra_rtr
+797 pozb_rtr bbra_rtr
+797 roza_rtr bbra_rtr
+797 gozb_rtr goza_rtr
+797 boza_rtr bbra_rtr
+797 goza_rtr gozb_rtr
+797 yozb_rtr bbra_rtr
+797 soza_rtr sozb_rtr
+797 sozb_rtr bbra_rtr
+797 bbrb_rtr soza_rtr
+797 rozb_rtr bbra_rtr
+797 poza_rtr bbra_rtr

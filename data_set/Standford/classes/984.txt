@@ -1,0 +1,16 @@
+984 bozb_rtr bbra_rtr
+984 bbra_rtr yoza_rtr
+984 yoza_rtr yozb_rtr
+984 cozb_rtr bbra_rtr
+984 coza_rtr bbra_rtr
+984 pozb_rtr bbra_rtr
+984 roza_rtr bbra_rtr
+984 gozb_rtr goza_rtr
+984 boza_rtr bbra_rtr
+984 goza_rtr gozb_rtr
+984 yozb_rtr yoza_rtr
+984 soza_rtr bbra_rtr
+984 sozb_rtr bbra_rtr
+984 bbrb_rtr yoza_rtr
+984 rozb_rtr bbra_rtr
+984 poza_rtr bbra_rtr

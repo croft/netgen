@@ -1,0 +1,16 @@
+143 bozb_rtr bbra_rtr
+143 bbra_rtr soza_rtr
+143 yoza_rtr yozb_rtr
+143 cozb_rtr bbrb_rtr
+143 coza_rtr bbrb_rtr
+143 pozb_rtr bbra_rtr
+143 roza_rtr bbra_rtr
+143 gozb_rtr goza_rtr
+143 boza_rtr bbra_rtr
+143 goza_rtr gozb_rtr
+143 yozb_rtr bbra_rtr
+143 soza_rtr sozb_rtr
+143 sozb_rtr bbrb_rtr
+143 bbrb_rtr soza_rtr
+143 rozb_rtr bbra_rtr
+143 poza_rtr bbra_rtr

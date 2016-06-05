@@ -1,0 +1,15 @@
+971 bozb_rtr bbra_rtr
+971 yoza_rtr yozb_rtr
+971 cozb_rtr bbra_rtr
+971 coza_rtr bbra_rtr
+971 pozb_rtr bbra_rtr
+971 roza_rtr bbra_rtr
+971 gozb_rtr goza_rtr
+971 boza_rtr bbra_rtr
+971 goza_rtr gozb_rtr
+971 yozb_rtr bbra_rtr
+971 soza_rtr bbra_rtr
+971 sozb_rtr bbra_rtr
+971 bbrb_rtr bbra_rtr
+971 rozb_rtr bbra_rtr
+971 poza_rtr bbra_rtr

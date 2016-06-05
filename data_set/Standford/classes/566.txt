@@ -1,0 +1,16 @@
+566 bozb_rtr bbra_rtr
+566 bbra_rtr rozb_rtr
+566 yoza_rtr yozb_rtr
+566 cozb_rtr bbra_rtr
+566 coza_rtr bbra_rtr
+566 pozb_rtr bbra_rtr
+566 roza_rtr bbra_rtr
+566 gozb_rtr goza_rtr
+566 boza_rtr bozb_rtr
+566 goza_rtr gozb_rtr
+566 yozb_rtr bbra_rtr
+566 soza_rtr bbra_rtr
+566 sozb_rtr bbra_rtr
+566 bbrb_rtr rozb_rtr
+566 rozb_rtr bbra_rtr
+566 poza_rtr bbra_rtr

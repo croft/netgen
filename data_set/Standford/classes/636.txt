@@ -1,0 +1,16 @@
+636 bozb_rtr boza_rtr
+636 bbra_rtr rozb_rtr
+636 yoza_rtr yozb_rtr
+636 cozb_rtr bbra_rtr
+636 coza_rtr bbra_rtr
+636 pozb_rtr bbra_rtr
+636 roza_rtr bbra_rtr
+636 gozb_rtr goza_rtr
+636 boza_rtr bozb_rtr
+636 goza_rtr gozb_rtr
+636 yozb_rtr bbra_rtr
+636 soza_rtr bbra_rtr
+636 sozb_rtr bbra_rtr
+636 bbrb_rtr rozb_rtr
+636 rozb_rtr bbra_rtr
+636 poza_rtr bbra_rtr

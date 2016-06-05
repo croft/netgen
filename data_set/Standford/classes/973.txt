@@ -1,0 +1,15 @@
+973 bozb_rtr bbra_rtr
+973 yoza_rtr yozb_rtr
+973 cozb_rtr bbra_rtr
+973 coza_rtr bbra_rtr
+973 pozb_rtr bbra_rtr
+973 roza_rtr bbra_rtr
+973 gozb_rtr goza_rtr
+973 boza_rtr bbra_rtr
+973 goza_rtr gozb_rtr
+973 yozb_rtr bbra_rtr
+973 soza_rtr bbra_rtr
+973 sozb_rtr bbra_rtr
+973 bbrb_rtr bbra_rtr
+973 rozb_rtr bbra_rtr
+973 poza_rtr bbra_rtr

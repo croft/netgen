@@ -5,7 +5,7 @@ import synthesis
 from network import NetworkConfig
 from grammar import SpecGrammar
 from spec import Specification
-from solver import AbstractNetwork, Solver
+from cppsolver import AbstractNetwork, CPPSolver
 from topos import DiamondTopo
 
 def conv_abstract_network(net):
@@ -61,7 +61,7 @@ def diamond_test():
     s = Specification.parseString(topo, specstr)
     net = synthesis.AbstractNetwork(topo, s)
     abs_net = conv_abstract_network(net)
-    slvr = Solver(abs_net)
+    slvr = CPPSolver(abs_net)
 
     t = time.time()
     result = slvr.solve()
@@ -87,7 +87,7 @@ def dummy_test():
                         1,
                         0)
 
-    s = Solver(a)
+    s = CPPSolver(a)
     res = s.solve()
     print "result", res
 

@@ -1,0 +1,16 @@
+668 bozb_rtr bbra_rtr
+668 bbra_rtr bbrb_rtr
+668 yoza_rtr yozb_rtr
+668 cozb_rtr bbra_rtr
+668 coza_rtr bbra_rtr
+668 pozb_rtr bbra_rtr
+668 roza_rtr bbra_rtr
+668 gozb_rtr goza_rtr
+668 boza_rtr bbra_rtr
+668 goza_rtr gozb_rtr
+668 yozb_rtr bbra_rtr
+668 soza_rtr bbra_rtr
+668 sozb_rtr bbra_rtr
+668 bbrb_rtr bbra_rtr
+668 rozb_rtr bbra_rtr
+668 poza_rtr bbra_rtr

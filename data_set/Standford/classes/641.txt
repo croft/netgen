@@ -1,0 +1,15 @@
+641 bozb_rtr bbra_rtr
+641 yoza_rtr yozb_rtr
+641 cozb_rtr bbra_rtr
+641 coza_rtr bbra_rtr
+641 pozb_rtr bbra_rtr
+641 roza_rtr bbra_rtr
+641 gozb_rtr goza_rtr
+641 boza_rtr bbra_rtr
+641 goza_rtr gozb_rtr
+641 yozb_rtr bbra_rtr
+641 soza_rtr bbra_rtr
+641 sozb_rtr bbra_rtr
+641 bbrb_rtr bbra_rtr
+641 rozb_rtr bbra_rtr
+641 poza_rtr bbra_rtr

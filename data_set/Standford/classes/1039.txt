@@ -1,0 +1,15 @@
+1039 bozb_rtr bbra_rtr
+1039 yoza_rtr yozb_rtr
+1039 cozb_rtr bbra_rtr
+1039 coza_rtr bbra_rtr
+1039 pozb_rtr bbra_rtr
+1039 roza_rtr bbra_rtr
+1039 gozb_rtr goza_rtr
+1039 boza_rtr bbra_rtr
+1039 goza_rtr gozb_rtr
+1039 yozb_rtr bbra_rtr
+1039 soza_rtr bbra_rtr
+1039 sozb_rtr bbra_rtr
+1039 bbrb_rtr bbra_rtr
+1039 rozb_rtr bbra_rtr
+1039 poza_rtr bbra_rtr

@@ -1,0 +1,16 @@
+239 bozb_rtr bbra_rtr
+239 bbra_rtr rozb_rtr
+239 yoza_rtr yozb_rtr
+239 cozb_rtr bbra_rtr
+239 coza_rtr bbra_rtr
+239 pozb_rtr bbra_rtr
+239 roza_rtr bbra_rtr
+239 gozb_rtr goza_rtr
+239 boza_rtr bbra_rtr
+239 goza_rtr gozb_rtr
+239 yozb_rtr bbra_rtr
+239 soza_rtr bbra_rtr
+239 sozb_rtr bbra_rtr
+239 bbrb_rtr rozb_rtr
+239 rozb_rtr bbra_rtr
+239 poza_rtr bbra_rtr

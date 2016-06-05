@@ -1,0 +1,15 @@
+393 bozb_rtr bbra_rtr
+393 yoza_rtr yozb_rtr
+393 cozb_rtr bbra_rtr
+393 coza_rtr bbra_rtr
+393 pozb_rtr bbra_rtr
+393 roza_rtr bbra_rtr
+393 gozb_rtr goza_rtr
+393 boza_rtr bbra_rtr
+393 goza_rtr gozb_rtr
+393 yozb_rtr bbra_rtr
+393 soza_rtr bbra_rtr
+393 sozb_rtr bbra_rtr
+393 bbrb_rtr bbra_rtr
+393 rozb_rtr bbra_rtr
+393 poza_rtr bbra_rtr

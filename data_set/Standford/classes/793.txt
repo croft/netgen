@@ -1,0 +1,15 @@
+793 bozb_rtr bbra_rtr
+793 yoza_rtr yozb_rtr
+793 cozb_rtr bbra_rtr
+793 coza_rtr bbra_rtr
+793 pozb_rtr bbra_rtr
+793 roza_rtr bbra_rtr
+793 gozb_rtr goza_rtr
+793 boza_rtr bbra_rtr
+793 goza_rtr gozb_rtr
+793 yozb_rtr bbra_rtr
+793 soza_rtr bbra_rtr
+793 sozb_rtr bbra_rtr
+793 bbrb_rtr bbra_rtr
+793 rozb_rtr bbra_rtr
+793 poza_rtr bbra_rtr

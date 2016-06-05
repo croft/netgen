@@ -1,0 +1,16 @@
+1243 bozb_rtr bbra_rtr
+1243 bbra_rtr roza_rtr
+1243 yoza_rtr yozb_rtr
+1243 cozb_rtr bbra_rtr
+1243 coza_rtr bbra_rtr
+1243 pozb_rtr bbra_rtr
+1243 roza_rtr bbra_rtr
+1243 gozb_rtr goza_rtr
+1243 boza_rtr bbra_rtr
+1243 goza_rtr gozb_rtr
+1243 yozb_rtr bbra_rtr
+1243 soza_rtr bbra_rtr
+1243 sozb_rtr bbra_rtr
+1243 bbrb_rtr yozb_rtr
+1243 rozb_rtr roza_rtr
+1243 poza_rtr bbra_rtr

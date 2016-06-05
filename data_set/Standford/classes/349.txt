@@ -1,0 +1,16 @@
+349 bozb_rtr bbra_rtr
+349 bbra_rtr pozb_rtr
+349 yoza_rtr yozb_rtr
+349 cozb_rtr bbra_rtr
+349 coza_rtr bbra_rtr
+349 pozb_rtr bbra_rtr
+349 roza_rtr bbra_rtr
+349 gozb_rtr goza_rtr
+349 boza_rtr bbra_rtr
+349 goza_rtr gozb_rtr
+349 yozb_rtr bbra_rtr
+349 soza_rtr bbra_rtr
+349 sozb_rtr bbra_rtr
+349 bbrb_rtr pozb_rtr
+349 rozb_rtr bbra_rtr
+349 poza_rtr bbra_rtr

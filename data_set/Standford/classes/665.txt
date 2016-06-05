@@ -1,0 +1,16 @@
+665 bozb_rtr bbra_rtr
+665 bbra_rtr yoza_rtr
+665 yoza_rtr yozb_rtr
+665 cozb_rtr bbra_rtr
+665 coza_rtr bbra_rtr
+665 pozb_rtr bbra_rtr
+665 roza_rtr bbra_rtr
+665 gozb_rtr goza_rtr
+665 boza_rtr bbra_rtr
+665 goza_rtr gozb_rtr
+665 yozb_rtr bbra_rtr
+665 soza_rtr bbra_rtr
+665 sozb_rtr bbra_rtr
+665 bbrb_rtr yoza_rtr
+665 rozb_rtr bbra_rtr
+665 poza_rtr bbra_rtr

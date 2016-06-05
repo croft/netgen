@@ -1,0 +1,15 @@
+584 bozb_rtr bbra_rtr
+584 yoza_rtr yozb_rtr
+584 cozb_rtr bbra_rtr
+584 coza_rtr bbra_rtr
+584 pozb_rtr bbra_rtr
+584 roza_rtr bbra_rtr
+584 gozb_rtr goza_rtr
+584 boza_rtr bbra_rtr
+584 goza_rtr gozb_rtr
+584 yozb_rtr bbra_rtr
+584 soza_rtr bbra_rtr
+584 sozb_rtr bbra_rtr
+584 bbrb_rtr bbra_rtr
+584 rozb_rtr bbra_rtr
+584 poza_rtr bbra_rtr

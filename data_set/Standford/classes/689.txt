@@ -1,0 +1,16 @@
+689 bozb_rtr bbra_rtr
+689 bbra_rtr soza_rtr
+689 yoza_rtr yozb_rtr
+689 cozb_rtr bbra_rtr
+689 coza_rtr bbra_rtr
+689 pozb_rtr bbra_rtr
+689 roza_rtr bbra_rtr
+689 gozb_rtr goza_rtr
+689 boza_rtr bbra_rtr
+689 goza_rtr gozb_rtr
+689 yozb_rtr bbra_rtr
+689 soza_rtr sozb_rtr
+689 sozb_rtr bbra_rtr
+689 bbrb_rtr soza_rtr
+689 rozb_rtr bbra_rtr
+689 poza_rtr bbra_rtr

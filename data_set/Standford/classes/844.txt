@@ -1,0 +1,16 @@
+844 bozb_rtr bbra_rtr
+844 bbra_rtr soza_rtr
+844 yoza_rtr yozb_rtr
+844 cozb_rtr bbra_rtr
+844 coza_rtr bbra_rtr
+844 pozb_rtr bbra_rtr
+844 roza_rtr bbra_rtr
+844 gozb_rtr goza_rtr
+844 boza_rtr bbra_rtr
+844 goza_rtr gozb_rtr
+844 yozb_rtr bbra_rtr
+844 soza_rtr bbra_rtr
+844 sozb_rtr bbra_rtr
+844 bbrb_rtr soza_rtr
+844 rozb_rtr bbra_rtr
+844 poza_rtr bbra_rtr

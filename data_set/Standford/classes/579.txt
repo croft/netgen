@@ -1,0 +1,16 @@
+579 bozb_rtr bbra_rtr
+579 bbra_rtr soza_rtr
+579 yoza_rtr yozb_rtr
+579 cozb_rtr bbra_rtr
+579 coza_rtr bbra_rtr
+579 pozb_rtr poza_rtr
+579 roza_rtr bbra_rtr
+579 gozb_rtr goza_rtr
+579 boza_rtr bbra_rtr
+579 goza_rtr gozb_rtr
+579 yozb_rtr bbra_rtr
+579 soza_rtr bbra_rtr
+579 sozb_rtr bbra_rtr
+579 bbrb_rtr soza_rtr
+579 rozb_rtr bbra_rtr
+579 poza_rtr pozb_rtr

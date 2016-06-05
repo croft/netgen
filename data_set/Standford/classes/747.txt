@@ -1,0 +1,16 @@
+747 bozb_rtr bbra_rtr
+747 bbra_rtr sozb_rtr
+747 yoza_rtr yozb_rtr
+747 cozb_rtr coza_rtr
+747 coza_rtr cozb_rtr
+747 pozb_rtr bbra_rtr
+747 roza_rtr bbra_rtr
+747 gozb_rtr goza_rtr
+747 boza_rtr bbra_rtr
+747 goza_rtr gozb_rtr
+747 yozb_rtr bbra_rtr
+747 soza_rtr bbra_rtr
+747 sozb_rtr bbra_rtr
+747 bbrb_rtr sozb_rtr
+747 rozb_rtr bbra_rtr
+747 poza_rtr bbra_rtr

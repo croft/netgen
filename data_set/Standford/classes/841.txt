@@ -1,0 +1,16 @@
+841 bozb_rtr bbra_rtr
+841 bbra_rtr sozb_rtr
+841 yoza_rtr yozb_rtr
+841 cozb_rtr bbra_rtr
+841 coza_rtr bbra_rtr
+841 pozb_rtr bbra_rtr
+841 roza_rtr bbra_rtr
+841 gozb_rtr goza_rtr
+841 boza_rtr bbra_rtr
+841 goza_rtr gozb_rtr
+841 yozb_rtr bbra_rtr
+841 soza_rtr bbra_rtr
+841 sozb_rtr bbra_rtr
+841 bbrb_rtr sozb_rtr
+841 rozb_rtr bbra_rtr
+841 poza_rtr bbra_rtr

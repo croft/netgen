@@ -1,0 +1,16 @@
+448 bozb_rtr boza_rtr
+448 bbra_rtr rozb_rtr
+448 yoza_rtr yozb_rtr
+448 cozb_rtr bbra_rtr
+448 coza_rtr bbra_rtr
+448 pozb_rtr bbra_rtr
+448 roza_rtr bbra_rtr
+448 gozb_rtr goza_rtr
+448 boza_rtr bozb_rtr
+448 goza_rtr gozb_rtr
+448 yozb_rtr bbra_rtr
+448 soza_rtr bbra_rtr
+448 sozb_rtr bbra_rtr
+448 bbrb_rtr rozb_rtr
+448 rozb_rtr bbra_rtr
+448 poza_rtr bbra_rtr

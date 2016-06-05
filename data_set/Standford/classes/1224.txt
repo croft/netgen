@@ -1,0 +1,16 @@
+1224 bozb_rtr bbra_rtr
+1224 bbra_rtr yoza_rtr
+1224 yoza_rtr yozb_rtr
+1224 cozb_rtr bbra_rtr
+1224 coza_rtr bbra_rtr
+1224 pozb_rtr bbra_rtr
+1224 roza_rtr bbra_rtr
+1224 gozb_rtr goza_rtr
+1224 boza_rtr bbra_rtr
+1224 goza_rtr gozb_rtr
+1224 yozb_rtr yoza_rtr
+1224 soza_rtr bbra_rtr
+1224 sozb_rtr bbra_rtr
+1224 bbrb_rtr yoza_rtr
+1224 rozb_rtr bbra_rtr
+1224 poza_rtr bbra_rtr

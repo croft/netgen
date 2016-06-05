@@ -1,0 +1,16 @@
+752 bozb_rtr bbra_rtr
+752 bbra_rtr sozb_rtr
+752 yoza_rtr yozb_rtr
+752 cozb_rtr coza_rtr
+752 coza_rtr cozb_rtr
+752 pozb_rtr bbra_rtr
+752 roza_rtr bbra_rtr
+752 gozb_rtr goza_rtr
+752 boza_rtr bbra_rtr
+752 goza_rtr gozb_rtr
+752 yozb_rtr bbra_rtr
+752 soza_rtr bbra_rtr
+752 sozb_rtr bbra_rtr
+752 bbrb_rtr sozb_rtr
+752 rozb_rtr bbra_rtr
+752 poza_rtr bbra_rtr

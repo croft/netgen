@@ -1,0 +1,15 @@
+673 bozb_rtr bbra_rtr
+673 yoza_rtr yozb_rtr
+673 cozb_rtr bbrb_rtr
+673 coza_rtr bbrb_rtr
+673 pozb_rtr bbra_rtr
+673 roza_rtr bbra_rtr
+673 gozb_rtr goza_rtr
+673 boza_rtr bbra_rtr
+673 goza_rtr gozb_rtr
+673 yozb_rtr bbra_rtr
+673 soza_rtr sozb_rtr
+673 sozb_rtr bbrb_rtr
+673 bbrb_rtr bbra_rtr
+673 rozb_rtr bbra_rtr
+673 poza_rtr bbra_rtr

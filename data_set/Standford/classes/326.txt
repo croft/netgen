@@ -1,0 +1,16 @@
+326 bozb_rtr bbra_rtr
+326 bbra_rtr soza_rtr
+326 yoza_rtr yozb_rtr
+326 cozb_rtr bbra_rtr
+326 coza_rtr bbra_rtr
+326 pozb_rtr poza_rtr
+326 roza_rtr bbra_rtr
+326 gozb_rtr goza_rtr
+326 boza_rtr bbra_rtr
+326 goza_rtr gozb_rtr
+326 yozb_rtr bbra_rtr
+326 soza_rtr bbra_rtr
+326 sozb_rtr bbra_rtr
+326 bbrb_rtr soza_rtr
+326 rozb_rtr bbra_rtr
+326 poza_rtr bbra_rtr

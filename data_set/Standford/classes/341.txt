@@ -1,0 +1,16 @@
+341 bozb_rtr bbra_rtr
+341 bbra_rtr pozb_rtr
+341 yoza_rtr yozb_rtr
+341 cozb_rtr bbra_rtr
+341 coza_rtr bbra_rtr
+341 pozb_rtr bbra_rtr
+341 roza_rtr bbra_rtr
+341 gozb_rtr goza_rtr
+341 boza_rtr bbra_rtr
+341 goza_rtr gozb_rtr
+341 yozb_rtr bbra_rtr
+341 soza_rtr bbra_rtr
+341 sozb_rtr bbra_rtr
+341 bbrb_rtr pozb_rtr
+341 rozb_rtr bbra_rtr
+341 poza_rtr bbra_rtr

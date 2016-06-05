@@ -1,0 +1,15 @@
+572 bozb_rtr bbra_rtr
+572 yoza_rtr yozb_rtr
+572 cozb_rtr bbra_rtr
+572 coza_rtr bbra_rtr
+572 pozb_rtr bbra_rtr
+572 roza_rtr bbra_rtr
+572 gozb_rtr goza_rtr
+572 boza_rtr bbra_rtr
+572 goza_rtr gozb_rtr
+572 yozb_rtr bbra_rtr
+572 soza_rtr bbra_rtr
+572 sozb_rtr bbra_rtr
+572 bbrb_rtr bbra_rtr
+572 rozb_rtr bbra_rtr
+572 poza_rtr bbra_rtr

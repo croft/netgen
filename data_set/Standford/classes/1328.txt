@@ -1,0 +1,16 @@
+1328 bozb_rtr bbra_rtr
+1328 bbra_rtr soza_rtr
+1328 yoza_rtr yozb_rtr
+1328 cozb_rtr bbra_rtr
+1328 coza_rtr bbra_rtr
+1328 pozb_rtr poza_rtr
+1328 roza_rtr bbra_rtr
+1328 gozb_rtr goza_rtr
+1328 boza_rtr bbra_rtr
+1328 goza_rtr gozb_rtr
+1328 yozb_rtr bbra_rtr
+1328 soza_rtr bbra_rtr
+1328 sozb_rtr bbra_rtr
+1328 bbrb_rtr soza_rtr
+1328 rozb_rtr bbra_rtr
+1328 poza_rtr pozb_rtr

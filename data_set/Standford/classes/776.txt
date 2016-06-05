@@ -1,0 +1,16 @@
+776 bozb_rtr bbra_rtr
+776 bbra_rtr sozb_rtr
+776 yoza_rtr yozb_rtr
+776 cozb_rtr coza_rtr
+776 coza_rtr cozb_rtr
+776 pozb_rtr bbra_rtr
+776 roza_rtr bbra_rtr
+776 gozb_rtr goza_rtr
+776 boza_rtr bbra_rtr
+776 goza_rtr gozb_rtr
+776 yozb_rtr bbra_rtr
+776 soza_rtr bbra_rtr
+776 sozb_rtr bbra_rtr
+776 bbrb_rtr sozb_rtr
+776 rozb_rtr bbra_rtr
+776 poza_rtr bbra_rtr

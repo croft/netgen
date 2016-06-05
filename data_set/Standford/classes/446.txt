@@ -1,0 +1,16 @@
+446 bozb_rtr bbra_rtr
+446 bbra_rtr pozb_rtr
+446 yoza_rtr yozb_rtr
+446 cozb_rtr bbra_rtr
+446 coza_rtr bbra_rtr
+446 pozb_rtr bbra_rtr
+446 roza_rtr bbra_rtr
+446 gozb_rtr goza_rtr
+446 boza_rtr bbra_rtr
+446 goza_rtr gozb_rtr
+446 yozb_rtr bbra_rtr
+446 soza_rtr bbra_rtr
+446 sozb_rtr bbra_rtr
+446 bbrb_rtr pozb_rtr
+446 rozb_rtr bbra_rtr
+446 poza_rtr bbra_rtr

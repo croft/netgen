@@ -1,0 +1,15 @@
+867 bozb_rtr bbra_rtr
+867 yoza_rtr yozb_rtr
+867 cozb_rtr bbra_rtr
+867 coza_rtr bbra_rtr
+867 pozb_rtr bbra_rtr
+867 roza_rtr bbra_rtr
+867 gozb_rtr goza_rtr
+867 boza_rtr bbra_rtr
+867 goza_rtr gozb_rtr
+867 yozb_rtr bbra_rtr
+867 soza_rtr bbra_rtr
+867 sozb_rtr bbra_rtr
+867 bbrb_rtr bbra_rtr
+867 rozb_rtr bbra_rtr
+867 poza_rtr bbra_rtr

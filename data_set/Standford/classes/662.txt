@@ -1,0 +1,15 @@
+662 bozb_rtr bbra_rtr
+662 yoza_rtr yozb_rtr
+662 cozb_rtr bbra_rtr
+662 coza_rtr bbra_rtr
+662 pozb_rtr bbra_rtr
+662 roza_rtr bbra_rtr
+662 gozb_rtr goza_rtr
+662 boza_rtr bbra_rtr
+662 goza_rtr gozb_rtr
+662 yozb_rtr bbra_rtr
+662 soza_rtr bbra_rtr
+662 sozb_rtr bbra_rtr
+662 bbrb_rtr bbra_rtr
+662 rozb_rtr bbra_rtr
+662 poza_rtr bbra_rtr

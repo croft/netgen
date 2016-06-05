@@ -1,0 +1,16 @@
+773 bozb_rtr bbra_rtr
+773 bbra_rtr sozb_rtr
+773 yoza_rtr yozb_rtr
+773 cozb_rtr coza_rtr
+773 coza_rtr cozb_rtr
+773 pozb_rtr bbra_rtr
+773 roza_rtr bbra_rtr
+773 gozb_rtr goza_rtr
+773 boza_rtr bbra_rtr
+773 goza_rtr gozb_rtr
+773 yozb_rtr bbra_rtr
+773 soza_rtr bbra_rtr
+773 sozb_rtr bbra_rtr
+773 bbrb_rtr sozb_rtr
+773 rozb_rtr bbra_rtr
+773 poza_rtr bbra_rtr

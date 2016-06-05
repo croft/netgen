@@ -1,0 +1,16 @@
+467 bozb_rtr bbra_rtr
+467 bbra_rtr rozb_rtr
+467 yoza_rtr yozb_rtr
+467 cozb_rtr bbra_rtr
+467 coza_rtr bbra_rtr
+467 pozb_rtr bbra_rtr
+467 roza_rtr bbra_rtr
+467 gozb_rtr goza_rtr
+467 boza_rtr bozb_rtr
+467 goza_rtr gozb_rtr
+467 yozb_rtr bbra_rtr
+467 soza_rtr bbra_rtr
+467 sozb_rtr bbra_rtr
+467 bbrb_rtr rozb_rtr
+467 rozb_rtr bbra_rtr
+467 poza_rtr bbra_rtr

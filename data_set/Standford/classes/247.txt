@@ -1,0 +1,15 @@
+247 bozb_rtr boza_rtr
+247 yoza_rtr yozb_rtr
+247 cozb_rtr bbra_rtr
+247 coza_rtr bbra_rtr
+247 pozb_rtr bbra_rtr
+247 roza_rtr bbra_rtr
+247 gozb_rtr goza_rtr
+247 boza_rtr bozb_rtr
+247 goza_rtr gozb_rtr
+247 yozb_rtr bbra_rtr
+247 soza_rtr bbra_rtr
+247 sozb_rtr bbra_rtr
+247 bbrb_rtr bbra_rtr
+247 rozb_rtr bbra_rtr
+247 poza_rtr bbra_rtr

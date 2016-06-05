@@ -1,38 +1,19 @@
 #include <boost/python.hpp>
+#include <boost/type_traits/integral_constant.hpp>
 #include <string>
 #include <iostream>
 #include <vector>
 #include <tuple>
+#include <set> 
+#include "utils.h"
+#include "solver.h"
+#include "network.h"
+#include "automata.h"
+#include "z3++.h"
+#include "recursive_definitions.h"
 
 using namespace std;
 namespace py = boost::python;
-
-// -----------------------------------------------------------------------------
-// COUT OVERRIDES
-// -----------------------------------------------------------------------------
-template <typename T>
-std::ostream& operator<<(std::ostream& out, const std::vector<T>& v) {
-    if (!v.empty()) {
-	out << '[';
-	std::copy(v.begin(), v.end(), std::ostream_iterator<T>(out, ", "));
-	out << "\b\b]";
-    }
-
-    return out;
-}
-
-template<typename T1,typename T2>
-std::ostream &operator<<(std::ostream &stream, const std::tuple<T1,T2> & p) {
-	stream<<"("<<get<0>(p)<<","<<get<1>(p)<<")";
-	return stream;
-}
-
-template<typename T1,typename T2, typename T3>
-std::ostream &operator<<(std::ostream &stream, const std::tuple<T1,T2,T3> & p) {
-	stream<<"("<<get<0>(p)<<","<<get<1>(p)<<","<<get<2>(p)<<")";
-	return stream;
-}
-// -----------------------------------------------------------------------------
 
 
 // -----------------------------------------------------------------------------
@@ -49,56 +30,90 @@ std::vector<T> pylist_to_vector(const py::object& obj) {
     return vect;
 }
 
-std::vector<tuple<int,int>> pylist_to_tuplist2(const py::object& obj) {
-    std::vector<tuple<int,int>> vect(len(obj));
-    int j, k;
-    for (unsigned long i = 0; i < vect.size(); i++)
+
+template <typename T>
+std::set<T> pylist_to_set(const py::object& obj) {
+    std::set<T> st;
+    for (unsigned long i = 0; i < len(obj); i++)
     {
-	j = py::extract<int>(obj[i][0]);
-	k = py::extract<int>(obj[i][1]);
-	vect[i] = make_tuple(j, k);
-	//cout << vect[i] << endl;
+        st.insert(py::extract<T>(obj[i]));
     }
 
-    return vect;
+    return st;
 }
 
-std::vector<tuple<int,int,int>> pylist_to_tuplist3(const py::object& obj) {
-    std::vector<tuple<int,int,int>> vect(len(obj));
+
+// std::vector<tuple<int,int>> pylist_to_tuplist2(const py::object& obj) {
+//     std::vector<tuple<int,int>> vect(len(obj));
+//     int j, k;
+//     for (unsigned long i = 0; i < vect.size(); i++)
+//     {
+// 	j = py::extract<int>(obj[i][0]);
+// 	k = py::extract<int>(obj[i][1]);
+// 	vect[i] = make_tuple(j, k);
+// 	//cout << vect[i] << endl;
+//     }
+
+//     return vect;
+// }
+
+
+// std::vector<tuple<int,int,int>> pylist_to_tuplist3(const py::object& obj) {
+//     std::vector<tuple<int,int,int>> vect(len(obj));
+//     int j, k, m;
+//     for (unsigned long i = 0; i < vect.size(); i++)
+//     {
+// 	j = py::extract<int>(obj[i][0]);
+// 	k = py::extract<int>(obj[i][1]);
+// 	m = py::extract<int>(obj[i][2]);
+// 	vect[i] = make_tuple(j, k, m);
+// 	//cout << vect[i] << endl;
+//     }
+
+//     return vect;
+// }
+
+
+std::map<std::pair<int,int>,int> pylist_to_map_pair(const py::object& obj) {
+    std::map<std::pair<int,int>,int> mpr;
     int j, k, m;
-    for (unsigned long i = 0; i < vect.size(); i++)
+    for (unsigned long i = 0; i < len(obj); i++)
     {
-	j = py::extract<int>(obj[i][0]);
-	k = py::extract<int>(obj[i][1]);
-	m = py::extract<int>(obj[i][2]);
-	vect[i] = make_tuple(j, k, m);
-	//cout << vect[i] << endl;
+        j = py::extract<int>(obj[i][0]);
+        k = py::extract<int>(obj[i][1]);
+        m = py::extract<int>(obj[i][2]);
+        mpr[make_pair(j,k)] =  m;
+    //cout << vect[i] << endl;
     }
 
-    return vect;
+    return mpr  ;
 }
+
+
+std::set<std::pair<int,int>> pylist_to_set_pair(const py::object& obj) {
+    std::set<std::pair<int,int>> spr;
+    int j, k;
+    for (unsigned long i = 0; i < len(obj); i++)
+    {
+        j = py::extract<int>(obj[i][0]);
+        k = py::extract<int>(obj[i][1]);
+        spr.insert(make_pair(j,k));
+    //cout << vect[i] << endl;
+    }
+
+    return spr  ;
+}
+
 // -----------------------------------------------------------------------------
+
+
+
 
 class AbstractNetwork {
 public:
-    vector<int> nodes;
-    vector<int> sources;
-    vector<int> egresses;
-    vector<int> immutables;
-
-    // (from node, to node)
-    vector<tuple<int,int>> topology;
-
-    // (from node, pc, to node)
-    vector<tuple<int,int,int>> classes;
-
-    // (state, symbol, successor)
-    vector<tuple<int,int,int>> fsa;
-    vector<int> states;
-    vector<int> symbols;
-    int initial;
-    int dead;
-    vector<int> finals;
+    
+    Automata a1;
+    Network n1;
 
     AbstractNetwork() {}
 
@@ -127,41 +142,50 @@ AbstractNetwork::AbstractNetwork(py::list _nodes,
 				 py::list _symbols,
 				 py::list _finals,
 				 int _initial,
-				 int _dead) {
-    // topology
-    topology = pylist_to_tuplist2(_topology);
-    nodes = pylist_to_vector<int>(_nodes);
-    sources = pylist_to_vector<int>(_sources);
-    egresses = pylist_to_vector<int>(_egresses);
-    immutables = pylist_to_vector<int>(_immutables);
+				 int _dead) 
+{   
+    
+    a1.states = pylist_to_set<int>(_states);
+    a1.symbols = pylist_to_vector<int>(_symbols);
+    a1.transitions = pylist_to_map_pair(_fsa);
+    a1.final_states = pylist_to_set<int>(_finals);
+    a1.start_state = _initial;
+    a1.dead_state = _dead; 
+        
+    n1.abstract_nodes =  pylist_to_set<int>(_nodes);
+    n1.abstract_topology = pylist_to_set_pair(_topology);
+    n1.abstract_rules = pylist_to_map_pair(_classes);
+    n1.abstract_immutable_nodes[1] = pylist_to_set<int>(_immutables);
+    n1.abstract_egress_nodes[1] = pylist_to_set<int>(_egresses);
+    n1.abstract_source_nodes[1] = pylist_to_set<int>(_sources);
+    n1.abstract_pc_map["1"] = 1; 
+    
+    std::cout << "\n\nNetwork";
+    std::cout << "\nNodes : " << n1.abstract_nodes;
+    std::cout << "\nTopology : " << n1.abstract_topology;
+    std::cout << "\nRules : " << n1.abstract_rules;
+    std::cout << "\nImmutable Nodes : " << n1.abstract_immutable_nodes[1];
+    std::cout << "\nEgress Nodes : " << n1.abstract_egress_nodes[1];
+    std::cout << "\nSource Nodes : " << n1.abstract_source_nodes[1];
+    
+    std::cout << "\n\nAutomata";
+    std::cout << "\nStates : " << a1.states; 
+    std::cout << "\nSymbols : " << a1.symbols; 
+    std::cout << "\nTransitions : " << a1.transitions; 
+    std::cout << "\nFinal States : " << a1.final_states; 
+    std::cout << "\nStart State : " << a1.start_state; 
+    std::cout << "\nDead State : " << a1.dead_state; 
 
-    // classes
-    classes = pylist_to_tuplist3(_classes);
-
-    // fsa
-    fsa = pylist_to_tuplist3(_fsa);
-    symbols = pylist_to_vector<int>(_symbols);
-    states = pylist_to_vector<int>(_states);
-    finals = pylist_to_vector<int>(_finals);
-    initial = initial;
-    dead = dead;
-
-    // cout << "Nodes:" << nodes << endl;
-    // cout << "Sources:" << sources << endl;
-    // cout << "Egresses:" << egresses << endl;
-    // cout << "Immutables:" << immutables << endl;
-    // cout << "Initial:" << _initial << endl;
-    // cout << "Dead:" << _dead << endl;
 }
 
-class Solver {
+class CPPSolver {
 public:
     AbstractNetwork network;
-    Solver(AbstractNetwork _network);
+    CPPSolver(AbstractNetwork _network);
     py::list solve();
 };
 
-Solver::Solver(AbstractNetwork _network) {
+CPPSolver::CPPSolver(AbstractNetwork _network) {
     network = _network;
 }
 
@@ -173,9 +197,77 @@ Solver::Solver(AbstractNetwork _network) {
  * Each tuple should be instantiated using:
  *    py::make_tuple(n, n1)
  */
-py::list Solver::solve() {
+
+
+
+py::list CPPSolver::solve() {
     py::list ret;
-    cout << "Solver:solve() was invoked" << endl;
+
+    try
+    {
+        network.n1.Compute_OD();
+        std::cout << "\n\nOriginal Destination : " << network.n1.abstract_od; 
+        
+
+        for(int k=1; k <= 2  ; k++)//n1.abstract_nodes.size()
+        {
+            cout << "\n\n Phase " << k << "\n";  
+            context ctx;
+            
+            
+            Solver s1(ctx,network.n1,k);
+            
+            s1.define_k_rules();
+            s1.delta_satisfies_topology();
+            s1.delta_satisfies_non_mutable();
+            s1.delta_satisfies_not_egress();
+            s1.delta_satisfies_not_existing(); 
+          
+            s1.print_query(); 
+            
+            func_decl cycle = z3::function("cycle", ctx.int_sort(), ctx.int_sort(), ctx.int_sort()); 
+            s1.execute_recursive(Cyclicity(ctx,cycle));
+            
+            func_decl dest = z3::function("dest", ctx.int_sort(), ctx.int_sort(), ctx.int_sort());
+            s1.execute_recursive(Compute_Dest(ctx,dest,network.n1));
+            
+            
+            
+            func_decl rho = z3::function("rho", ctx.int_sort(), ctx.int_sort(), ctx.int_sort()); 
+            func_decl delta = z3::function("delta", ctx.int_sort(), ctx.int_sort(), ctx.int_sort()); 
+            //expr_vector delta_vars(ctx);
+            //expr  delta_expr(ctx);
+            s1.execute_recursive(Modified_Functionality(ctx,rho,delta,network.a1,network.n1.abstract_nodes));   
+            s1.accept_automata(rho,network.a1);
+            
+            
+            
+            Z3_model m = s1.solve_z3();
+            if(m)
+            {
+                model m1(ctx, m);
+                cout << "\n\nModel\n" << m1;
+                break;
+            }
+        }
+
+    }
+    catch(...)  
+    {   std::cout << "Exception Caught";
+    }
+        
+        
+
+    // cout << "IN solve module";
+    // cout << "Solver:solve() was invoked" << endl;
+    // // add code here
+    // cout << network.topology;
+    // // << "\n" << network.nodes << "\n" << network.sources << "\n" << network.egresses << "\n" << network.immutables << "\n" << network.classes 
+    // cout     << "\n" << network.fsa << "\n" << network.symbols << "\n" << network.states << "\n" << network.finals << "\n" << network.initial ; 
+    // cout     << "\n" << network.dead << "\n" ; 
+         
+    
+    
     ret.append(py::make_tuple(1, 2));
     return ret;
 }
@@ -195,7 +287,8 @@ BOOST_PYTHON_MODULE(solver){
 				int,
 				int>());
 
-    py::class_<Solver>("Solver",
+    py::class_<CPPSolver>("CPPSolver",
     		       py::init<AbstractNetwork>())
-    	.def("solve", &Solver::solve);
+    	.def("solve", &CPPSolver::solve);
 }
+

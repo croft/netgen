@@ -1,0 +1,15 @@
+1382 bozb_rtr bbra_rtr
+1382 yoza_rtr yozb_rtr
+1382 cozb_rtr bbra_rtr
+1382 coza_rtr bbra_rtr
+1382 pozb_rtr bbra_rtr
+1382 roza_rtr bbra_rtr
+1382 gozb_rtr goza_rtr
+1382 boza_rtr bbra_rtr
+1382 goza_rtr gozb_rtr
+1382 yozb_rtr yoza_rtr
+1382 soza_rtr bbra_rtr
+1382 sozb_rtr bbra_rtr
+1382 bbrb_rtr bbra_rtr
+1382 rozb_rtr bbra_rtr
+1382 poza_rtr bbra_rtr

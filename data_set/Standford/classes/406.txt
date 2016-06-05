@@ -1,0 +1,16 @@
+406 bozb_rtr bbra_rtr
+406 bbra_rtr pozb_rtr
+406 yoza_rtr yozb_rtr
+406 cozb_rtr bbra_rtr
+406 coza_rtr bbra_rtr
+406 pozb_rtr bbra_rtr
+406 roza_rtr bbra_rtr
+406 gozb_rtr goza_rtr
+406 boza_rtr bbra_rtr
+406 goza_rtr gozb_rtr
+406 yozb_rtr bbra_rtr
+406 soza_rtr bbra_rtr
+406 sozb_rtr bbra_rtr
+406 bbrb_rtr pozb_rtr
+406 rozb_rtr bbra_rtr
+406 poza_rtr bbra_rtr

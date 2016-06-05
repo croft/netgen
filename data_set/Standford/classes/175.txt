@@ -1,0 +1,15 @@
+175 bozb_rtr bbra_rtr
+175 yoza_rtr yozb_rtr
+175 cozb_rtr bbrb_rtr
+175 coza_rtr bbrb_rtr
+175 pozb_rtr bbra_rtr
+175 roza_rtr bbra_rtr
+175 gozb_rtr goza_rtr
+175 boza_rtr bbra_rtr
+175 goza_rtr gozb_rtr
+175 yozb_rtr bbra_rtr
+175 soza_rtr sozb_rtr
+175 sozb_rtr bbrb_rtr
+175 bbrb_rtr bbra_rtr
+175 rozb_rtr bbra_rtr
+175 poza_rtr bbra_rtr

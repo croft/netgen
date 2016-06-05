@@ -1,0 +1,15 @@
+670 bozb_rtr bbra_rtr
+670 yoza_rtr yozb_rtr
+670 cozb_rtr bbra_rtr
+670 coza_rtr bbra_rtr
+670 pozb_rtr bbra_rtr
+670 roza_rtr bbra_rtr
+670 gozb_rtr goza_rtr
+670 boza_rtr bbra_rtr
+670 goza_rtr gozb_rtr
+670 yozb_rtr bbra_rtr
+670 soza_rtr bbra_rtr
+670 sozb_rtr bbra_rtr
+670 bbrb_rtr bbra_rtr
+670 rozb_rtr bbra_rtr
+670 poza_rtr bbra_rtr

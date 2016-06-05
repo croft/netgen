@@ -1,0 +1,15 @@
+24 bozb_rtr bbra_rtr
+24 yoza_rtr yozb_rtr
+24 cozb_rtr bbra_rtr
+24 coza_rtr bbra_rtr
+24 pozb_rtr bbra_rtr
+24 roza_rtr bbra_rtr
+24 gozb_rtr goza_rtr
+24 boza_rtr bbra_rtr
+24 goza_rtr gozb_rtr
+24 yozb_rtr bbra_rtr
+24 soza_rtr bbra_rtr
+24 sozb_rtr bbra_rtr
+24 bbrb_rtr bbra_rtr
+24 rozb_rtr bbra_rtr
+24 poza_rtr bbra_rtr

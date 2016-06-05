@@ -1,0 +1,15 @@
+454 bozb_rtr bbra_rtr
+454 yoza_rtr yozb_rtr
+454 cozb_rtr bbra_rtr
+454 coza_rtr bbra_rtr
+454 pozb_rtr bbra_rtr
+454 roza_rtr bbra_rtr
+454 gozb_rtr goza_rtr
+454 boza_rtr bbra_rtr
+454 goza_rtr gozb_rtr
+454 yozb_rtr bbra_rtr
+454 soza_rtr bbra_rtr
+454 sozb_rtr bbra_rtr
+454 bbrb_rtr bbra_rtr
+454 rozb_rtr bbra_rtr
+454 poza_rtr bbra_rtr

@@ -1,0 +1,15 @@
+176 bozb_rtr bbra_rtr
+176 yoza_rtr yozb_rtr
+176 cozb_rtr bbra_rtr
+176 coza_rtr bbra_rtr
+176 pozb_rtr bbra_rtr
+176 roza_rtr bbra_rtr
+176 gozb_rtr goza_rtr
+176 boza_rtr bbra_rtr
+176 goza_rtr gozb_rtr
+176 yozb_rtr bbra_rtr
+176 soza_rtr bbra_rtr
+176 sozb_rtr bbra_rtr
+176 bbrb_rtr bbra_rtr
+176 rozb_rtr bbra_rtr
+176 poza_rtr bbra_rtr

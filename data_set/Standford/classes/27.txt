@@ -1,0 +1,16 @@
+27 bozb_rtr bbra_rtr
+27 bbra_rtr soza_rtr
+27 yoza_rtr yozb_rtr
+27 cozb_rtr bbra_rtr
+27 coza_rtr bbra_rtr
+27 pozb_rtr bbra_rtr
+27 roza_rtr bbra_rtr
+27 gozb_rtr goza_rtr
+27 boza_rtr bbra_rtr
+27 goza_rtr gozb_rtr
+27 yozb_rtr bbra_rtr
+27 soza_rtr sozb_rtr
+27 sozb_rtr soza_rtr
+27 bbrb_rtr soza_rtr
+27 rozb_rtr bbra_rtr
+27 poza_rtr bbra_rtr

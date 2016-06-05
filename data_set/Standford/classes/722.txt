@@ -1,0 +1,16 @@
+722 bozb_rtr bbra_rtr
+722 bbra_rtr soza_rtr
+722 yoza_rtr yozb_rtr
+722 cozb_rtr bbra_rtr
+722 coza_rtr bbra_rtr
+722 pozb_rtr bbra_rtr
+722 roza_rtr bbra_rtr
+722 gozb_rtr goza_rtr
+722 boza_rtr bbra_rtr
+722 goza_rtr gozb_rtr
+722 yozb_rtr bbra_rtr
+722 soza_rtr sozb_rtr
+722 sozb_rtr bbra_rtr
+722 bbrb_rtr soza_rtr
+722 rozb_rtr bbra_rtr
+722 poza_rtr bbra_rtr

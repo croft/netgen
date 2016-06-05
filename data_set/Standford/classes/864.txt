@@ -1,0 +1,16 @@
+864 bozb_rtr bbra_rtr
+864 bbra_rtr roza_rtr
+864 yoza_rtr yozb_rtr
+864 cozb_rtr bbra_rtr
+864 coza_rtr bbra_rtr
+864 pozb_rtr bbra_rtr
+864 roza_rtr bbra_rtr
+864 gozb_rtr goza_rtr
+864 boza_rtr bbra_rtr
+864 goza_rtr gozb_rtr
+864 yozb_rtr bbra_rtr
+864 soza_rtr bbra_rtr
+864 sozb_rtr bbra_rtr
+864 bbrb_rtr yozb_rtr
+864 rozb_rtr bbra_rtr
+864 poza_rtr bbra_rtr

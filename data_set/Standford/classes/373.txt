@@ -1,0 +1,15 @@
+373 bozb_rtr bbra_rtr
+373 yoza_rtr yozb_rtr
+373 cozb_rtr bbra_rtr
+373 coza_rtr bbra_rtr
+373 pozb_rtr bbra_rtr
+373 roza_rtr bbra_rtr
+373 gozb_rtr goza_rtr
+373 boza_rtr bbra_rtr
+373 goza_rtr gozb_rtr
+373 yozb_rtr bbra_rtr
+373 soza_rtr bbra_rtr
+373 sozb_rtr bbra_rtr
+373 bbrb_rtr bbra_rtr
+373 rozb_rtr bbra_rtr
+373 poza_rtr bbra_rtr

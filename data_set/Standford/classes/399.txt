@@ -1,0 +1,15 @@
+399 bozb_rtr bbra_rtr
+399 yoza_rtr yozb_rtr
+399 cozb_rtr bbra_rtr
+399 coza_rtr bbra_rtr
+399 pozb_rtr bbra_rtr
+399 roza_rtr bbra_rtr
+399 gozb_rtr goza_rtr
+399 boza_rtr bbra_rtr
+399 goza_rtr gozb_rtr
+399 yozb_rtr bbra_rtr
+399 soza_rtr bbra_rtr
+399 sozb_rtr bbra_rtr
+399 bbrb_rtr bbra_rtr
+399 rozb_rtr bbra_rtr
+399 poza_rtr bbra_rtr

@@ -1,0 +1,16 @@
+345 bozb_rtr bbra_rtr
+345 bbra_rtr pozb_rtr
+345 yoza_rtr yozb_rtr
+345 cozb_rtr bbra_rtr
+345 coza_rtr bbra_rtr
+345 pozb_rtr bbra_rtr
+345 roza_rtr bbra_rtr
+345 gozb_rtr goza_rtr
+345 boza_rtr bbra_rtr
+345 goza_rtr gozb_rtr
+345 yozb_rtr bbra_rtr
+345 soza_rtr bbra_rtr
+345 sozb_rtr bbra_rtr
+345 bbrb_rtr pozb_rtr
+345 rozb_rtr bbra_rtr
+345 poza_rtr bbra_rtr

@@ -1,0 +1,15 @@
+367 bozb_rtr bbra_rtr
+367 yoza_rtr yozb_rtr
+367 cozb_rtr bbra_rtr
+367 coza_rtr bbra_rtr
+367 pozb_rtr bbra_rtr
+367 roza_rtr bbra_rtr
+367 gozb_rtr goza_rtr
+367 boza_rtr bbra_rtr
+367 goza_rtr gozb_rtr
+367 yozb_rtr bbra_rtr
+367 soza_rtr bbra_rtr
+367 sozb_rtr bbra_rtr
+367 bbrb_rtr bbra_rtr
+367 rozb_rtr bbra_rtr
+367 poza_rtr bbra_rtr

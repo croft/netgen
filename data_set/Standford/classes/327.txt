@@ -1,0 +1,15 @@
+327 bozb_rtr bbra_rtr
+327 yoza_rtr yozb_rtr
+327 cozb_rtr bbra_rtr
+327 coza_rtr bbra_rtr
+327 pozb_rtr bbra_rtr
+327 roza_rtr bbra_rtr
+327 gozb_rtr goza_rtr
+327 boza_rtr bbra_rtr
+327 goza_rtr gozb_rtr
+327 yozb_rtr bbra_rtr
+327 soza_rtr bbra_rtr
+327 sozb_rtr bbra_rtr
+327 bbrb_rtr bbra_rtr
+327 rozb_rtr bbra_rtr
+327 poza_rtr bbra_rtr

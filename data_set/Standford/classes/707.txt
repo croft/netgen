@@ -1,0 +1,16 @@
+707 bozb_rtr bbra_rtr
+707 bbra_rtr sozb_rtr
+707 yoza_rtr yozb_rtr
+707 cozb_rtr bbra_rtr
+707 coza_rtr bbra_rtr
+707 pozb_rtr bbra_rtr
+707 roza_rtr bbra_rtr
+707 gozb_rtr goza_rtr
+707 boza_rtr bbra_rtr
+707 goza_rtr gozb_rtr
+707 yozb_rtr bbra_rtr
+707 soza_rtr bbra_rtr
+707 sozb_rtr bbra_rtr
+707 bbrb_rtr sozb_rtr
+707 rozb_rtr bbra_rtr
+707 poza_rtr bbra_rtr

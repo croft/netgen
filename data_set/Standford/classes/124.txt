@@ -1,0 +1,16 @@
+124 bozb_rtr bbra_rtr
+124 bbra_rtr soza_rtr
+124 yoza_rtr yozb_rtr
+124 cozb_rtr bbra_rtr
+124 coza_rtr bbra_rtr
+124 pozb_rtr bbra_rtr
+124 roza_rtr bbra_rtr
+124 gozb_rtr goza_rtr
+124 boza_rtr bbra_rtr
+124 goza_rtr gozb_rtr
+124 yozb_rtr bbra_rtr
+124 sozb_rtr bbrb_rtr
+124 soza_rtr sozb_rtr
+124 bbrb_rtr soza_rtr
+124 rozb_rtr bbra_rtr
+124 poza_rtr bbra_rtr

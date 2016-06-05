@@ -1,0 +1,16 @@
+1282 bozb_rtr bbra_rtr
+1282 bbra_rtr soza_rtr
+1282 yoza_rtr yozb_rtr
+1282 cozb_rtr bbra_rtr
+1282 coza_rtr bbra_rtr
+1282 pozb_rtr poza_rtr
+1282 roza_rtr bbra_rtr
+1282 gozb_rtr goza_rtr
+1282 boza_rtr bbra_rtr
+1282 goza_rtr gozb_rtr
+1282 yozb_rtr bbra_rtr
+1282 soza_rtr bbra_rtr
+1282 sozb_rtr bbra_rtr
+1282 bbrb_rtr soza_rtr
+1282 rozb_rtr bbra_rtr
+1282 poza_rtr bbra_rtr

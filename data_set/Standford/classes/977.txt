@@ -1,0 +1,16 @@
+977 bozb_rtr bbra_rtr
+977 bbra_rtr roza_rtr
+977 yoza_rtr yozb_rtr
+977 cozb_rtr bbra_rtr
+977 coza_rtr bbra_rtr
+977 pozb_rtr bbra_rtr
+977 roza_rtr bbra_rtr
+977 gozb_rtr goza_rtr
+977 boza_rtr bbra_rtr
+977 goza_rtr gozb_rtr
+977 yozb_rtr bbra_rtr
+977 soza_rtr bbra_rtr
+977 sozb_rtr bbra_rtr
+977 bbrb_rtr yozb_rtr
+977 rozb_rtr roza_rtr
+977 poza_rtr bbra_rtr

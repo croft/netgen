@@ -1,0 +1,16 @@
+1118 bozb_rtr bbra_rtr
+1118 bbra_rtr yoza_rtr
+1118 yoza_rtr yozb_rtr
+1118 cozb_rtr bbra_rtr
+1118 coza_rtr bbra_rtr
+1118 pozb_rtr bbra_rtr
+1118 roza_rtr bbra_rtr
+1118 gozb_rtr goza_rtr
+1118 boza_rtr bbra_rtr
+1118 goza_rtr gozb_rtr
+1118 yozb_rtr yoza_rtr
+1118 soza_rtr bbra_rtr
+1118 sozb_rtr bbra_rtr
+1118 bbrb_rtr yoza_rtr
+1118 rozb_rtr bbra_rtr
+1118 poza_rtr bbra_rtr

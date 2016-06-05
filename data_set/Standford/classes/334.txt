@@ -1,0 +1,16 @@
+334 bozb_rtr bbra_rtr
+334 bbra_rtr soza_rtr
+334 yoza_rtr yozb_rtr
+334 cozb_rtr bbra_rtr
+334 coza_rtr bbra_rtr
+334 pozb_rtr poza_rtr
+334 roza_rtr bbra_rtr
+334 gozb_rtr goza_rtr
+334 boza_rtr bbra_rtr
+334 goza_rtr gozb_rtr
+334 yozb_rtr bbra_rtr
+334 soza_rtr bbra_rtr
+334 sozb_rtr bbra_rtr
+334 bbrb_rtr soza_rtr
+334 rozb_rtr bbra_rtr
+334 poza_rtr bbra_rtr

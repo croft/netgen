@@ -1,0 +1,15 @@
+659 bozb_rtr bbra_rtr
+659 yoza_rtr yozb_rtr
+659 cozb_rtr bbra_rtr
+659 coza_rtr bbra_rtr
+659 pozb_rtr bbra_rtr
+659 roza_rtr bbra_rtr
+659 gozb_rtr goza_rtr
+659 boza_rtr bbra_rtr
+659 goza_rtr gozb_rtr
+659 yozb_rtr bbra_rtr
+659 soza_rtr bbra_rtr
+659 sozb_rtr bbra_rtr
+659 bbrb_rtr bbra_rtr
+659 rozb_rtr bbra_rtr
+659 poza_rtr bbra_rtr

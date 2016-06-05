@@ -1,0 +1,16 @@
+137 bozb_rtr bbra_rtr
+137 bbra_rtr sozb_rtr
+137 yoza_rtr yozb_rtr
+137 cozb_rtr bbra_rtr
+137 coza_rtr bbra_rtr
+137 pozb_rtr bbra_rtr
+137 roza_rtr bbra_rtr
+137 gozb_rtr goza_rtr
+137 boza_rtr bbra_rtr
+137 goza_rtr gozb_rtr
+137 yozb_rtr bbra_rtr
+137 sozb_rtr bbrb_rtr
+137 soza_rtr sozb_rtr
+137 bbrb_rtr sozb_rtr
+137 rozb_rtr bbra_rtr
+137 poza_rtr bbra_rtr
