@@ -17,7 +17,8 @@ using namespace std;
 namespace py = boost::python;
 using namespace z3;
 
-#define SORT     ctx.int_sort()
+//#define SORT     ctx.int_sort()
+#define SORT     ctx.bv_sort(14)
 
 // -----------------------------------------------------------------------------
 // PYTHON TYPES CONVERSION

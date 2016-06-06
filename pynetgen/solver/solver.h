@@ -28,8 +28,10 @@
 using namespace z3;
 using namespace std;
 
-#define CONST(X) ctx.int_const(X)
-#define VALUE(X) ctx.int_val(X)
+// #define CONST(X) ctx.int_const(X)
+// #define VALUE(X) ctx.int_val(X)
+#define CONST(X) ctx.bv_const(X,14)
+#define VALUE(X) ctx.bv_val(X,14)
 
 class Network;
 
