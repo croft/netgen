@@ -13,20 +13,13 @@
 #include "automata.h"
 #include "z3++.h"
 #include "recursive_definitions.h"
+#include "config.h"
 
 using namespace std;
 namespace py = boost::python;
 using namespace z3;
 
 int SIZE; 
-
-#define  LIA 1
-#define  BV  2 
-#define  LRA 3
-
-
-#define THEORY LIA
-
 
 #if THEORY == LIA
     #define SORT     ctx.int_sort()
@@ -35,15 +28,6 @@ int SIZE;
 #elif THEORY == LRA
     #define SORT     ctx.real_sort()
 #endif
-
-
-
-#define UF    4
-#define MACRO 5
-
-#define ENCODING MACRO
-
-
 
 
 // -----------------------------------------------------------------------------

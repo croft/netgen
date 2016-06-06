@@ -44,7 +44,8 @@ OTHER_DEP_FILES=$(SOLVER_DIR)/solver.h \
 				$(SOLVER_DIR)/recursive_definitions.h \
 				$(SOLVER_DIR)/utils.h \
 				$(SOLVER_DIR)/network.h \
-				$(SOLVER_DIR)/automata.h
+				$(SOLVER_DIR)/automata.h \
+				$(SOLVER_DIR)/config.h
 
 OBJECTS=$(DEST)/$(TARGET).so
 TEMPOBJ=$(DEST)/$(TARGET).o

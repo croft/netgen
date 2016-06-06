@@ -23,20 +23,13 @@
 #include "recursive_definitions.h"
 
 #include "network.h"
+#include "config.h"
 
 
 using namespace z3;
 using namespace std;
 
 extern int SIZE; 
-
-#define  LIA 1
-#define  BV  2 
-#define  LRA 3
-
-
-#define THEORY LIA
-
 
 #if THEORY == LIA
     #define CONST(X) ctx.int_const(X)

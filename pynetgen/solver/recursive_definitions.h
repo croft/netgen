@@ -4,20 +4,11 @@
 #include "z3++.h"
 #include "automata.h"
 #include "network.h"
-
+#include "config.h"
 using namespace z3;
 
 extern int SIZE; 
 
-
-#define  LIA 1
-#define  BV  2 
-#define  LRA 3
-
-
-#define THEORY LIA
-    
-    
 #if THEORY == LIA
     #define VALUE(X) ctx.int_val(X)
 #elif THEORY == BV
@@ -25,7 +16,6 @@ extern int SIZE;
 #elif THEORY == LRA
     #define VALUE(X) ctx.real_val(X)
 #endif
-
 
 
 class recursive_definition
