@@ -228,7 +228,11 @@ py::list CPPSolver::solve()
             begin = clock();
 
             s1.define_k_rules();
-            s1.delta_satisfies_topology();
+            //s1.delta_satisfies_topology();
+            
+            func_decl topology = z3::function("topology", ctx.int_sort(), ctx.int_sort(), ctx.bool_sort());
+            s1.delta_satisfies_topology_uf(topology);
+            
             s1.delta_satisfies_non_mutable();
             s1.delta_satisfies_not_egress();
             s1.delta_satisfies_not_existing();

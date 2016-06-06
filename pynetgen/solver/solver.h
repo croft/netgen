@@ -137,6 +137,38 @@ public:
 
 		query = query && ex; 
 	}	
+	
+	void delta_satisfies_topology_uf(func_decl &topology)
+	{
+		
+		for( auto n_it = network.abstract_nodes.begin(); n_it != network.abstract_nodes.end(); n_it ++ )
+		{
+			for( auto n1_it = network.abstract_nodes.begin(); n1_it != network.abstract_nodes.end(); n1_it ++ )
+			{
+				if( *n_it == *n1_it) 
+				{
+					query = query && topology(ctx.int_val(*n_it),ctx.int_val(*n1_it)) == ctx.bool_val(false);
+				}
+				else if (  network.abstract_topology.find(make_pair(*n_it,*n1_it))  != network.abstract_topology.end())
+				{
+					query = query && topology(ctx.int_val(*n_it),ctx.int_val(*n1_it)) == ctx.bool_val(true);
+				}
+				else
+				{
+					query = query && topology(ctx.int_val(*n_it),ctx.int_val(*n1_it)) == ctx.bool_val(false);
+				}
+			}
+		} 
+		
+		for (int index = 0; index < k ; index ++ )			
+		{
+			query = query && topology(n[index],n1[index]) == ctx.bool_val(true);
+		}		 
+			 
+	}	
+	
+	
+	
 
 	void delta_satisfies_not_egress()
 	{
