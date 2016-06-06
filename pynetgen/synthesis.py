@@ -3,6 +3,7 @@
 import abc
 from z3 import *
 
+import solver.cppsolver as cppsolver
 from log import logger
 from profiling import PerfCounter
 
@@ -86,7 +87,78 @@ class AbstractNetwork(object):
     def classes(self):
         return self.class_pcrep.keys()
 
-class Synthesizer(object):
+class AbstractSynthesizer:
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, network, spec):
+        pass
+
+    def solve(self):
+        return
+
+class CppSynthesizer(AbstractSynthesizer):
+    def __init__(self, network, spec):
+        pc = PerfCounter("absnet creation")
+        pc.start()
+        self.abstract_network = AbstractNetwork(network, spec)
+        self.network = CppSynthesizer.convert_abstract_network(self.abstract_network)
+        pc.stop()
+
+    @classmethod
+    def convert_abstract_network(cls, net):
+        nodes = net.nodes
+        sources = net.sources
+        egresses = net.sinks
+        immutables = net.immutables
+
+        topo = []
+        for m, n in net.concrete_network.iteredges():
+            topo.append((net.node_intrep[m], net.node_intrep[n]))
+
+        classes = []
+        for pcid, pc in net.class_pcrep.iteritems():
+            for m, n in pc.iteredges():
+                classes.append((net.node_intrep[m], pcid, net.node_intrep[n]))
+
+        fsa = []
+        for s1, t, s2 in net.fsa.transitions:
+            s1 = int(s1)
+            s2 = int(s2)
+            if t in net.node_intrep:
+                fsa.append((s1, net.node_intrep[t], s2))
+            else:
+                fsa.append((s1, int(t), s2))
+
+        symbols = net.fsa.symbolAliases.values()
+        states = [int(s) for s in net.fsa.states]
+        finals = [int(s) for s in net.fsa.final]
+        initial = int(net.fsa.initial)
+        dead = 0
+
+        return cppsolver.AbstractNetwork(nodes,
+                                         sources,
+                                         egresses,
+                                         immutables,
+                                         topo,
+                                         classes,
+                                         fsa,
+                                         states,
+                                         symbols,
+                                         finals,
+                                         initial,
+                                         dead)
+
+    def solve(self):
+        solver = cppsolver.CPPSolver(self.network)
+        result = solver.solve()
+        path = [(self.abstract_network.node_strrep[int(f)],
+                 self.abstract_network.node_strrep[int(t)])
+                for (f, t) in result]
+
+        print "Model found:", path
+        return path
+
+class PythonSynthesizer(AbstractSynthesizer):
     def __init__(self, network, spec):
         pc = PerfCounter("absnet creation")
         pc.start()
@@ -157,6 +229,10 @@ class Synthesizer(object):
                 logger.debug("Node mapping: %s", self.network.node_strrep)
                 logger.info("Model found: %s", path)
                 return path
+
+# TODO: cleanup Synthesizer references, no default
+# set default to Python
+Synthesizer = PythonSynthesizer
 
 class SmtQuery(object):
     def __init__(self, fsa, network, k, spec):

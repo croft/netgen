@@ -1,16 +1,20 @@
 .PHONY: cppsolver.so
 
-DEST=..
+DEST=./
 TARGET=cppsolver
 SOLVER_DIR=.
 
 
 PY_INCL=/usr/include/python2.7
 
+# BOOST_DIR=/usr/include/boost
+# BOOST_INCLUDE=$(BOOST_DIR)
+# BOOST_LIB=$(BOOST_DIR)
 BOOST_DIR=/home/me/boost_1_60_0
 BOOST_INCLUDE=$(BOOST_DIR)/include
 BOOST_LIB=$(BOOST_DIR)/stage/lib
 
+# Z3_DIR=/home/croftj/src/netgen/Lib/z3Linux
 Z3_DIR=/home/me/mac/Networks/netgen/lib/z3Linux
 Z3_LIB_DIR=$(Z3_DIR)/bin
 Z3_INC_DIR=$(Z3_DIR)/include
@@ -31,7 +35,6 @@ INCLUDES= \
 		$(SOLVER_DIR) \
 		$(BOOST_INCLUDE) \
 		$(PY_INCL)
-		
 
 INCLUDE_PARAMS=$(foreach d, $(INCLUDES), -I$d)
 
@@ -41,16 +44,14 @@ OTHER_DEP_FILES=$(SOLVER_DIR)/solver.h \
 				$(SOLVER_DIR)/recursive_definitions.h \
 				$(SOLVER_DIR)/utils.h \
 				$(SOLVER_DIR)/network.h \
-				$(SOLVER_DIR)/automata.h 
-
-				
+				$(SOLVER_DIR)/automata.h
 
 OBJECTS=$(DEST)/$(TARGET).so
 TEMPOBJ=$(DEST)/$(TARGET).o
 
 
 CFLAGS =  -c $(OPTFLAGS) -std=$(STD) $(ARCHITECTURE) -fPIC
-LFLAGS =  -shared 
+LFLAGS =  -shared
 
 
 ifeq ($(PROFILE),true)
@@ -60,7 +61,7 @@ endif
 
 
 ifeq ($(DEBUG),false)
-	CFLAGS += -DNDEBUG 
+	CFLAGS += -DNDEBUG
 else
 	CFLAGS += -g
 endif
@@ -74,20 +75,18 @@ else
 endif
 
 
-all : $(SOURCES) $(INCLUDES)  $(OBJECTS) 
+all : $(SOURCES) $(INCLUDES)  $(OBJECTS)
 
 $(OBJECTS) : $(TEMPOBJ) $(Z3_LIB)
 	$(CC) $(LFLAGS) -Wl,-soname,$(TARGET).so -o $(OBJECTS)  $(TEMPOBJ)  $(Z3_LIB)  -lpython2.7 -lboost_python
 
 
 $(TEMPOBJ) : $(SOURCES) $(OTHER_DEP_FILES)
-	$(CC) $(CFLAGS) -o  $(TEMPOBJ)  $(INCLUDE_PARAMS) $(SOURCES) 
+	$(CC) $(CFLAGS) -o  $(TEMPOBJ)  $(INCLUDE_PARAMS) $(SOURCES)
 
 
 clean :
 	rm  -f $(OBJECTS) $(TEMPOBJ)
-	
-
 
 # solver.so:
 # 	g++ -Wall -shared -fPIC -o $(DEST)/solver.so solver.cpp -std=c++0x -lboost_python -I$(PY_INCL)

@@ -5,7 +5,7 @@ import synthesis
 from network import NetworkConfig
 from grammar import SpecGrammar
 from spec import Specification
-from cppsolver import AbstractNetwork, CPPSolver
+from solver.cppsolver import AbstractNetwork, CPPSolver
 from topos import DiamondTopo, FattreeTopo
 
 def conv_abstract_network(net):
