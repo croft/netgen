@@ -28,6 +28,9 @@
 using namespace z3;
 using namespace std;
 
+#define CONST(X) ctx.int_const(X)
+#define VALUE(X) ctx.int_val(X)
+
 class Network;
 
 class Solver
@@ -73,17 +76,17 @@ public:
 			ps << "p_" << index;
 			n1s<< "n1_" << index ;
 
-			expr x = ctx.int_const(ns.str().c_str());
+			expr x = CONST(ns.str().c_str());
 			n.push_back(x);
-			query = query && (ctx.int_val(0) < x) && (x <= ctx.int_val(num_nodes)) ;
+			query = query && (VALUE(0) < x) && (x <= VALUE(num_nodes)) ;
 
-			expr y = ctx.int_const(ps.str().c_str());
+			expr y = CONST(ps.str().c_str());
 			pc.push_back(y);
-			query = query && (ctx.int_val(0) < y) && (y <= ctx.int_val(num_pc)) ;
+			query = query && (VALUE(0) < y) && (y <= VALUE(num_pc)) ;
 
-			expr z = ctx.int_const(n1s.str().c_str());
+			expr z = CONST(n1s.str().c_str());
 			n1.push_back(z);
-			query = query && (ctx.int_val(0) < z) && (z <= ctx.int_val(num_nodes) ) ; 
+			query = query && (VALUE(0) < z) && (z <= VALUE(num_nodes) ) ; 
 
 		}
 	}
@@ -147,15 +150,15 @@ public:
 			{
 				if( *n_it == *n1_it) 
 				{
-					query = query && topology(ctx.int_val(*n_it),ctx.int_val(*n1_it)) == ctx.bool_val(false);
+					query = query && topology(VALUE(*n_it),VALUE(*n1_it)) == ctx.bool_val(false);
 				}
 				else if (  network.abstract_topology.find(make_pair(*n_it,*n1_it))  != network.abstract_topology.end())
 				{
-					query = query && topology(ctx.int_val(*n_it),ctx.int_val(*n1_it)) == ctx.bool_val(true);
+					query = query && topology(VALUE(*n_it),VALUE(*n1_it)) == ctx.bool_val(true);
 				}
 				else
 				{
-					query = query && topology(ctx.int_val(*n_it),ctx.int_val(*n1_it)) == ctx.bool_val(false);
+					query = query && topology(VALUE(*n_it),VALUE(*n1_it)) == ctx.bool_val(false);
 				}
 			}
 		} 
@@ -241,10 +244,10 @@ public:
 					expr not_new = ctx.bool_val(true);
 					for(int index = 0; index < k ; index++ )
 					{
-						query = query && implies( ( ctx.int_val((int)node) == n[index] &&  ctx.int_val(pc_int) == pc[index] ),
+						query = query && implies( ( VALUE((int)node) == n[index] &&  VALUE(pc_int) == pc[index] ),
 						                         functionality.change_rec (node, pc_int, n1[index]));
 						
-						not_new = not_new && ( ctx.int_val((int)node) != n[index] ||  ctx.int_val(pc_int) != pc[index] ) ; 
+						not_new = not_new && ( VALUE((int)node) != n[index] ||  VALUE(pc_int) != pc[index] ) ; 
 						
 					}					                     	
 					 
@@ -272,7 +275,7 @@ public:
 				for( auto q_it = automata.final_states.begin(); q_it != automata.final_states.end(); q_it++)
 				{
 					int q = *q_it;
-					for_each_s = for_each_s || rho( ctx.int_val(s), ctx.int_val(pc_int)) == ctx.int_val(q); 
+					for_each_s = for_each_s || rho( VALUE(s), VALUE(pc_int)) == VALUE(q); 
 				}
 				query = query &&  for_each_s;
 				

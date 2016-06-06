@@ -7,6 +7,9 @@
 
 using namespace z3;
 
+#define VALUE(X) ctx.int_val(X)
+
+
 class recursive_definition
 {
 	public:
@@ -27,12 +30,12 @@ class Cyclicity : public recursive_definition
 		{ }
 		expr base(const int node, const int pc) const
 		{ 
-			expr query = cycle(ctx.int_val(node), ctx.int_val(pc)) == ctx.int_val(0);
+			expr query = cycle(VALUE(node), VALUE(pc)) == VALUE(0);
 			return query;
 		}
 		expr change_rec(const int node,const int pc, const expr n_to) const
 		{
-			expr query = (cycle(ctx.int_val(node),ctx.int_val(pc)) > cycle(n_to,ctx.int_val(pc)));
+			expr query = (cycle(VALUE(node),VALUE(pc)) > cycle(n_to,VALUE(pc)));
 			return query;
 		}
 		expr default_rec(const int node,const int pc, const int n_to) const
@@ -42,7 +45,7 @@ class Cyclicity : public recursive_definition
 			// 	return ctx.bool_val(true);
 			// }
 			
-			expr query = (cycle(ctx.int_val(node),ctx.int_val(pc)) > cycle(ctx.int_val(n_to),ctx.int_val(pc)));
+			expr query = (cycle(VALUE(node),VALUE(pc)) > cycle(VALUE(n_to),VALUE(pc)));
 			return query;
 		}
 		expr auxilary_def() const 
@@ -51,7 +54,7 @@ class Cyclicity : public recursive_definition
 		}
 		expr encode_null(int pc) const
 		{
-			return cycle(ctx.int_val(0), ctx.int_val(pc)) == ctx.int_val(0);
+			return cycle(VALUE(0), VALUE(pc)) == VALUE(0);
 		}	
 };
 
@@ -135,7 +138,7 @@ class Modified_Functionality : public recursive_definition
 			
 			for( auto tran_it = a1.transitions.begin(); tran_it != a1.transitions.end(); tran_it++)
 			{
-				query = query && delta(ctx.int_val(tran_it->first.first),ctx.int_val(tran_it->first.second) ) == ctx.int_val(tran_it->second) ; 
+				query = query && delta(VALUE(tran_it->first.first),VALUE(tran_it->first.second) ) == VALUE(tran_it->second) ; 
 				
 			}
 			
@@ -164,14 +167,14 @@ class Modified_Functionality : public recursive_definition
 		{
 			//expr query = rho(ctx.int_val(node), ctx.int_val(pc)) == ctx.int_val(a1.transitions[make_pair(a1.start_state,node)]);
 			
-			expr query = rho(ctx.int_val(node), ctx.int_val(pc)) == delta(ctx.int_val(a1.start_state), ctx.int_val(node)) ;
+			expr query = rho(VALUE(node), VALUE(pc)) == delta(VALUE(a1.start_state), VALUE(node)) ;
 			return query;
 		}
 		
 		
 		expr change_rec(const int node,const int pc, const expr n_to) const
 		{
-			expr query = rho( ctx.int_val(node), ctx.int_val(pc) ) == delta( rho( n_to, ctx.int_val(pc)), ctx.int_val(node)) ; 
+			expr query = rho( VALUE(node), VALUE(pc) ) == delta( rho( n_to, VALUE(pc)), VALUE(node)) ; 
 			return query;
 			
 			// stringstream program;
@@ -194,7 +197,7 @@ class Modified_Functionality : public recursive_definition
 			// 	return ctx.bool_val(true);
 			// }
 			
-			expr query = (rho(ctx.int_val(node),ctx.int_val(pc)) ==   delta( rho(ctx.int_val(n_to),ctx.int_val(pc)),ctx.int_val(node))); 		
+			expr query = (rho(VALUE(node),VALUE(pc)) ==   delta( rho(VALUE(n_to),VALUE(pc)),VALUE(node))); 		
 			return query;
 			
 			
@@ -211,7 +214,7 @@ class Modified_Functionality : public recursive_definition
 		
 		expr encode_null(int pc) const
 		{
-			return rho(ctx.int_val(0), ctx.int_val(pc)) == ctx.int_val(0);
+			return rho(VALUE(0), VALUE(pc)) == VALUE(0);
 		}
 }; 
 
@@ -227,12 +230,12 @@ class Compute_Dest : public recursive_definition
 		{ }
 		expr base(const int node, const int pc) const
 		{ 
-			expr query = dest(ctx.int_val(node), ctx.int_val(pc)) == ctx.int_val(node);
+			expr query = dest(VALUE(node), VALUE(pc)) == VALUE(node);
 			return query;
 		}
 		expr change_rec(const int node,const int pc, const expr n_to) const
 		{
-			expr query = (dest( ctx.int_val(node), ctx.int_val(pc) ) == dest( n_to, ctx.int_val(pc))) ; 
+			expr query = (dest( VALUE(node), VALUE(pc) ) == dest( n_to, VALUE(pc))) ; 
 			return query;
 		}
 		expr default_rec(const int node,const int pc, const int n_to) const
@@ -242,7 +245,7 @@ class Compute_Dest : public recursive_definition
 			// 	return ctx.bool_val(true);
 			// }
 			
-			expr query = (dest( ctx.int_val(node), ctx.int_val(pc) ) == dest( ctx.int_val(n_to), ctx.int_val(pc))) ; 
+			expr query = (dest( VALUE(node), VALUE(pc) ) == dest( VALUE(n_to), VALUE(pc))) ; 
 			return query;
 		}
 		expr auxilary_def() const 
@@ -254,7 +257,7 @@ class Compute_Dest : public recursive_definition
 				for( auto src_it = n.abstract_source_nodes[pc].begin(); src_it != n.abstract_source_nodes[pc].end(); src_it ++ ) 
 				{
 					int src = *src_it;
-					query = query &&  dest(ctx.int_val(src), ctx.int_val(pc)) == ctx.int_val( n.abstract_od[make_pair(src,pc)] );
+					query = query &&  dest(VALUE(src), VALUE(pc)) == VALUE( n.abstract_od[make_pair(src,pc)] );
 				}
 			}
 			
@@ -263,7 +266,7 @@ class Compute_Dest : public recursive_definition
 		
 		expr encode_null(int pc) const
 		{
-			return  dest(ctx.int_val(0), ctx.int_val(pc)) == ctx.int_val(0);
+			return  dest(VALUE(0), VALUE(pc)) == VALUE(0);
 		}
 };
 

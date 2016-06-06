@@ -17,6 +17,8 @@ using namespace std;
 namespace py = boost::python;
 using namespace z3;
 
+#define SORT     ctx.int_sort()
+
 // -----------------------------------------------------------------------------
 // PYTHON TYPES CONVERSION
 // -----------------------------------------------------------------------------
@@ -228,23 +230,25 @@ py::list CPPSolver::solve()
             begin = clock();
 
             s1.define_k_rules();
-            //s1.delta_satisfies_topology();
             
-            func_decl topology = z3::function("topology", ctx.int_sort(), ctx.int_sort(), ctx.bool_sort());
-            s1.delta_satisfies_topology_uf(topology);
+            //topology macro or uninterpreted functions
+            s1.delta_satisfies_topology();
+            
+            //func_decl topology = z3::function("topology", SORT, SORT, ctx.bool_sort());
+            //s1.delta_satisfies_topology_uf(topology);
             
             s1.delta_satisfies_non_mutable();
             s1.delta_satisfies_not_egress();
             s1.delta_satisfies_not_existing();
 
-            func_decl cycle = z3::function("cycle", ctx.int_sort(), ctx.int_sort(), ctx.int_sort());
+            func_decl cycle = z3::function("cycle", SORT, SORT, SORT);
             s1.execute_recursive(Cyclicity(ctx,cycle));
 
-            func_decl dest = z3::function("dest", ctx.int_sort(), ctx.int_sort(), ctx.int_sort());
+            func_decl dest = z3::function("dest", SORT, SORT, SORT);
             s1.execute_recursive(Compute_Dest(ctx,dest,network.n1));
 
-            func_decl rho = z3::function("rho", ctx.int_sort(), ctx.int_sort(), ctx.int_sort());
-            func_decl delta = z3::function("delta", ctx.int_sort(), ctx.int_sort(), ctx.int_sort());
+            func_decl rho = z3::function("rho", SORT, SORT, SORT);
+            func_decl delta = z3::function("delta", SORT, SORT, SORT);
             //expr_vector delta_vars(ctx);
             //expr  delta_expr(ctx);
             s1.execute_recursive(Modified_Functionality(ctx,rho,delta,network.a1,network.n1.abstract_nodes));
