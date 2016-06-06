@@ -6,6 +6,7 @@
 #include <tuple>
 #include <set>
 #include <ctime>
+#include <math.h> 
 #include "utils.h"
 #include "solver.h"
 #include "network.h"
@@ -18,7 +19,8 @@ namespace py = boost::python;
 using namespace z3;
 
 //#define SORT     ctx.int_sort()
-#define SORT     ctx.bv_sort(14)
+int SIZE; 
+#define SORT     ctx.bv_sort(SIZE)
 
 // -----------------------------------------------------------------------------
 // PYTHON TYPES CONVERSION
@@ -216,6 +218,8 @@ py::list CPPSolver::solve()
     try
     {
         network.n1.Compute_OD();
+        SIZE = ceil((float)log2(network.n1.abstract_nodes.size()))+2;
+        cout << "\nSIZE = " << SIZE << "\n";  
         //std::cout << "\n\nOriginal Destination : " << network.n1.abstract_od;
         clock_t begin, end;
         double elapsed_ms;

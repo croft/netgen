@@ -30,8 +30,10 @@ using namespace std;
 
 // #define CONST(X) ctx.int_const(X)
 // #define VALUE(X) ctx.int_val(X)
-#define CONST(X) ctx.bv_const(X,14)
-#define VALUE(X) ctx.bv_val(X,14)
+// 
+extern int SIZE; 
+#define CONST(X) ctx.bv_const(X,SIZE)
+#define VALUE(X) ctx.bv_val(X,SIZE)
 
 class Network;
 

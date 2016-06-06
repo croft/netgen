@@ -8,7 +8,8 @@
 using namespace z3;
 
 // #define VALUE(X) ctx.int_val(X)
-#define VALUE(X) ctx.bv_val(X,14)
+extern int SIZE; 
+#define VALUE(X) ctx.bv_val(X,SIZE)
 
 class recursive_definition
 {
