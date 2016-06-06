@@ -1,6 +1,6 @@
 .PHONY: cppsolver.so
 
-DEST=./
+DEST=.
 TARGET=cppsolver
 SOLVER_DIR=.
 
