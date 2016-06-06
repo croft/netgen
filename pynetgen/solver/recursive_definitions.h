@@ -7,9 +7,26 @@
 
 using namespace z3;
 
-// #define VALUE(X) ctx.int_val(X)
 extern int SIZE; 
-#define VALUE(X) ctx.bv_val(X,SIZE)
+
+
+#define  LIA 1
+#define  BV  2 
+#define  LRA 3
+
+
+#define THEORY LIA
+    
+    
+#if THEORY == LIA
+    #define VALUE(X) ctx.int_val(X)
+#elif THEORY == BV
+    #define VALUE(X) ctx.bv_val(X,SIZE)
+#elif THEORY == LRA
+    #define VALUE(X) ctx.real_val(X)
+#endif
+
+
 
 class recursive_definition
 {

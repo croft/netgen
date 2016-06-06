@@ -18,9 +18,33 @@ using namespace std;
 namespace py = boost::python;
 using namespace z3;
 
-//#define SORT     ctx.int_sort()
 int SIZE; 
-#define SORT     ctx.bv_sort(SIZE)
+
+#define  LIA 1
+#define  BV  2 
+#define  LRA 3
+
+
+#define THEORY LIA
+
+
+#if THEORY == LIA
+    #define SORT     ctx.int_sort()
+#elif THEORY == BV
+    #define SORT     ctx.bv_sort(SIZE)
+#elif THEORY == LRA
+    #define SORT     ctx.real_sort()
+#endif
+
+
+
+#define UF    4
+#define MACRO 5
+
+#define ENCODING MACRO
+
+
+
 
 // -----------------------------------------------------------------------------
 // PYTHON TYPES CONVERSION
@@ -235,13 +259,16 @@ py::list CPPSolver::solve()
             begin = clock();
 
             s1.define_k_rules();
-            
-            //topology macro or uninterpreted functions
-            s1.delta_satisfies_topology();
-            
-            //func_decl topology = z3::function("topology", SORT, SORT, ctx.bool_sort());
-            //s1.delta_satisfies_topology_uf(topology);
-            
+    
+    
+            #if ENCODING == MACRO             
+                s1.delta_satisfies_topology();
+            #elif ENCODING == UF
+                func_decl topology = z3::function("topology", SORT, SORT, ctx.bool_sort());
+                s1.delta_satisfies_topology_uf(topology);
+            #endif
+                
+                
             s1.delta_satisfies_non_mutable();
             s1.delta_satisfies_not_egress();
             s1.delta_satisfies_not_existing();
@@ -281,10 +308,10 @@ py::list CPPSolver::solve()
                 for( int index = 0; index < k ; index++)
                 {
                     //cout << "\n" << s1.n[index] << " -> " << s1.n1[index] ;
-                    int from, to;
-                    Z3_get_numeral_int(ctx, m1.eval(s1.n[index], true), &from);
-                    Z3_get_numeral_int(ctx, m1.eval(s1.n1[index], true), &to);
-
+                  
+                    const char* from = Z3_get_numeral_string (ctx, m1.eval(s1.n[index], true));
+                    const char* to = Z3_get_numeral_string(ctx, m1.eval(s1.n1[index], true));  
+                   
                     ret.append(py::make_tuple(from, to));
                 }
 

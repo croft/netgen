@@ -28,12 +28,27 @@
 using namespace z3;
 using namespace std;
 
-// #define CONST(X) ctx.int_const(X)
-// #define VALUE(X) ctx.int_val(X)
-// 
 extern int SIZE; 
-#define CONST(X) ctx.bv_const(X,SIZE)
-#define VALUE(X) ctx.bv_val(X,SIZE)
+
+#define  LIA 1
+#define  BV  2 
+#define  LRA 3
+
+
+#define THEORY LIA
+
+
+#if THEORY == LIA
+    #define CONST(X) ctx.int_const(X)
+    #define VALUE(X) ctx.int_val(X)
+#elif THEORY == BV
+    #define CONST(X) ctx.bv_const(X,SIZE)
+    #define VALUE(X) ctx.bv_val(X,SIZE)
+#elif THEORY == LRA
+    #define CONST(X) ctx.real_const(X)
+    #define VALUE(X) ctx.real_val(X)
+#endif
+
 
 class Network;
 
