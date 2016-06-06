@@ -201,7 +201,7 @@ class PythonSynthesizer(AbstractSynthesizer):
             logger.debug("        Phase: %d", i+1)
             logger.debug("-------------------------------------------")
 
-            query_pc = PerfCounter("query constr k={0}".format(i))
+            query_pc = PerfCounter("query constr k={0}".format(i+1))
             query_pc.start()
 
             query = SmtQuery(self.fsa, self.network, i+1, self.spec)
@@ -224,7 +224,7 @@ class PythonSynthesizer(AbstractSynthesizer):
 
             query.accept_automata(rho)
             query_pc.stop()
-            solve_pc = PerfCounter("z3 solve k={0}".format(i))
+            solve_pc = PerfCounter("z3 solve k={0}".format(i+1))
             solve_pc.start()
             model = query.solve()
             solve_pc.stop()
