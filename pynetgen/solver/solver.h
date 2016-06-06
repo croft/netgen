@@ -161,7 +161,7 @@ public:
 	Z3_model solve_z3()
 	{
 		set_param("pp.min-alias-size", 1000000 );
-        set_param("pp.max-depth", 1000000);
+		set_param("pp.max-depth", 1000000);
 		solver s(ctx);
 		//query = query.simplify();
 		s.add(query);		

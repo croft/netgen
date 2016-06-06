@@ -155,6 +155,11 @@ class CppSynthesizer(AbstractSynthesizer):
                  self.abstract_network.node_strrep[int(t)])
                 for (f, t) in result]
 
+        for pc in solver.get_perf_counters():
+            counter = PerfCounter("{0} k={1}".format(pc[1], pc[0]),
+                                  pc[2])
+            counter.report()
+
         print "Model found:", path
         return path
 
