@@ -5,6 +5,7 @@
 #include <vector>
 #include <tuple>
 #include <set> 
+#include <ctime>
 #include "utils.h"
 #include "solver.h"
 #include "network.h"
@@ -215,35 +216,41 @@ py::list CPPSolver::solve()
         {
             cout << "\n\nPhase " << k << "\n";  
             context ctx;
-            
-            
             Solver s1(ctx,network.n1,k);
+
+	    clock_t begin = clock();
             
             s1.define_k_rules();
             s1.delta_satisfies_topology();
             s1.delta_satisfies_non_mutable();
             s1.delta_satisfies_not_egress();
-            s1.delta_satisfies_not_existing(); 
-          
-                        
+            s1.delta_satisfies_not_existing();
+
             func_decl cycle = z3::function("cycle", ctx.int_sort(), ctx.int_sort(), ctx.int_sort()); 
             s1.execute_recursive(Cyclicity(ctx,cycle));
             
             func_decl dest = z3::function("dest", ctx.int_sort(), ctx.int_sort(), ctx.int_sort());
             s1.execute_recursive(Compute_Dest(ctx,dest,network.n1));
-            
-            
-            
+
             func_decl rho = z3::function("rho", ctx.int_sort(), ctx.int_sort(), ctx.int_sort()); 
             func_decl delta = z3::function("delta", ctx.int_sort(), ctx.int_sort(), ctx.int_sort()); 
             //expr_vector delta_vars(ctx);
             //expr  delta_expr(ctx);
             s1.execute_recursive(Modified_Functionality(ctx,rho,delta,network.a1,network.n1.abstract_nodes));   
             s1.accept_automata(rho,network.a1);
+
+	    clock_t end = clock();
+	    double elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
+	    cout << "Query construction: " << elapsed_ms << endl;
             
             //s1.print_query(); 
 
+	    begin = clock();
             Z3_model m = s1.solve_z3();
+	    end = clock();
+	    elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
+	    cout << "Solve time: " << elapsed_ms << endl;
+
             if(m)
             {
                 model m1(ctx, m);
