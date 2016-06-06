@@ -20,11 +20,20 @@ class AbstractNetwork(object):
         self.class_pcrep = {}
 
         # switch renaming
-        for switch in self.concrete_network.switches.keys():
+        for switch in sorted(self.concrete_network.switches.keys()):
             # TODO: clean this up
             alias = spec.fsa.symbolAliases[switch]
             self.node_strrep[alias] = switch
             self.node_intrep[switch] = alias
+
+        for host in sorted(self.concrete_network.hosts.keys()):
+            if host in spec.fsa.symbolAliases:
+                alias = spec.fsa.symbolAliases[host]
+            else:
+                alias = len(self.node_intrep)
+
+            self.node_strrep[alias] = host
+            self.node_intrep[host] = alias
 
         # packet class renaming
         idx = 1

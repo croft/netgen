@@ -6,7 +6,7 @@ from network import NetworkConfig
 from grammar import SpecGrammar
 from spec import Specification
 from cppsolver import AbstractNetwork, CPPSolver
-from topos import DiamondTopo
+from topos import DiamondTopo, FattreeTopo
 
 def conv_abstract_network(net):
     nodes = net.nodes
@@ -73,6 +73,28 @@ def diamond_test():
     print "Expect:", expected
     print "Solver time: {0}ms".format(round(t * 1000, 3))
 
+def fattree_test():
+    config = NetworkConfig(paths=[('h25', 'h34',  ['h25', 's14', 's6', 's0',
+                                                   's10', 's19', 'h34'])])
+    topo = FattreeTopo()
+    topo.apply_config(config)
+
+    specstr = "not match(ip_src=a.b.c.d); s14: .* s0 .* => (N-s0)* s1 (N-s0)* od"
+    s = Specification.parseString(topo, specstr)
+    net = synthesis.AbstractNetwork(topo, s)
+    abs_net = conv_abstract_network(net)
+    slvr = CPPSolver(abs_net)
+
+    t = time.time()
+    result = slvr.solve()
+    t = time.time() - t
+
+    expected = [('s6', 's1'), ('s1', 's10')]
+    expected = [(net.node_intrep[s], net.node_intrep[d]) for (s,d) in expected]
+    print "Result:", result
+    print "Expect:", expected
+    print "Solver time: {0}ms".format(round(t * 1000, 3))
+
 def dummy_test():
     a = AbstractNetwork([1,2,3],
                         [2,3,4],
@@ -93,4 +115,5 @@ def dummy_test():
 
 if __name__ == "__main__":
     #dummy_test()
-    diamond_test()
+    #diamond_test()
+    fattree_test()
