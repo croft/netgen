@@ -151,17 +151,27 @@ class CppSynthesizer(AbstractSynthesizer):
     def solve(self):
         solver = cppsolver.CPPSolver(self.network)
         result = solver.solve()
-        path = [(self.abstract_network.node_strrep[int(f)],
-                 self.abstract_network.node_strrep[int(t)])
-                for (f, t) in result]
+
+        paths = {}
+        for p, f, t in result:
+            if p not in paths:
+                paths[p] = []
+
+            paths[p].append((self.abstract_network.node_strrep[int(f)],
+                             self.abstract_network.node_strrep[int(t)]))
 
         for pc in solver.get_perf_counters():
             counter = PerfCounter("{0} k={1}".format(pc[1], pc[0]),
                                   pc[2])
             counter.report()
 
-        print "Model found:", path
-        return path
+        if len(paths) > 0:
+            print "Model found:"
+
+        for p in paths.keys():
+            print "   pktcls={0},  {1}".format(p, paths[p])
+
+        return paths
 
 class PythonSynthesizer(AbstractSynthesizer):
     def __init__(self, network, spec):

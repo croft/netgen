@@ -25,7 +25,7 @@ def run(name, topo, config, specstr):
     s = spec.Specification.parseString(topo, specstr)
     solver = synthesizerType(topo, s)
     result = solver.solve()
-    print result
+    #print result
     pe.stop()
     pe.print_summary()
     print "\n"
@@ -35,12 +35,14 @@ def test_fattree_perf():
 
     # fattree 4 ------------------------------------------------------
     topo = FattreeTopo(k=4)
-    config = NetworkConfig(paths=[('h25', 'h34', None)])
+    config = NetworkConfig(paths=[('h25', 'h34', None),
+                                  ('h24', 'h34', None)])
     specstr = "not match(ip_src=a.b.c.d); s14: .* s3 .* => (N-s3)* s2 (N-s3)* od"
     run("fattree4,2", topo, config, specstr)
 
-    topo = FattreeTopo(k=4)
-    config = NetworkConfig(paths=[('h25', 'h34', None)])
+    # topo = FattreeTopo(k=4)
+    config = NetworkConfig(paths=[('h25', 'h34', None),
+                                  ('h24', 'h34', None)])
     specstr = "not match(ip_src=a.b.c.d); s14: .* s3 .* => (N-s3)* s0 (N-s3)* od"
     run("fattree4,4", topo, config, specstr)
 
