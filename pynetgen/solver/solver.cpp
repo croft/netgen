@@ -296,7 +296,7 @@ py::list CPPSolver::solve()
                     const char* from = Z3_get_numeral_string (ctx, m1.eval(s1.n[index], true));
                     const char* to = Z3_get_numeral_string(ctx, m1.eval(s1.n1[index], true));  
                    
-                    ret.append(py::make_tuple(from, to));
+                    ret.append(py::make_tuple(1, from, to));
                 }
 
                 return ret;
