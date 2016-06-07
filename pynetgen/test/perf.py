@@ -95,13 +95,13 @@ def test_fattree_perf():
 
     # fattree 14 -----------------------------------------------------
     topo = FattreeTopo(k=14)
-    config = NetworkConfig(paths=[('h249', 'h767', None)])
-    specstr = "not match(ip_src=a.b.c.d); s49: .* s3 .* => (N-s3)* s2 (N-s3)* od"
+    config = NetworkConfig(paths=[('h690', 'h587', None)])
+    specstr = "not match(ip_src=a.b.c.d); s210: .* s19 .* => (N-s19)* s19 (N-s19)* od"
     run("fattree14,2", topo, config, specstr)
 
     topo = FattreeTopo(k=14)
-    config = NetworkConfig(paths=[('h249', 'h767', None)])
-    specstr = "not match(ip_src=a.b.c.d); s49: .* s3 .* => (N-s3)* s2 (N-s3)* od"
+    config = NetworkConfig(paths=[('h690', 'h587', None)])
+    specstr = "not match(ip_src=a.b.c.d); s210: .* s19 .* => (N-s19)* s0 (N-s19)* od"
     run("fattree14,4", topo, config, specstr)
 
 
