@@ -14,15 +14,16 @@ for theory in ${THEORIES[*]}
 do
     for encoding in ${ENCODINGS[*]}
     do
+	echo "Testing $theory $encoding"
 	cd $DIR
 	cd ../solver/
 	cp configs/config_${theory}_${encoding}.h config.h
-	make
+	make >> /dev/null
 
 	cd $DIR
 	destfile=$RESULTDIR/result_${theory}_${encoding}.txt
 	rm -f $destfile
 
-	./perf.py -c >> $destfile
+	./perf.py -c >> $destfile 2>/dev/null
     done
 done
