@@ -281,7 +281,7 @@ py::list CPPSolver::solve()
             {
                 if (std::get<1>(tup) == pcid1)
                 {
-                    network.n1.abstract_rules[make_pair(std::get<0>(tup), std::get<1>(tup))] = std::get<2>(tup);
+                    network.n1.abstract_rules[make_pair(std::get<0>(tup), pcid)] = std::get<2>(tup);
                 }
             }
 
@@ -303,7 +303,7 @@ py::list CPPSolver::solve()
             begin = clock();
 
             s1.define_k_rules();
-            //s1.define_prev_model(prev_model);
+            s1.define_prev_model(prev_model);
 
             #if ENCODING == MACRO
                 s1.delta_satisfies_topology();
@@ -331,9 +331,17 @@ py::list CPPSolver::solve()
 
             end = clock();
             elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
-            perfCounters.push_back(make_tuple(budget, "query constr", elapsed_ms));
 
-            //s1.print_query();
+            if (prev_model.size() > 0)
+            {
+                perfCounters.push_back(make_tuple(budget, "check query constr", elapsed_ms));
+            }
+            else
+            {
+                perfCounters.push_back(make_tuple(budget, "query constr", elapsed_ms));
+            }
+
+            // s1.print_query();
 
             cout << "solving" << endl;
 
@@ -341,14 +349,21 @@ py::list CPPSolver::solve()
             Z3_model m = s1.solve_z3();
             end = clock();
             elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
-            cout << elapsed_ms << endl;
 
-            perfCounters.push_back(make_tuple(budget, "z3 solve", elapsed_ms));
+            if (prev_model.size() > 0)
+            {
+                perfCounters.push_back(make_tuple(budget, "z3 check", elapsed_ms));
+            }
+            else
+            {
+
+                perfCounters.push_back(make_tuple(budget, "z3 solve", elapsed_ms));
+            }
 
             if(m)
             {
                 model m1(ctx, m);
-                cout << "\n\nModel\n" << m1;
+                // cout << "\n\nModel\n" << m1;
 
                 cout << "MODEL FOUND" << endl;
                 prev_model = std::vector<std::tuple<int,int>>();
@@ -358,11 +373,23 @@ py::list CPPSolver::solve()
                     const char* from = Z3_get_numeral_string (ctx, m1.eval(s1.n[index], true));
                     const char* to = Z3_get_numeral_string(ctx, m1.eval(s1.n1[index], true));
                     ret.append(py::make_tuple(pcid1, from, to));
-                    prev_model.push_back(std::make_tuple(stoi(from), stoi(to)));
+
+                    int int_to, int_from;
+                    Z3_get_numeral_int(ctx, m1.eval(s1.n[index], true), &int_to);
+                    Z3_get_numeral_int(ctx, m1.eval(s1.n1[index], true), &int_from);
+                    prev_model.push_back(std::make_tuple(int_to, int_from));
                 }
 
                 break;
-        }
+            }
+            else if (prev_model.size() > 0)
+            {
+                cout << "WARNING: Previous model is not satisfying" << endl;
+
+                // restart
+                prev_model = std::vector<std::tuple<int,int>>();
+                k = 0;
+            }
         }
         }
 

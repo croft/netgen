@@ -85,9 +85,8 @@ public:
 	{
 	    for (int i = 0; i < prev_model.size(); i++)
 	    {
-		cout << "Appending prev model: " << prev_model[i] << endl;
-		query = query && (VALUE(n[i]) == VALUE(std::get<0>(prev_model[i])));
-		query = query && (VALUE(n1[i]) == VALUE(std::get<1>(prev_model[i])));
+		query = query && (n[i] == VALUE(std::get<0>(prev_model[i])));
+		query = query && (n1[i] == VALUE(std::get<1>(prev_model[i])));
 	    }
 	}
 
