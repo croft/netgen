@@ -92,16 +92,33 @@ public:
 
 			expr x = CONST(ns.str().c_str());
 			n.push_back(x);
-			query = query && (VALUE(0) < x) && (x <= VALUE(num_nodes)) ;
-
-			expr y = CONST(ps.str().c_str());
-			pc.push_back(y);
-			query = query && (VALUE(0) < y) && (y <= VALUE(num_pc)) ;
-
-			expr z = CONST(n1s.str().c_str());
-			n1.push_back(z);
-			query = query && (VALUE(0) < z) && (z <= VALUE(num_nodes) ) ; 
-
+            expr y = CONST(ps.str().c_str());
+            pc.push_back(y);
+            expr z = CONST(n1s.str().c_str());
+            n1.push_back(z);
+            
+            
+        #if THEORY == LIA || THEORY == BV 
+            query = query && (VALUE(0) < x) && (x <= VALUE(num_nodes)) ;
+            query = query && (VALUE(0) < y) && (y <= VALUE(num_pc)) ;
+            query = query && (VALUE(0) < z) && (z <= VALUE(num_nodes) ) ; 
+        #elif THEORY == LRA
+            expr nvalue  = ctx.bool_val(false);
+            expr n1value = ctx.bool_val(false); 
+            for( int i = 1 ; i<= num_nodes; i++)
+            {
+                    nvalue = nvalue || ( VALUE(i) == x );
+                    n1value = n1value || (VALUE(i) == z);
+            }
+            expr pcvalue = ctx.bool_val(false); 
+            for( int i =1; i<= num_pc; i++)
+            {
+                pcvalue = pcvalue || ( VALUE(i) == y); 
+            }
+            query = query && nvalue && pcvalue && n1value; 
+        #endif
+            
+		
 		}
 	}
 
