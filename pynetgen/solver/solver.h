@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <time.h>
 #include <regex>
+#include <sstream>
 #include "boost/regex.hpp"
 #include <boost/algorithm/string.hpp>
 #include "z3++.h"
@@ -30,6 +31,7 @@ using namespace z3;
 using namespace std;
 
 extern int SIZE; 
+
 
 #if THEORY == LIA
     #define CONST(X) ctx.int_const(X)
@@ -122,14 +124,37 @@ public:
 
 	void delta_satisfies_topology()
 	{
-		stringstream topo_str; 
+		std::stringstream topo_str; 
 		set<pair<int,int>> abstract_topology = network.abstract_topology;
-
+        
+        std::string sort_string; 
+        
+        #if THEORY == LIA
+            sort_string = string(" Int ");
+        #elif THEORY == BV
+            sort_string = string(" (_ BitVec " + std::to_string(SIZE) + " ) ");
+        #elif THEORY == LRA
+            sort_string = string(" Real ");
+        #endif
+                        
 		int count=0;
-		topo_str << "(define-fun topology ((node_from Int) (node_to Int)) Bool \n ";
+		topo_str << "(define-fun topology ((node_from " << sort_string << " ) (node_to " << sort_string << " )) Bool \n ";
 		for ( auto at_it = abstract_topology.begin(); at_it != abstract_topology.end(); at_it++)
-		{
-			topo_str << "( ite ( and ( = node_from " << at_it->first << " ) ( = node_to " << at_it->second <<" )) true  \n ";
+		{ 
+            std::stringstream v1, v2; 
+            
+            #if THEORY == LIA
+                v1 << ctx.int_val(at_it->first); 
+                v2 << ctx.int_val(at_it->second); 
+            #elif THEORY == BV
+                v1 << ctx.bv_val(at_it->first,SIZE); 
+                v2 << ctx.bv_val(at_it->second,SIZE); 
+            #elif THEORY == LRA
+                v1 << ctx.real_val(at_it->first); 
+                v2 << ctx.real_val(at_it->second);  
+            #endif
+            
+			topo_str << "( ite ( and ( = node_from " << v1.str() << " ) ( = node_to " << v2.str() <<" )) true  \n ";
 			count++;
 		}
 		topo_str << "false";
@@ -140,18 +165,16 @@ public:
 		topo_str << "\n";
 		for(unsigned index = 0; index < k; index++ )
 		{
-			topo_str << "\n (declare-const " << n[index] << " Int )";
-			topo_str << "\n (declare-const " << n1[index] << " Int )";
+			topo_str << "\n (declare-const " << n[index]    << sort_string << " )";
+			topo_str << "\n (declare-const " << n1[index]   << sort_string << " )";
 			topo_str << "\n(assert ( topology " << n[index] << " " << n1[index] << "))";
 		}
 		Z3_ast asty;
-		// ctx.set(":pp_min_alias_size", 1000000);
-		// ctx.set(":pp_max_depth", 1000000);
 		asty = Z3_parse_smtlib2_string(ctx, topo_str.str().c_str(), 0, 0, 0, 0, 0, 0);
 		expr ex(ctx, asty);
-
+        
 		query = query && ex; 
-	}	
+	}
 	
 	void delta_satisfies_topology_uf(func_decl &topology)
 	{
