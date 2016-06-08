@@ -81,6 +81,16 @@ public:
 		std::cout << "\nQuery : "  << query; 
 	}
 
+	void define_prev_model(std::vector<std::tuple<int,int>> prev_model)
+	{
+	    for (int i = 0; i < prev_model.size(); i++)
+	    {
+		cout << "Appending prev model: " << prev_model[i] << endl;
+		query = query && (VALUE(n[i]) == VALUE(std::get<0>(prev_model[i])));
+		query = query && (VALUE(n1[i]) == VALUE(std::get<1>(prev_model[i])));
+	    }
+	}
+
 	void define_k_rules()
 	{
 		for (unsigned int index = 0; index < k; index++)

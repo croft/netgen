@@ -6,7 +6,7 @@
 #include <tuple>
 #include <set>
 #include <ctime>
-#include <math.h> 
+#include <math.h>
 #include "utils.h"
 #include "solver.h"
 #include "network.h"
@@ -19,7 +19,7 @@ using namespace std;
 namespace py = boost::python;
 using namespace z3;
 
-int SIZE; 
+int SIZE;
 
 #if THEORY == LIA
     #define SORT     ctx.int_sort()
@@ -69,20 +69,20 @@ std::set<T> pylist_to_set(const py::object& obj) {
 //     return vect;
 // }
 
-// std::vector<tuple<int,int,int>> pylist_to_tuplist3(const py::object& obj) {
-//     std::vector<tuple<int,int,int>> vect(len(obj));
-//     int j, k, m;
-//     for (unsigned long i = 0; i < vect.size(); i++)
-//     {
-//      j = py::extract<int>(obj[i][0]);
-//      k = py::extract<int>(obj[i][1]);
-//      m = py::extract<int>(obj[i][2]);
-//      vect[i] = make_tuple(j, k, m);
-//      //cout << vect[i] << endl;
-//     }
+std::vector<std::tuple<int,int,int>> pylist_to_tuplist3(const py::object& obj) {
+    std::vector<std::tuple<int,int,int>> vect(len(obj));
+    int j, k, m;
+    for (unsigned long i = 0; i < vect.size(); i++)
+    {
+     j = py::extract<int>(obj[i][0]);
+     k = py::extract<int>(obj[i][1]);
+     m = py::extract<int>(obj[i][2]);
+     vect[i] = make_tuple(j, k, m);
+     //cout << vect[i] << endl;
+    }
 
-//     return vect;
-// }
+    return vect;
+}
 
 std::map<std::pair<int,int>,int> pylist_to_map_pair(const py::object& obj) {
     std::map<std::pair<int,int>,int> mpr;
@@ -119,6 +119,11 @@ class AbstractNetwork {
 public:
     Automata a1;
     Network n1;
+    set<int> pcids;
+    set<int> immutables;
+    set<int> egresses;
+    set<int> sources;
+std::vector<std::tuple<int,int,int>> arules;
 
     AbstractNetwork() {}
 
@@ -158,11 +163,29 @@ AbstractNetwork::AbstractNetwork(py::list _nodes,
 
     n1.abstract_nodes =  pylist_to_set<int>(_nodes);
     n1.abstract_topology = pylist_to_set_pair(_topology);
-    n1.abstract_rules = pylist_to_map_pair(_classes);
-    n1.abstract_immutable_nodes[1] = pylist_to_set<int>(_immutables);
-    n1.abstract_egress_nodes[1] = pylist_to_set<int>(_egresses);
-    n1.abstract_source_nodes[1] = pylist_to_set<int>(_sources);
-    n1.abstract_pc_map["1"] = 1;
+
+    arules = pylist_to_tuplist3(_classes);
+    immutables = pylist_to_set<int>(_immutables);
+    sources = pylist_to_set<int>(_sources);
+    egresses = pylist_to_set<int>(_egresses);
+
+    //n1.abstract_rules = pylist_to_map_pair(_classes);
+    // n1.abstract_immutable_nodes[1] = pylist_to_set<int>(_immutables);
+    // n1.abstract_egress_nodes[1] = pylist_to_set<int>(_egresses);
+    // n1.abstract_source_nodes[1] = pylist_to_set<int>(_sources);
+    // n1.abstract_pc_map["1"] = 1;
+
+    pcids = set<int>();
+    for (auto cls: arules)
+    {
+        pcids.insert(std::get<1>(cls));
+    }
+
+    for (auto pcid : pcids){
+        // n1.abstract_immutable_nodes[pcid] = pylist_to_set<int>(_immutables);
+        // n1.abstract_egress_nodes[pcid] = pylist_to_set<int>(_egresses);
+        // n1.abstract_source_nodes[pcid] = pylist_to_set<int>(_sources);
+    }
 
     // std::cout << "\n\nNetwork";
     // std::cout << "\nNodes : " << n1.abstract_nodes;
@@ -222,37 +245,73 @@ py::list CPPSolver::get_perf_counters()
 py::list CPPSolver::solve()
 {
     py::list ret;
+    std::vector<std::tuple<int,int>> prev_model = std::vector<std::tuple<int,int>>();
+
+    // prev_model.push_back(std::make_tuple(13, 4));
+    // prev_model.push_back(std::make_tuple(18, 13));
 
     try
     {
-        network.n1.Compute_OD();
         SIZE = ceil((float)log2(network.n1.abstract_nodes.size()))+2;
-        cout << "\nSIZE = " << SIZE << "\n";  
+        cout << "\nSIZE = " << SIZE << "\n";
         //std::cout << "\n\nOriginal Destination : " << network.n1.abstract_od;
         clock_t begin, end;
         double elapsed_ms;
+
+        for (auto pcid1 : network.pcids)
+        {
+            // XXX: bug - if packetclass number != 1, it doesn't find a solution, why??
+            int pcid = 1;
+
+            // reset the solver to a fresh state
+            network.n1.abstract_pc_map = map<string,int>();
+            network.n1.abstract_pc_map[std::to_string(pcid)] = pcid;
+
+            network.n1.abstract_immutable_nodes = map<int,set<int>>();
+            network.n1.abstract_egress_nodes = map<int,set<int>>();
+            network.n1.abstract_source_nodes = map<int,set<int>>();
+
+            network.n1.abstract_immutable_nodes[pcid] = network.immutables;
+            network.n1.abstract_egress_nodes[pcid] = network.egresses;
+            network.n1.abstract_source_nodes[pcid] = network.sources;
+
+            network.n1.abstract_rules = map<pair<int,int>,int>();
+            network.n1.abstract_od = map<pair<int,int>,int>();
+            for (auto tup : network.arules)
+            {
+                if (std::get<1>(tup) == pcid1)
+                {
+                    network.n1.abstract_rules[make_pair(std::get<0>(tup), std::get<1>(tup))] = std::get<2>(tup);
+                }
+            }
+
+            network.n1.Compute_OD();
 
         for(int k=1; k <= network.n1.abstract_nodes.size() ; k++)
         {
             //cout << "\n\nPhase " << k << "\n";
             std::cout << "Starting phase: " << k << endl;
+            int budget = k;
+            if (prev_model.size() > 0)
+            {
+                budget = prev_model.size();
+            }
 
             context ctx;
-            Solver s1(ctx,network.n1,k);
+            Solver s1(ctx,network.n1,budget);
 
             begin = clock();
 
             s1.define_k_rules();
-    
-    
-            #if ENCODING == MACRO             
+            //s1.define_prev_model(prev_model);
+
+            #if ENCODING == MACRO
                 s1.delta_satisfies_topology();
             #elif ENCODING == UF
                 func_decl topology = z3::function("topology", SORT, SORT, ctx.bool_sort());
                 s1.delta_satisfies_topology_uf(topology);
             #endif
-                
-                
+
             s1.delta_satisfies_non_mutable();
             s1.delta_satisfies_not_egress();
             s1.delta_satisfies_not_existing();
@@ -272,7 +331,7 @@ py::list CPPSolver::solve()
 
             end = clock();
             elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
-            perfCounters.push_back(make_tuple(k, "query constr", elapsed_ms));
+            perfCounters.push_back(make_tuple(budget, "query constr", elapsed_ms));
 
             //s1.print_query();
 
@@ -282,27 +341,32 @@ py::list CPPSolver::solve()
             Z3_model m = s1.solve_z3();
             end = clock();
             elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
-            perfCounters.push_back(make_tuple(k, "z3 solve", elapsed_ms));
+            cout << elapsed_ms << endl;
+
+            perfCounters.push_back(make_tuple(budget, "z3 solve", elapsed_ms));
 
             if(m)
             {
                 model m1(ctx, m);
-                //cout << "\n\nModel\n" << m1;
+                cout << "\n\nModel\n" << m1;
 
-                for( int index = 0; index < k ; index++)
+                cout << "MODEL FOUND" << endl;
+                prev_model = std::vector<std::tuple<int,int>>();
+
+                for( int index = 0; index < budget; index++)
                 {
-                    //cout << "\n" << s1.n[index] << " -> " << s1.n1[index] ;
-                  
                     const char* from = Z3_get_numeral_string (ctx, m1.eval(s1.n[index], true));
-                    const char* to = Z3_get_numeral_string(ctx, m1.eval(s1.n1[index], true));  
-                   
-                    ret.append(py::make_tuple(1, from, to));
+                    const char* to = Z3_get_numeral_string(ctx, m1.eval(s1.n1[index], true));
+                    ret.append(py::make_tuple(pcid1, from, to));
+                    prev_model.push_back(std::make_tuple(stoi(from), stoi(to)));
                 }
 
-                return ret;
-            }
+                break;
         }
-    }
+        }
+        }
+
+        }
     catch(...)
     {   std::cout << "\nException Caught\n";
         return ret;
