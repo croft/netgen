@@ -175,24 +175,24 @@ AbstractNetwork::AbstractNetwork(py::list _nodes,
     sources = pylist_to_set<int>(_sources);
     egresses = pylist_to_set<int>(_egresses);
 
-    //n1.abstract_rules = pylist_to_map_pair(_classes);
-    // n1.abstract_immutable_nodes[1] = pylist_to_set<int>(_immutables);
-    // n1.abstract_egress_nodes[1] = pylist_to_set<int>(_egresses);
-    // n1.abstract_source_nodes[1] = pylist_to_set<int>(_sources);
-    // n1.abstract_pc_map["1"] = 1;
-
     pcids = set<int>();
     for (auto cls: arules)
     {
         pcids.insert(std::get<1>(cls));
     }
 
-    for (auto pcid : pcids)
-    {
+    // for (auto pcid : pcids)
+    // {
         // n1.abstract_immutable_nodes[pcid] = pylist_to_set<int>(_immutables);
         // n1.abstract_egress_nodes[pcid] = pylist_to_set<int>(_egresses);
         // n1.abstract_source_nodes[pcid] = pylist_to_set<int>(_sources);
-    }
+    // }
+
+    // n1.abstract_rules = pylist_to_map_pair(_classes);
+    // n1.abstract_immutable_nodes[1] = pylist_to_set<int>(_immutables);
+    // n1.abstract_egress_nodes[1] = pylist_to_set<int>(_egresses);
+    // n1.abstract_source_nodes[1] = pylist_to_set<int>(_sources);
+    // n1.abstract_pc_map["1"] = 1;
 
     // std::cout << "\n\nNetwork";
     // std::cout << "\nNodes : " << n1.abstract_nodes;
@@ -267,30 +267,31 @@ py::list CPPSolver::solve()
         clock_t begin, end;
         double elapsed_ms;
 
-        for (auto pcid1 : network.pcids)
+        for (auto pcid : network.pcids)
         {
             // XXX: bug - if packetclass number != 1, it doesn't find a solution, why??
-            int pcid = 1;
+            // hack: hardcode pcid reference
+            int hc_pcid = 1;
 
             // reset the network object to a fresh state
             network.n1.abstract_pc_map = map<string,int>();
-            network.n1.abstract_pc_map[std::to_string(pcid)] = pcid;
+            network.n1.abstract_pc_map[std::to_string(hc_pcid)] = hc_pcid;
 
             network.n1.abstract_immutable_nodes = map<int,set<int>>();
             network.n1.abstract_egress_nodes = map<int,set<int>>();
             network.n1.abstract_source_nodes = map<int,set<int>>();
 
-            network.n1.abstract_immutable_nodes[pcid] = network.immutables;
-            network.n1.abstract_egress_nodes[pcid] = network.egresses;
-            network.n1.abstract_source_nodes[pcid] = network.sources;
+            network.n1.abstract_immutable_nodes[hc_pcid] = network.immutables;
+            network.n1.abstract_egress_nodes[hc_pcid] = network.egresses;
+            network.n1.abstract_source_nodes[hc_pcid] = network.sources;
 
             network.n1.abstract_rules = map<pair<int,int>,int>();
             network.n1.abstract_od = map<pair<int,int>,int>();
             for (auto tup : network.arules)
             {
-                if (std::get<1>(tup) == pcid1)
+                if (std::get<1>(tup) == pcid)
                 {
-                    network.n1.abstract_rules[make_pair(std::get<0>(tup), pcid)] = std::get<2>(tup);
+                    network.n1.abstract_rules[make_pair(std::get<0>(tup), hc_pcid)] = std::get<2>(tup);
                 }
             }
 
@@ -381,7 +382,7 @@ py::list CPPSolver::solve()
                     {
                         const char* from = Z3_get_numeral_string (ctx, m1.eval(s1.n[index], true));
                         const char* to = Z3_get_numeral_string(ctx, m1.eval(s1.n1[index], true));
-                        ret.append(py::make_tuple(pcid1, from, to));
+                        ret.append(py::make_tuple(pcid, from, to));
 
                         int int_to, int_from;
                         Z3_get_numeral_int(ctx, m1.eval(s1.n[index], true), &int_to);
