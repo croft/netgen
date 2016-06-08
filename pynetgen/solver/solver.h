@@ -250,9 +250,10 @@ public:
 		set_param("pp.min-alias-size", 1000000 );
 		set_param("pp.max-depth", 1000000);
 		solver s(ctx);
-		//query = query.simplify();
+		query = query.simplify();
 		s.add(query);		
-		//cout << "\n\nQuery:\n" << s;
+		// cout << "\n\nQuery:\n" << s;
+        // cin.get();
 		
 		switch(s.check())
 		{
