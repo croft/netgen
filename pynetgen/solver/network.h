@@ -58,6 +58,7 @@ void Network::Compute_OD()
         {
             int src = *source_it;
             int temp = src;
+	    int last;
 
             if( find( egress.begin(), egress.end(), temp) != egress.end())
             {
@@ -67,7 +68,11 @@ void Network::Compute_OD()
 
             while( find( egress.begin(), egress.end(), temp) == egress.end()  && temp != 0)
             {
+		// Rocketfuel has self loops, break if find one
+		last = temp;
                 temp =  abstract_rules[make_pair(temp,pc_int)];
+		if (last == temp)
+		    break;
             }
 
             abstract_od[make_pair(src,pc_int)] = temp;
