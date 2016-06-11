@@ -74,6 +74,11 @@ def node_diff(topo, subset, superset=None):
 
 # convert set difference expression (eg, N-s0) into regex disjunction
 def expand_regex(expr, topo, aliases):
+    # convert . to N
+    # don't want to substitute . in IP addresses, so match .* or with whitespace
+    expr = re.sub(r"(?!\\)\.\*", r"N*", expr)
+    expr = re.sub(r"\s+(?!\\)\.\s+", r" N ", expr)
+
     matches = re.finditer(r"([\w\.]+)\s*-\s*([\w\.]+)",
                           expr,
                           re.IGNORECASE|re.MULTILINE)
