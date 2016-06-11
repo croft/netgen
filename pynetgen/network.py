@@ -62,6 +62,10 @@ class PacketClass(object):
     def iteredges(self):
         for location, links in self.graph.links.iteritems():
             for link in links:
+                # skip self loops
+                if location == link.rule.nextHop:
+                    continue
+
                 yield location, link.rule.nextHop
 
     def to_networkx(self):
@@ -88,7 +92,8 @@ class PacketClass(object):
             src_paths = [p for p in paths if p[0] == src]
             dests = list(set([p[-1] for p in src_paths]))
             if len(dests) > 1:
-                raise Exception("Can't handle multiple destinations yet")
+                logger.error("Can't handle multiple destinations yet")
+                #raise Exception("Can't handle multiple destinations yet")
 
             if len(dests) > 0:
                 dest[src] = dests[0]
@@ -100,6 +105,11 @@ class PacketClass(object):
             return self._powerset
 
         def rec_construct_paths(paths, path, node):
+            # rocketfuel has some self loops in packet class
+            # if len(path) > 0 and node == path[-1]:
+            #     paths.append(path)
+            #     return paths
+
             if node in path:
                 loop = path + [node]
                 raise Exception("Loop in packet classes {0}: {1}"
@@ -133,6 +143,19 @@ class PacketClass(object):
     def check_connectivity(self):
         g = self.to_networkx()
         return networkx.is_weakly_connected(g)
+
+    def make_graph(self, dest_dir, graphfile=None):
+        if graphfile is None:
+            graphfile = "pc_{0}.gv".format(self.idx)
+
+        g = graphviz.Digraph(format='svg')
+        added = []
+        for src, dst in self.iteredges():
+            if (src,dst) not in added:
+                g.edge(src, dst)
+                added.append((dst, src))
+
+        g.render(os.path.join(dest_dir, graphfile))
 
     def __repr__(self):
         return str(self)
@@ -452,6 +475,10 @@ class Topology(object):
             if not isinstance(dsts, list):
                 raise Exception("Invalid edge type: expect key -> list")
             for dst in dsts:
+                # skip self loops
+                if src == dst:
+                    continue
+
                 yield (src, dst)
 
     def to_networkx(self):
@@ -545,15 +572,19 @@ class Topology(object):
             fname = os.path.join(outdir, "{0}.p".format(pcid))
             pickle.dump(pc, open(fname, 'wb'))
 
-    def deserialize_classes(self, indir="classes", limit=None):
+    def deserialize_classes(self, indir="classes", limit=None, start=0, reset=True):
         if not os.path.isdir(indir):
             raise Exception("Serialized class directory {0} does not exist!"
                             .format(indir))
 
-        self._classes = {}
+        if reset:
+            self._classes = {}
+
         files = [os.path.join(indir, f) for f in
                  os.listdir(indir)]
 
+        files.sort(key=lambda x: int(os.path.splitext(os.path.basename(x))[0]))
+        files = files[start:]
         if limit is not None and len(files) > limit:
             files = files[:limit]
 

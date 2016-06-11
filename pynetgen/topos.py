@@ -510,17 +510,21 @@ def mp_parse_switch((topo, fname)):
     return topo.parse_switch_file(fname)
 
 class As1755Topo(Topology):
-    def __init__(self, mp=True, mp_procs=12, no_ft=False):
+    def __init__(self, mp=True, mp_procs=12, no_ft=False, path="../data_set/RocketFuel/AS-1755"):
         super(As1755Topo, self).__init__()
-        path = "../data_set/RocketFuel/AS-1755"
-
         if not no_ft:
             self.read_flowtable(path, mp, mp_procs)
         self.read_links(path)
+        self.build_from_graph(self.graph)
+
+        # for sw in self.switches.keys():
+        #     if not sw.startswith("10."):
+        #         self._egresses.append(sw)
 
     def read_links(self, path):
         topofile = os.path.join(path, "as1755.topo")
-        self.graph = networkx.DiGraph()
+        #self.graph = networkx.DiGraph()
+        self.graph = networkx.Graph()
 
         with open(topofile) as f:
             for line in f.readlines():
@@ -528,7 +532,10 @@ class As1755Topo(Topology):
                 if len(tokens) != 2:
                     raise Exception("Invalid line in topo: {0}".format(line))
 
-                self.graph.add_edge(tokens[0], tokens[1])
+                # skip duplicates and self loops
+                if not self.graph.has_edge(tokens[0], tokens[1]) and \
+                   tokens[0] != tokens[1]:
+                    self.graph.add_edge(tokens[0], tokens[1])
 
     def read_flowtable(self, path, mp, mp_procs):
         files = [os.path.join(path, f) for f in os.listdir(path)
