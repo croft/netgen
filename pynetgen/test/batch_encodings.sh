@@ -18,7 +18,8 @@ do
 	cd $DIR
 	cd ../solver/
 	cp configs/config_${theory}_${encoding}.h config.h
-	make >> /dev/null
+	make clean > /dev/null
+	make all > /dev/null
 
 	cd $DIR
 	destfile=$RESULTDIR/result_${theory}_${encoding}.txt
