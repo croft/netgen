@@ -75,30 +75,22 @@ class PacketClass(object):
 
         return g
 
-    def original_dest(self, topo, sources=None):
-        if sources is None:
-            sources = []
-
+    def original_dest(self, topo, sources, egress):
         dest = {}
-        egress = [e for e in topo.egresses
-                  if e not in sources]
-
         paths = self.powerset_paths()
-        for src in topo.switches.keys():
-            if src in egress:
-                dest[src] = src
-                continue
 
-            src_paths = [p for p in paths if p[0] == src]
-            dests = list(set([p[-1] for p in src_paths]))
-            if len(dests) > 1:
-                pass
-                # logger.error("Can't handle multiple destinations yet")
-                #raise Exception("Can't handle multiple destinations yet")
+        for e in egress:
+            dest[e] = e
 
-            if len(dests) > 0:
-                dest[src] = dests[0]
+        for src in sources:
+            for p in paths:
+                for pnode in p:
+                    if pnode in egress:
+                        dest[src] = pnode
+                        break
 
+                if src in dest:
+                    break
         return dest
 
     def powerset_paths(self):

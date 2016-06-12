@@ -141,10 +141,11 @@ class AbstractSynthesizer:
     def solve(self):
         return
 
-class CppSynthesizer(AbstractSynthesizer):
-    def __init__(self, network, spec):
+class CppSynthesizerBase(AbstractSynthesizer):
+    def __init__(self, network, spec, solver_type):
         pc = PerfCounter("absnet creation")
         pc.start()
+        self.solver_type = solver_type
         self.abstract_network = AbstractNetwork(network, spec)
         self.network = CppSynthesizer.convert_abstract_network(self.abstract_network)
         pc.stop()
@@ -155,10 +156,7 @@ class CppSynthesizer(AbstractSynthesizer):
         sources = net.sources
         egresses = net.sinks
         immutables = net.immutables
-
-        topo = []
-        for m, n in net.concrete_network.iteredges():
-            topo.append((net.node_intrep[m], net.node_intrep[n]))
+        topo = net.edges
 
         classes = []
         for pcid, pc in net.class_pcrep.iteritems():
@@ -194,7 +192,7 @@ class CppSynthesizer(AbstractSynthesizer):
                                          dead)
 
     def solve(self):
-        solver = cppsolver.CPPSolver(self.network)
+        solver = self.solver_type(self.network)
         result = solver.solve()
 
         paths = {}
@@ -217,6 +215,18 @@ class CppSynthesizer(AbstractSynthesizer):
             print "   pktcls={0},  {1}".format(p, paths[p])
 
         return paths
+
+class CppSynthesizer(CppSynthesizerBase):
+    def  __init__(self, network, spec):
+        super(CppSynthesizer, self).__init__(network,
+                                             spec,
+                                             cppsolver.DefaultSolver)
+
+class CppCachingSynthesizer(CppSynthesizerBase):
+    def  __init__(self, network, spec):
+        super(CppCachingSynthesizer, self).__init__(network,
+                                                    spec,
+                                                    cppsolver.CachingSolver)
 
 class PythonSynthesizer(AbstractSynthesizer):
     def __init__(self, network, spec):
@@ -322,7 +332,8 @@ class PythonCachingSynthesizer(PythonSynthesizer):
 
         classes = dict(self.network.class_pcrep)
         for pc in classes.keys():
-            self.network.reset(classes[pc])
+            cls = classes[pc]
+            self.network.reset(cls)
             is_cached = False
             result = None
 
@@ -340,11 +351,11 @@ class PythonCachingSynthesizer(PythonSynthesizer):
                 result = self._solve()
 
             if result is None:
-                print "No model found for packet class", pc
+                print "No model found for packet class", cls.idx
             else:
-                self.results[pc] = [(self.network.node_strrep[int(str(f))],
-                                     self.network.node_strrep[int(str(t))])
-                                    for (f, t) in result]
+                self.results[cls.idx] = [(self.network.node_strrep[int(str(f))],
+                                          self.network.node_strrep[int(str(t))])
+                                         for (f, t) in result]
                 if not is_cached:
                     self.prev_models.append(result)
 
@@ -364,7 +375,7 @@ class PythonCachingSynthesizer(PythonSynthesizer):
         print "\n"
 
         # TODO
-        return None
+        return self.results
 
     def _solve(self):
         for i in range(len(self.network.nodes)):
@@ -426,7 +437,7 @@ class PythonCachingSynthesizer(PythonSynthesizer):
 
         query = SmtQuery(self.fsa, self.network, i+1, self.spec)
         query.define_k_rules()
-        # query.define_existing_k_rules(prev_model)
+        query.define_existing_k_rules(prev_model)
         query.define_immutability()
         query.delta_sat_topo()
 
@@ -647,19 +658,19 @@ class ComputeDestination(RecursiveDefinition):
     def auxiliary_def(self):
         query = BoolVal(True)
         for pc in self.network.classes:
-            for src in self.network.sources:
-                # TODO: cleanup original_dest syntax, awkward ()[]
-                srcname = self.network.node_strrep[src]
-                srcnames = [self.network.node_strrep[src] for src in self.network.sources]
-                pcobj = self.network.class_pcrep[pc]
+            query = And(query, self.dest(0, pc) == 0)
+            srcnames = [self.network.node_strrep[src] for src in self.network.sources]
+            sinknames = [self.network.node_strrep[src] for src in self.network.sinks]
+            pcobj = self.network.class_pcrep[pc]
 
-                ods = pcobj.original_dest(self.network.concrete_network, srcnames)
-                if srcname in ods.keys():
-                    #odname = pcobj.original_dest(self.network.concrete_network, srcnames)[srcname]
-                    odname = ods[srcname]
-                    odint = self.network.node_intrep[odname]
-                    query = And(query,
-                                self.dest(src, pc) == odint)
+            # TODO: cleanup original_dest syntax, awkward ()[]
+            ods = pcobj.original_dest(self.network.concrete_network, srcnames, sinknames)
+
+            for od_srcname, od_dstname in ods.iteritems():
+                srcint = self.network.node_intrep[od_srcname]
+                dstint = self.network.node_intrep[od_dstname]
+                query = And(query,
+                            self.dest(srcint, pc) == dstint)
 
         return query
 
