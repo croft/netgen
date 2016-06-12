@@ -92,7 +92,8 @@ class PacketClass(object):
             src_paths = [p for p in paths if p[0] == src]
             dests = list(set([p[-1] for p in src_paths]))
             if len(dests) > 1:
-                logger.error("Can't handle multiple destinations yet")
+                pass
+                # logger.error("Can't handle multiple destinations yet")
                 #raise Exception("Can't handle multiple destinations yet")
 
             if len(dests) > 0:
@@ -171,9 +172,6 @@ class NetworkConfig(object):
         self.flowtable = flowtable
         self.paths = {}
 
-        if egresses is None:
-            self.egresses = []
-
         if self.paths is not None:
             self.paths = paths
 
@@ -209,7 +207,10 @@ class NetworkConfig(object):
             topo.add_path(src, dst, path)
 
     def apply_config(self, topo_instance):
-        topo_instance._egresses = self.egresses
+        # egresses might be auto-defined by topology type
+        if self.egresses is not None:
+            topo_instance._egresses = self.egresses
+
         if self.flowtable is not None:
             self._make_flowtable(topo_instance)
         else:
@@ -279,7 +280,7 @@ class Topology(object):
         self.edges = {}
         self.paths = {}
         self.graph = None
-        self._egresses = []
+        self._egresses = None
         self._classes = None
 
     @property
@@ -311,7 +312,7 @@ class Topology(object):
     @property
     def egresses(self):
         # if manually defined
-        if len(self._egresses) > 0:
+        if self._egresses is not None:
             return self._egresses
 
         # otherwise, any switch with switch degree 1 or

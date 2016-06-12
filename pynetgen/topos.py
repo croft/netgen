@@ -365,6 +365,7 @@ class FattreeTopo(Topology):
         self.size = k
         self.pods = {}
         self.pods_rev = {}
+        self._egresses = []
         self._make_topo()
 
     @classmethod
@@ -437,7 +438,8 @@ class FattreeTopo(Topology):
                     aggname = "s{0}".format(agg_offset + agg)
                     edgename = "s{0}".format(edge_offset + edge)
                     g.add_edge(aggname, edgename)
-                    self._egresses.append(edgename)
+                    if edgename not in self._egresses:
+                        self._egresses.append(edgename)
 
             # connect edge switches with hosts
             for edge in range(0, self.size/2):
@@ -512,17 +514,29 @@ def mp_parse_switch((topo, fname)):
 class As1755Topo(Topology):
     def __init__(self, mp=True, mp_procs=12, no_ft=False, path="../data_set/RocketFuel/AS-1755"):
         super(As1755Topo, self).__init__()
+        self._egresses = []
         if not no_ft:
             self.read_flowtable(path, mp, mp_procs)
-        self.read_links(path)
-        self.build_from_graph(self.graph)
+            # TODO: egress => if link.rule.isGateway
+            self._egresses = []
+            for sw in self.switches.values():
+                for rule in sw.ft:
+                    # is gateway
+                    if rule.location == rule.nextHop:
+                        self._egresses.append(sw.name)
 
-        # for sw in self.switches.keys():
-        #     if not sw.startswith("10."):
-        #         self._egresses.append(sw)
+            with open('as1755.egress', 'w') as f:
+                f.write("\n".join(self._egresses))
+                    # if not rule.nextHop.startswith("10.") and \
+                    #    sw.name not in self._egresses:
+                    #     self._egresses.append(sw.name)
+
+        self.read_links(path)
 
     def read_links(self, path):
         topofile = os.path.join(path, "as1755.topo")
+        egressfile = os.path.join(path, "as1755.egress")
+
         #self.graph = networkx.DiGraph()
         self.graph = networkx.Graph()
 
@@ -537,10 +551,31 @@ class As1755Topo(Topology):
                    tokens[0] != tokens[1]:
                     self.graph.add_edge(tokens[0], tokens[1])
 
+        for node in self.graph.nodes():
+            if node.startswith("10."):
+                if node not in self.switches:
+                    self.switches[node] = Switch(name=node, ip=node)
+            else:
+                if node not in self.hosts:
+                    self.hosts[node] = Host(name=node, ip=node)
+
+        for e0, e1 in self.graph.edges():
+            if e0 not in self.edges:
+                self.edges[e0] = []
+            if e1 not in self.edges:
+                self.edges[e1] = []
+
+            self.edges[e0].append(e1)
+            self.edges[e1].append(e0)
+
+        with open(egressfile) as f:
+            self._egresses = [e.strip() for e in f.readlines()]
+
     def read_flowtable(self, path, mp, mp_procs):
         files = [os.path.join(path, f) for f in os.listdir(path)
                  if os.path.isfile(os.path.join(path, f))
                  and f[0] == 'R']
+                 #and os.path.basename(f) == "R10.0.0.50"]
 
         if mp:
             import time
@@ -552,9 +587,9 @@ class As1755Topo(Topology):
             pool.close()
         else:
             for fname in files:
-                for sw, ft in self._parse_switch_file(fname):
-                    self.switches[sw] = Switch(name=sw, ip=sw)
-                    self.switches[sw].ft = ft
+                sw, ft = self.parse_switch_file(fname)
+                self.switches[sw] = Switch(name=sw, ip=sw)
+                self.switches[sw].ft = ft
 
     def parse_switch_file(self, fname):
         switch = os.path.basename(fname)[1:]
