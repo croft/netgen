@@ -1,7 +1,6 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-
 #include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>
@@ -48,41 +47,77 @@ public:
 
 void Network::Compute_OD()
 {
-    for( auto pc_it = abstract_pc_map.begin(); pc_it != abstract_pc_map.end(); pc_it++ )
+    /* Algorithm:
+     * For each source node, search through packet class edges as a path
+     * Once an egress node is reached, stop
+     */
+    for (auto pc_it = abstract_pc_map.begin(); pc_it != abstract_pc_map.end(); pc_it++)
     {
         int pc_int = pc_it->second;
         set<int> egress = abstract_egress_nodes[pc_int];
+        set<int> sources = abstract_source_nodes[pc_int];
+        map<int, int> pc_edges = map<int, int>();
+        set<int> pc_egress = set<int>();
 
-        //for( auto source_it = abstract_source_nodes[pc_int].begin(); source_it != abstract_source_nodes[pc_int].end(); source_it++ )
-        for( auto source_it = abstract_nodes.begin(); source_it != abstract_nodes.end(); source_it++ )
+        for (auto rule : abstract_rules)
         {
-            int src = *source_it;
-            int temp = src;
-	    int last;
+            pc_edges[rule.first.first] = rule.second;
+        }
 
-            if( find( egress.begin(), egress.end(), temp) != egress.end())
+        for (auto edge : pc_edges)
+        {
+            if (egress.find(edge.first) != egress.end())
             {
-                abstract_od[make_pair(src,pc_int)] = src;
+                pc_egress.insert(edge.first);
+            }
+
+            if (egress.find(edge.second) != egress.end())
+            {
+                pc_egress.insert(edge.second);
+            }
+        }
+
+        abstract_egress_nodes[pc_int] = pc_egress;
+
+        // drop node
+        abstract_od[make_pair(0, pc_int)] = 0;
+
+        for (auto node : egress)
+        {
+            abstract_od[make_pair(node, pc_int)] = node;
+        }
+
+        for (auto node : sources)
+        {
+            if (egress.find(node) != egress.end())
+            {
+                abstract_od[make_pair(node, pc_int)] = node;
                 continue;
             }
 
-            while( find( egress.begin(), egress.end(), temp) == egress.end()  && temp != 0)
+            int curr = node;
+            int prev = curr;
+
+            while (pc_edges.find(curr) != pc_edges.end())
             {
-		// Rocketfuel has self loops, break if find one
-		last = temp;
-                temp =  abstract_rules[make_pair(temp,pc_int)];
-		if (last == temp)
-		    break;
+                prev = curr;
+                curr = pc_edges.find(curr)->second;
+
+                if (prev == curr)
+                {
+                    break;
+                }
             }
 
-            abstract_od[make_pair(src,pc_int)] = temp;
+            if (egress.find(curr) != egress.end())
+            {
+                abstract_od[make_pair(node, pc_int)] = curr;
+                continue;
+            }
         }
     }
 
-    //cout << "\n\nAbstract OD\n" << abstract_od;
+    /* cout << "\n\nAbstract OD\n" << abstract_od; */
 }
-
-
-
 
 #endif
