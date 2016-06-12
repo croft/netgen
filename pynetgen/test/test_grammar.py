@@ -24,17 +24,17 @@ class testGrammar(unittest.TestCase):
         spec = "not match(ip_src=a.b.c.d); h1: .* s2 .* => (N-s2)* s3 (N-s)*"
         parsed = SpecGrammar.parseString(spec)
         assert parsed is not None
-        assert len(parsed[5]) == 0
+        assert len(parsed[6]) == 0
 
         spec = "not match(ip_src=a.b.c.d); h1: .* s2 .* => (N-s2)* s3 (N-s)* NM:{s0}"
         parsed = SpecGrammar.parseString(spec)
         assert parsed is not None
-        assert len(parsed[5]) == 1
+        assert len(parsed[6]) == 1
 
         spec = "not match(ip_src=a.b.c.d); h1: .* s2 .* => (N-s2)* s3 (N-s)* NM:{s0, s1}"
         parsed = SpecGrammar.parseString(spec)
         assert parsed is not None
-        assert len(parsed[5]) == 2
+        assert len(parsed[6]) == 2
 
     def testPathCondition(self):
         spec = "not match(ip_src=a.b.c.d); h1: .* s2 .* => (N-s2)* s3 (N-s2)* NM:{s0, s1}"
@@ -43,6 +43,12 @@ class testGrammar(unittest.TestCase):
         assert " ".join(parsed[3]) == "(N-s2)* s3 (N-s2)*"
         assert len(parsed[2]) > 0
         assert len(parsed[3]) > 0
+
+    def testDrop(self):
+        spec = "match(ip_src=a.b.c.d); h1: .* s2 .* => (N-s2)* s3 (N-s)* drop NM:{s0}"
+        parsed = SpecGrammar.parseString(spec)
+        assert parsed is not None
+        assert len(parsed[5]) > 0
 
 if __name__ == "__main__":
     unittest.main()

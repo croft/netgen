@@ -305,6 +305,7 @@ class Specification(object):
         self.sources = []
         self.immutables = []
         self.od = True
+        self.drop = False
         self.lhs = None
         self.rhs = None
         self.aliases = {}
@@ -352,7 +353,8 @@ class Specification(object):
         self.lhs = " ".join(parsed[2])
         self.rhs = " ".join(parsed[3])
         self.od = len(parsed[4]) > 0
-        self.immutables = [str(s) for s in parsed[5]]
+        self.drop = len(parsed[5]) > 0
+        self.immutables = [str(s) for s in parsed[6]]
         self.aliases["N"] = topo.switches.keys()
 
         logger.debug("Sources: %s", self.sources)

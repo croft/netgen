@@ -29,6 +29,7 @@ SEMICOLON = Literal(";")
 COLON = Literal(":")
 MATCH = Keyword("match")
 OD = Keyword("od")
+DROP = Keyword("drop")
 NM = Keyword("NM")
 
 HEADER_WORDS = Word(alphanums+"_.")
@@ -60,12 +61,15 @@ TRAFFIC = Group(TRAFFIC_CORE + Literal("&") + TRAFFIC_CORE |
 
 LHS_PATH = Group(OneOrMore(Word(alphanums+"()_.*-")))
 
-RHS_PATH = Group(ZeroOrMore(~OD + ~NM + Word(alphanums+"()_.*-")) + \
-                 (Optional(FollowedBy(OD))) | Optional(FollowedBy(NM)))
+RHS_PATH = Group(ZeroOrMore(~OD + ~DROP + ~NM + Word(alphanums+"()_.*-")) + \
+                 Optional(FollowedBy(OD)) | Optional(FollowedBy(DROP)) |
+                 Optional(FollowedBy(NM)))
 
 SOURCES = Group(Word(alphanums+"_.") + ZeroOrMore(COMMA.suppress() + Word(alphanums+"_.")))
 
 ORIG_DEST = Group(Optional(OD))
+
+DROP_GROUP = Group(Optional(DROP))
 
 IMMUTABLE_CORE = NM.suppress() + COLON.suppress() + LBRACKET.suppress() + \
                  Word(alphanums+"_.") + \
@@ -82,4 +86,5 @@ SpecGrammar = (TRAFFIC +
                ARROW.suppress() +
                RHS_PATH +
                ORIG_DEST +
+               DROP_GROUP +
                IMMUTABLES)

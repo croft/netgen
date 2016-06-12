@@ -16,6 +16,12 @@ from topos import (DiamondTopo, DiamondExtendedTopo,
 
 cwd = os.path.dirname(os.path.realpath(__file__))
 
+import synthesis
+#Synthesizer = synthesis.CppSynthesizer
+#Synthesizer = synthesis.CppCachingSynthesizer
+Synthesizer = synthesis.PythonSynthesizer
+#Synthesizer = synthesis.PythonCachingSynthesizer
+
 def runSynthesisConfigured(topo, spec, expected):
     s = Specification.parseString(topo, spec)
     solver = Synthesizer(topo, s)
@@ -99,6 +105,13 @@ class testDiamond(unittest.TestCase):
         expected = [('s4', 's3'), ('s3', 's1')]
         runSynthesis(DiamondTopo(), config, spec, expected)
 
+    def testDrop(self):
+        config = NetworkConfig(paths=[('s4', 's1', ['s4', 's2', 's1'])],
+                               egresses=['s1'])
+        specstr = "not match(ip_src=a.b.c.d); s1: .* s2 .* => (N-s2) s3 (N-s2) od"
+        expected = [('s1', 's3')]
+        runSynthesis(DiamondTopo(), config, spec, expected)
+
 class testSosr(unittest.TestCase):
 
     def testSosrFigure3(self):
@@ -114,6 +127,16 @@ class testSosr(unittest.TestCase):
         expected = [('Y', 'Z'), ('B', 'F2'), ('C', 'F2'), ('A', 'F2')]
         runSynthesis(SosrTopo(), config, spec, expected)
 
+
+class testThintree(unittest.TestCase):
+    def testThinTree(self):
+        config = NetworkConfig(egresses=['s10', 's11', 's1'],
+                               paths=[('s1', 's10',
+                                       ['s1', 's2', 's4', 's8', 's10'])])
+
+        spec = "not match(ip_src=a.b.c.d); s1: .* s4 .* => (N-s4)(N-s4)* s5 (N-s4)(N-s4)*"
+        expected = [('s2', 's5'), ('s5', 's8')]
+        runSynthesis(ThintreeTopo(), config, spec, expected)
 
 class testCluster(unittest.TestCase):
 

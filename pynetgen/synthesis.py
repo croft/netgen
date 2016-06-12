@@ -10,8 +10,9 @@ from profiling import PerfCounter
 class AbstractNetwork(object):
     def __init__(self, concrete_network, spec):
         self.concrete_network = concrete_network
-        self.fsa = spec.fsa
-        classes = spec.matched_classes.values()
+        self.spec = spec
+        self.fsa = self.spec.fsa
+        classes = self.spec.matched_classes.values()
 
         self.edges = []
         self.rules = {}
@@ -76,6 +77,11 @@ class AbstractNetwork(object):
                           self.concrete_network.egresses
                           if s not in spec.sources]
 
+        if self.spec.drop:
+            self._egresses.append(0)
+            self.node_strrep[0] = "drop"
+            self.node_intrep["drop"] = 0
+
         self.set_sinks(classes)
 
         self.immutables = [self.node_intrep[s] for s in spec.immutables]
@@ -106,6 +112,9 @@ class AbstractNetwork(object):
         # remove dups
         #self.sinks = list(set(self.sinks + list(pc_sinks)))
         self.sinks = list(pc_sinks)
+        if self.spec.drop:
+            self.sinks.append(0)
+
 
     # reset absnet to a single packet class network
     def reset(self, pc):
@@ -663,14 +672,19 @@ class ComputeDestination(RecursiveDefinition):
             sinknames = [self.network.node_strrep[src] for src in self.network.sinks]
             pcobj = self.network.class_pcrep[pc]
 
-            # TODO: cleanup original_dest syntax, awkward ()[]
-            ods = pcobj.original_dest(self.network.concrete_network, srcnames, sinknames)
+            if self.spec.drop:
+                for src in self.network.sources:
+                    query = And(query,
+                                self.dest(src, pc) == 0)
+            else:
+                # TODO: cleanup original_dest syntax, awkward ()[]
+                ods = pcobj.original_dest(self.network.concrete_network, srcnames, sinknames)
 
-            for od_srcname, od_dstname in ods.iteritems():
-                srcint = self.network.node_intrep[od_srcname]
-                dstint = self.network.node_intrep[od_dstname]
-                query = And(query,
-                            self.dest(srcint, pc) == dstint)
+                for od_srcname, od_dstname in ods.iteritems():
+                    srcint = self.network.node_intrep[od_srcname]
+                    dstint = self.network.node_intrep[od_dstname]
+                    query = And(query,
+                                self.dest(srcint, pc) == dstint)
 
         return query
 
