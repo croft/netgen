@@ -2,6 +2,7 @@
 
 import unittest
 
+import os
 from runner import addPath
 addPath()
 
@@ -11,15 +12,49 @@ from spec import Specification
 from synthesis import Synthesizer
 from topos import (DiamondTopo, DiamondExtendedTopo,
                    ThintreeTopo, FattreeTopo, SosrTopo,
-                   DiamondClusterTopo)
+                   DiamondClusterTopo, As1755Topo)
 
-def runSynthesis(topo, config, spec, expected):
-    topo.apply_config(config)
+cwd = os.path.dirname(os.path.realpath(__file__))
+
+def runSynthesisConfigured(topo, spec, expected):
     s = Specification.parseString(topo, spec)
     solver = Synthesizer(topo, s)
     result = solver.solve()
     for edge in expected:
         assert edge in result
+
+def runSynthesis(topo, config, spec, expected):
+    topo.apply_config(config)
+    runSynthesisConfigured(topo, spec, expected)
+
+class testAs1755(unittest.TestCase):
+    def test_1K_1PC(self):
+        as1755dir = os.path.join(cwd, "../../data_set/RocketFuel/AS-1755")
+        classdir = os.path.join(cwd, "rf_classes")
+        topo = As1755Topo(no_ft=True, path=as1755dir)
+        topo.deserialize_classes(classdir, limit=1)
+
+        spec = "not match(ip_src=a.b.c.d); 10.0.0.166: .* 10.0.0.150  .* => .* 10.0.0.154 .* od"
+        expected = [('10.0.0.166', '10.0.0.154')]
+        runSynthesisConfigured(topo, spec, expected)
+
+        spec = "not match(ip_src=a.b.c.d); 10.0.3.18: .* 10.0.2.241  .* =>  10.0.3.18 (N-10.0.2.241) .* od"
+        expected = [('10.0.3.18', '10.0.2.242')]
+        runSynthesisConfigured(topo, spec, expected)
+
+        spec = "not match(ip_src=a.b.c.d); 10.0.4.70: .* 10.0.0.122  .* => (N-10.0.0.122)* od"
+        expected = [('10.0.3.102', '10.0.3.222')]
+        runSynthesisConfigured(topo, spec, expected)
+
+    def test_2K_1PC(self):
+        as1755dir = os.path.join(cwd, "../../data_set/RocketFuel/AS-1755")
+        classdir = os.path.join(cwd, "rf_classes")
+        topo = As1755Topo(no_ft=True, path=as1755dir)
+        topo.deserialize_classes(classdir, limit=1)
+
+        spec = "not match(ip_src=a.b.c.d); 10.0.1.162: .* 10.0.1.153  .* => (N-10.0.1.153)* od"
+        expected = [('10.0.1.162', '10.0.2.174'), ('10.0.2.174', '10.0.1.134')]
+        runSynthesisConfigured(topo, spec, expected)
 
 class testFattree(unittest.TestCase):
     config = NetworkConfig(paths=[('h25', 'h34',  ['h25', 's14', 's6', 's0',
