@@ -31,7 +31,7 @@ class AbstractNetwork(object):
             if host in spec.fsa.symbolAliases:
                 alias = spec.fsa.symbolAliases[host]
             else:
-                alias = len(self.node_intrep)
+                alias = len(self.node_intrep) + 1
 
             self.node_strrep[alias] = host
             self.node_intrep[host] = alias
@@ -71,13 +71,58 @@ class AbstractNetwork(object):
         self.sources = [self.node_intrep[s] for s in spec.sources]
 
         # TODO: filter sources from sinks - is this correct?
-        self.sinks = [self.node_intrep[s] for s in
-                      self.concrete_network.egresses
-                      if s not in spec.sources]
+        # XXX: we also need to add each packet class sink
+        self._egresses = [self.node_intrep[s] for s in
+                          self.concrete_network.egresses
+                          if s not in spec.sources]
+
+        self.set_sinks(classes)
 
         self.immutables = [self.node_intrep[s] for s in spec.immutables]
                            # if s not in spec.sources and
                            # s not in self.concrete_network.egresses]
+
+        # backup rules for reset()
+        self.orig_rules = dict(self.rules)
+        self.class_pcrep = dict(self.class_pcrep)
+
+    def set_sinks(self, pcs):
+        self.sinks = list(self._egresses)
+        pc_sinks = set()
+        for pc in pcs:
+            # for location, links in pc.graph.links.iteritems():
+            #     for link in links:
+            #         if link.isGateway:
+            #             pc_sinks.add(self.node_intrep[location])
+            #             break
+
+            for path in pc.powerset_paths():
+                for node in reversed(path):
+                    if node in self.concrete_network.switches:
+                        if node in self.concrete_network.egresses:
+                            pc_sinks.add(self.node_intrep[node])
+                            break
+
+        # remove dups
+        #self.sinks = list(set(self.sinks + list(pc_sinks)))
+        self.sinks = list(pc_sinks)
+
+    # reset absnet to a single packet class network
+    def reset(self, pc):
+        self.set_sinks([pc])
+        self.rules = {}
+        # set default value 0
+        for switch in self.node_strrep.keys():
+            self.rules[switch] = {}
+            self.rules[switch][1] = 0
+
+        for src, dst in pc.iteredges():
+            src_int = self.node_intrep[src]
+            dst_int = self.node_intrep[dst]
+            self.rules[src_int][1] = dst_int
+
+        self.class_pcrep = {}
+        self.class_pcrep[1] = pc
 
     @property
     def nodes(self):
@@ -211,6 +256,7 @@ class PythonSynthesizer(AbstractSynthesizer):
             logger.debug("        Phase: %d", i+1)
             logger.debug("-------------------------------------------")
 
+            logger.debug("constructing query")
             query_pc = PerfCounter("query constr k={0}".format(i+1))
             query_pc.start()
 
@@ -235,6 +281,7 @@ class PythonSynthesizer(AbstractSynthesizer):
             query.accept_automata(rho)
             query_pc.stop()
             solve_pc = PerfCounter("z3 solve k={0}".format(i+1))
+            logger.debug("starting solution search")
             solve_pc.start()
             model = query.solve()
             solve_pc.stop()
@@ -244,6 +291,176 @@ class PythonSynthesizer(AbstractSynthesizer):
                 logger.debug("Node mapping: %s", self.network.node_strrep)
                 logger.info("Model found: %s", path)
                 return path
+
+class PythonCachingSynthesizer(PythonSynthesizer):
+    def __init__(self, network, spec):
+        super(PythonCachingSynthesizer, self).__init__(network, spec)
+        self.prev_models = []
+        self.results = {}
+
+    # don't convert node ids to string representation
+    def path_solution_raw(self, model):
+        varnames = {}
+        for g in model:
+            if str(g)[0] == 'n':
+                varnames[str(g)] = model[g]
+
+        links = []
+        for i in range(len(varnames.keys())/2):
+            from_name = "n_{0}".format(i)
+            to_name = "n1_{0}".format(i)
+            links.append((varnames[from_name], varnames[to_name]))
+
+        return links
+
+    def solve(self):
+        set_option("pp.min-alias-size", 1000000)
+        set_option("pp.max-depth", 1000000)
+        solves = 0
+        cache_hits = 0
+        cache_misses = 0
+
+        classes = dict(self.network.class_pcrep)
+        for pc in classes.keys():
+            self.network.reset(classes[pc])
+            is_cached = False
+            result = None
+
+            for model in self.prev_models:
+                result = self._solve_with_prev(model)
+                if result is not None:
+                    cache_hits += 1
+                    is_cached = True
+                    break
+                else:
+                    cache_misses += 1
+
+            if result is None:
+                solves += 1
+                result = self._solve()
+
+            if result is None:
+                print "No model found for packet class", pc
+            else:
+                self.results[pc] = [(self.network.node_strrep[int(str(f))],
+                                     self.network.node_strrep[int(str(t))])
+                                    for (f, t) in result]
+                if not is_cached:
+                    self.prev_models.append(result)
+
+        print "\n\n-------------------------------------------"
+        print "        FOUND MODELS"
+        print "-------------------------------------------"
+        for pc, result in self.results.iteritems():
+            print "   ", pc, ":", result
+
+        print "-------------------------------------------"
+        print "   Total:", len(classes)
+        print "   Solves:", solves
+        print "   Cache Hits:", cache_hits
+        print "   Cache Misses:", cache_misses
+        print "-------------------------------------------"
+
+        print "\n"
+
+        # TODO
+        return None
+
+    def _solve(self):
+        for i in range(len(self.network.nodes)):
+            logger.info("Starting phase %d", i+1)
+            logger.debug("-------------------------------------------")
+            logger.debug("        Phase: %d", i+1)
+            logger.debug("-------------------------------------------")
+
+            logger.debug("constructing query")
+            query_pc = PerfCounter("query constr k={0}".format(i+1))
+            query_pc.start()
+
+            query = SmtQuery(self.fsa, self.network, i+1, self.spec)
+            query.define_k_rules()
+            query.define_immutability()
+            query.delta_sat_topo()
+
+            cycle = Function("cycle", IntSort(), IntSort(), IntSort())
+            query.exec_recursion(Cyclicity(cycle))
+
+            dest = Function("dest", IntSort(), IntSort(), IntSort())
+            query.exec_recursion(ComputeDestination(dest, self.network, self.spec))
+
+            rho = Function("rho", IntSort(), IntSort(), IntSort())
+            delta = Function("delta", IntSort(), IntSort(), IntSort())
+            query.exec_recursion(ModifiedFunctionality(rho,
+                                                       delta,
+                                                       self.fsa,
+                                                       self.network.nodes))
+
+            query.accept_automata(rho)
+            query_pc.stop()
+
+            solve_pc = PerfCounter("z3 solve k={0}".format(i+1))
+            logger.debug("starting solution search")
+            solve_pc.start()
+            model = query.solve()
+            solve_pc.stop()
+
+            if model is not None:
+                path = self.path_solution_raw(model)
+                logger.debug(model)
+                logger.info("Model found")
+                return path
+
+    def _solve_with_prev(self, prev_model):
+        set_option("pp.min-alias-size", 1000000)
+        set_option("pp.max-depth", 1000000)
+        i = len(prev_model) - 1
+
+        logger.info("Starting check phase %d", i+1)
+        logger.debug("-------------------------------------------")
+        logger.debug("        Phase: %d", i+1)
+        logger.debug("-------------------------------------------")
+
+        logger.debug("constructing query")
+        query_pc = PerfCounter("check query constr k={0}".format(i+1))
+        query_pc.start()
+
+        query = SmtQuery(self.fsa, self.network, i+1, self.spec)
+        query.define_k_rules()
+        # query.define_existing_k_rules(prev_model)
+        query.define_immutability()
+        query.delta_sat_topo()
+
+        cycle = Function("cycle", IntSort(), IntSort(), IntSort())
+        query.exec_recursion(Cyclicity(cycle))
+
+        dest = Function("dest", IntSort(), IntSort(), IntSort())
+        query.exec_recursion(ComputeDestination(dest, self.network, self.spec))
+
+        rho = Function("rho", IntSort(), IntSort(), IntSort())
+        delta = Function("delta", IntSort(), IntSort(), IntSort())
+        query.exec_recursion(ModifiedFunctionality(rho,
+                                                   delta,
+                                                   self.fsa,
+                                                   self.network.nodes))
+
+        query.accept_automata(rho)
+        query_pc.stop()
+
+        solve_pc = PerfCounter("check z3 k={0}".format(i+1))
+        logger.debug("starting solution search")
+        solve_pc.start()
+        model = query.solve()
+        solve_pc.stop()
+
+        if model is not None:
+            path = self.path_solution_raw(model)
+            logger.debug(model)
+            logger.info("Prev model SAT")
+            return path
+        else:
+            logger.info("Prev model UNSAT")
+            return None
+
 
 # TODO: cleanup Synthesizer references, no default
 # set default to Python
@@ -266,7 +483,7 @@ class SmtQuery(object):
 
     def solve(self):
         self.solver.add(self.query)
-        logger.debug(self.solver.sexpr())
+        # logger.debug(self.solver.sexpr())
         if self.solver.check() == sat:
             return self.solver.model()
         else:
@@ -294,8 +511,13 @@ class SmtQuery(object):
             topostr += "\n (declare-const {0} Int)".format(self.n1[i])
             topostr += "\n (assert (topology {0} {1}))".format(self.n[i], self.n1[i])
 
-        logger.debug(topostr)
+        # logger.debug(topostr)
         self.query = And(self.query, parse_smt2_string(topostr, ctx=main_ctx()))
+
+    def define_existing_k_rules(self, prev_model):
+        for i, (n_from, n_to)  in enumerate(prev_model):
+            self.query = And(self.query, self.n[i] == n_from)
+            self.query = And(self.query, self.n1[i] == n_to)
 
     def define_k_rules(self):
         for i in range(self.k):
