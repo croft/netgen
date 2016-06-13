@@ -12,6 +12,8 @@ from log import logger
 from fields import HeaderField, ip2int, int2ip
 from profiling import PerfCounter
 
+Ignore_pc_loops = False
+
 def pairwise(iterable):
     a, b = itertools.tee(iterable)
     next(b, None)
@@ -104,6 +106,10 @@ class PacketClass(object):
             #     return paths
 
             if node in path:
+                if Ignore_pc_loops:
+                    paths.append(path)
+                    return paths
+
                 loop = path + [node]
                 raise Exception("Loop in packet classes {0}: {1}"
                             .format(self.idx, loop))

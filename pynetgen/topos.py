@@ -23,9 +23,23 @@ from log import logger
 from network import Topology, Switch, Host, FlowEntry, pairwise, PacketClass
 
 class TfTopology(Topology):
-    def __init__(self, definition, ntf, ttf, port_ids, router):
+    def __init__(self, definition, ntf, ttf, port_ids, router, no_ft=False):
         super(TfTopology, self).__init__()
         self.definition = definition
+        if no_ft:
+            for rtr1, intf1, rtr2, intf2 in self.definition:
+                if rtr1 not in self.edges:
+                    self.edges[rtr1] = []
+                if rtr2 not in self.edges:
+                    self.edges[rtr2] = []
+
+                self.edges[rtr1].append(rtr2)
+                self.edges[rtr2].append(rtr1)
+                self.switches[rtr1] = Switch(name=rtr1)
+                self.switches[rtr2] = Switch(name=rtr2)
+
+            return
+
         self.ntf = ntf()
         self.ttf = ttf()
         self.port_map, self.port_reverse_map = port_ids()
@@ -57,14 +71,24 @@ class TfTopology(Topology):
             self.switches[rtr1] = Switch(name=rtr1)
             self.switches[rtr2] = Switch(name=rtr2)
 
+        host_limit = {}
         for rtr in self.port_map.keys():
             for port in self.port_map[rtr].values():
-                self.edge_ports.add(int(port) +
-                                    self.router.PORT_TYPE_MULTIPLIER *
-                                    self.router.OUTPUT_PORT_TYPE_CONST)
+                host_limit[rtr] = int(port) + \
+                                  self.router.PORT_TYPE_MULTIPLIER * \
+                                  self.router.OUTPUT_PORT_TYPE_CONST
+                break
+                # self.edge_ports.add(int(port) +
+                #                     self.router.PORT_TYPE_MULTIPLIER *
+                #                     self.router.OUTPUT_PORT_TYPE_CONST)
 
-        for port in sorted(self.edge_ports):
-            edge_port_ips[port] = int2ip(start_ip + len(edge_port_ips))
+        #for port in sorted(self.edge_ports):
+        for port in sorted(host_limit.values()):
+            self.edge_ports.add(port)
+
+            ip = int2ip(start_ip + len(edge_port_ips))
+            edge_port_ips[port] = ip
+            self.hosts[ip] = Host(ip=ip, name=ip)
 
         for tf in self.ntf.tf_list:
             ofg = OpenFlow_Rule_Generator(tf, self.router.HS_FORMAT())
@@ -120,6 +144,7 @@ class TfTopology(Topology):
 
                 if len(inports) > 0:
                     r.fieldValue[HeaderField.Index["IN_PORT"]] = sorted(inports)[0]
+                    r.fieldMask[HeaderField.Index["IN_PORT"]] = 0xFFFF
 
                 # TODO: handle vlan rewrite?
                 # r.fieldValue[HeaderField.Index["DL_VLAN"]] = rule['vlan_match']
@@ -127,6 +152,11 @@ class TfTopology(Topology):
                 #                  wildcard=wc,
                 #                  location=location,
                 #                  nexthops=nexthops)
+
+                # add host to edges
+                for n in nexthops:
+                    if n in self.hosts and n not in self.edges[location]:
+                        self.edges[location].append(n)
 
                 if len(nexthops) > 1:
                     print "Can't handle multiple next hops", nexthops
@@ -155,6 +185,21 @@ class TfTopology(Topology):
                     break
 
         return egress
+
+    def load_edges(self, fname):
+        with open(fname) as f:
+            for line in f.readlines():
+                tokens = line.strip().split()
+                src = tokens[0]
+                dst = tokens[1]
+                if src not in self.switches:
+                    self.hosts[src] = Host(ip=src, name=src)
+                if dst not in self.switches:
+                    self.hosts[dst] = Host(ip=dst, name=dst)
+
+                if src in self.switches:
+                    if dst not in self.edges[src]:
+                        self.edges[src].append(dst)
 
 class Internet2Topo(TfTopology):
     Definition = [("chic","xe-0/1/0","newy32aoa","xe-0/1/3"), #05667
@@ -187,12 +232,13 @@ class Internet2Topo(TfTopology):
                   ("chic","xe-1/1/0","newy32aoa","xe-0/0/0"), #05239
               ]
 
-    def __init__(self):
+    def __init__(self, no_ft=False):
         super(Internet2Topo, self).__init__(Internet2Topo.Definition,
                                             load_internet2_backbone_ntf,
                                             load_internet2_backbone_ttf,
                                             load_internet2_backbone_port_to_id_map,
-                                            juniperRouter)
+                                            juniperRouter,
+                                            no_ft)
 
 class StanfordTopo(TfTopology):
     Definition = [("bbra_rtr","te7/3","goza_rtr","te2/1"),
@@ -234,12 +280,13 @@ class StanfordTopo(TfTopology):
                   ("yoza_rtr","te1/2","yozb_rtr","te1/2"),
               ]
 
-    def __init__(self):
+    def __init__(self, no_ft=False):
         super(StanfordTopo, self).__init__(StanfordTopo.Definition,
                                            load_stanford_backbone_ntf,
                                            load_stanford_backbone_ttf,
                                            load_stanford_backbone_port_to_id_map,
-                                           ciscoRouter)
+                                           ciscoRouter,
+                                           no_ft)
 
 class DiamondTopo(Topology):
     def __init__(self):
