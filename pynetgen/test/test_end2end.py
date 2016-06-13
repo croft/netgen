@@ -36,7 +36,7 @@ def runSynthesis(topo, config, spec, expected):
 class testAs1755(unittest.TestCase):
     def test_1K_1PC(self):
         as1755dir = os.path.join(cwd, "../../data_set/RocketFuel/AS-1755")
-        classdir = os.path.join(cwd, "rf_classes")
+        classdir = os.path.join(cwd, "data/rf_classes")
         topo = As1755Topo(no_ft=True, path=as1755dir)
         topo.deserialize_classes(classdir, limit=1)
 
