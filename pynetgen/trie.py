@@ -929,4 +929,112 @@ class MultilevelTrie(object):
     def getAllEquivalenceClasses(self):
         dummyRule = Rule()
         dummyRule.ruleType = Rule.FORWARDING
-        return self.getAffectedEquivalenceClasses(dummyRule, OFPFC_ADD)
+        #return self.getAffectedEquivalenceClasses(dummyRule, OFPFC_ADD)
+        return self.old_getAffectedEquivalenceClasses(dummyRule, OFPFC_ADD)
+
+    def old_getAffectedEquivalenceClasses(self, rule, command):
+        finalPacketClasses = []
+        finalTries = []
+
+        if command == OFPFC_ADD:
+            result = self.addRule(rule)
+            if not result:
+                print "ERROR in addRule()"
+                return
+        elif command == OFPFC_DELETE_STRICT:
+            result = self.delRule(rule)
+            if not result:
+                print "ERROR in delRule()"
+                return
+
+            self.addRule(dummyRule)
+
+        inportClasses = self.primaryTrie.getEquivalenceClasses(rule)
+        if len(inportClasses) == 0:
+            print "Error: 0 inport packet classes"
+            return
+
+        inportTries = [self.primaryTrie]
+        for inport_pc in inportClasses:
+            if rule.ruleType == Rule.FORWARDING:
+                dlsrcTries, dlsrcClasses = Trie.getNextLevelEquivalenceClasses(
+                    HeaderField.Index["IN_PORT"],
+                    inport_pc.lowerBound[HeaderField.Index["IN_PORT"]],
+                    rule,
+                    inportTries)
+
+                if len(dlsrcClasses) == 0:
+                    print "Error: 0 dl_src packet classes"
+                    return
+
+                for dlsrc_pc in dlsrcClasses:
+                    dldstTries, dldstClasses = Trie.getNextLevelEquivalenceClasses(
+                        HeaderField.Index["DL_SRC"],
+                        dlsrc_pc.lowerBound[HeaderField.Index["DL_SRC"]],
+                        rule,
+                        dlsrcTries)
+
+                    if len(dldstClasses) == 0:
+                        print "Error: 0 dl_dst packet classes"
+                        return
+
+                    for dldst_pc in dldstClasses:
+                        dltypTries, dltypClasses = Trie.getNextLevelEquivalenceClasses(
+                            HeaderField.Index["DL_DST"],
+                            dldst_pc.lowerBound[HeaderField.Index["DL_DST"]],
+                            rule,
+                            dldstTries)
+
+                        if len(dltypClasses) == 0:
+                            print "Error: 0 dl_type packet classes"
+                            return
+
+                            # TODO: add vlan?
+
+                        for dltyp_pc in dltypClasses:
+                            nwsrcTries, nwsrcClasses = Trie.getNextLevelEquivalenceClasses(
+                                HeaderField.Index["DL_TYPE"],
+                                dltyp_pc.lowerBound[HeaderField.Index["DL_TYPE"]],
+                                rule,
+                                dltypTries)
+
+                            if len(nwsrcClasses) == 0:
+                                print "Error: 0 nw_src packet classes"
+                                return
+
+                            for nwsrc_pc in nwsrcClasses:
+                                nwdstTries, nwdstClasses = Trie.getNextLevelEquivalenceClasses(
+                                    HeaderField.Index["NW_SRC"],
+                                    nwsrc_pc.lowerBound[HeaderField.Index["NW_SRC"]],
+                                    rule,
+                                    nwsrcTries)
+
+                                if len(nwdstClasses) == 0:
+                                    print "Error: 0 nw_dst packet classes"
+                                    return
+
+                                for nwdst_pc in nwdstClasses:
+                                    pc = EquivalenceClass()
+
+                                    bounds = { "IN_PORT" : inport_pc,
+                                               "DL_SRC" : dlsrc_pc,
+                                               "DL_DST" : dldst_pc,
+                                               "DL_TYPE" : dltyp_pc,
+                                               "NW_SRC" : nwsrc_pc,
+                                               "NW_DST" : nwdst_pc }
+
+                                    for key, value in bounds.iteritems():
+                                        index = HeaderField.Index[key]
+                                        pc.lowerBound[index] = value.lowerBound[index]
+                                        pc.upperBound[index] = value.upperBound[index]
+
+                                    finalPacketClasses.append(pc)
+                                    finalTries.append(nwdstTries)
+
+        #return (finalPacketClasses, finalTries)
+        #return finalPacketClasses
+        ret = []
+        for i in range(len(finalPacketClasses)):
+            ret.append((finalTries[i], finalPacketClasses[i]))
+
+        return ret
