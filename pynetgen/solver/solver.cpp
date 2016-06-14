@@ -877,8 +877,11 @@ py::list CachingSolver::solve()
     {
         model_t result = model_t();
 
-        for (auto model : cache)
+        // iterate backwards
+        //for (auto model : cache)
+        for (int i = cache.size(); i > 0; i--)
         {
+            model_t model = cache[i-1];
             result = cached_solve(pcid, model);
             if (result.empty())
             {
@@ -917,6 +920,11 @@ py::list CachingSolver::solve()
             }
         }
     }
+
+    perfCounters.push_back(make_tuple(0, "cache_hits", cache_hits));
+    perfCounters.push_back(make_tuple(0, "cache_misses", cache_misses));
+    perfCounters.push_back(make_tuple(0, "solves", solves));
+    perfCounters.push_back(make_tuple(0, "total_classes", network.pcids.size()));
 
     cout << "--------------------------------" << endl;
     cout << "   Total: " << network.pcids.size() << endl;
