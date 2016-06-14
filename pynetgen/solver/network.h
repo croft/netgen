@@ -53,22 +53,22 @@ void Network::Compute_OD()
      * For each source node, search through packet class edges as a path
      * Once an egress node is reached, stop
      */
-    if (dest_drop)
-    {
-	for (auto pc_it = abstract_pc_map.begin(); pc_it != abstract_pc_map.end(); pc_it++)
-	{
-	    int pc_int = pc_it->second;
-	    set<int> sources = abstract_source_nodes[pc_int];
+    /* if (dest_drop) */
+    /* { */
+    /* 	for (auto pc_it = abstract_pc_map.begin(); pc_it != abstract_pc_map.end(); pc_it++) */
+    /* 	{ */
+    /* 	    int pc_int = pc_it->second; */
+    /* 	    set<int> sources = abstract_source_nodes[pc_int]; */
 
-	    abstract_od[make_pair(0, pc_int)] = 0;
-	    for (auto node: sources)
-	    {
-		abstract_od[make_pair(node, pc_int)] = 0;
-	    }
-	}
+    /* 	    abstract_od[make_pair(0, pc_int)] = 0; */
+    /* 	    for (auto node: sources) */
+    /* 	    { */
+    /* 		abstract_od[make_pair(node, pc_int)] = 0; */
+    /* 	    } */
+    /* 	} */
 
-	return;
-    }
+    /* 	return; */
+    /* } */
 
     for (auto pc_it = abstract_pc_map.begin(); pc_it != abstract_pc_map.end(); pc_it++)
     {
@@ -83,7 +83,8 @@ void Network::Compute_OD()
 	{
 	    for (auto link : rule.second)
 	    {
-		if (abstract_rules.find(make_pair(link, rule.first.second)) == abstract_rules.end())
+		if (abstract_rules.find(make_pair(link, rule.first.second)) == abstract_rules.end() or
+		    link == 0)
 		{
 		    // if it's not an egress, there's still a rule for node->0, so skip it
 		    if (link == 0 && egress.find(rule.first.first) == egress.end())
@@ -95,7 +96,7 @@ void Network::Compute_OD()
 		    if (switches.find(link) != switches.end())
 		    {
 			// actually...for now ignore it
-			/* pc_egress.insert(link); */
+			pc_egress.insert(link);
 		    }
 		    else
 		    {
@@ -105,8 +106,16 @@ void Network::Compute_OD()
 	    }
 	}
 
+	if (dest_drop)
+	{
+	    pc_egress.insert(0);
+	}
+
 	abstract_egress_nodes[pc_int] = set<int>();
 	abstract_egress_nodes[pc_int] = pc_egress;
+
+	//cout << "PC GRESS: " << pc_egress << endl;
+	/* cout << "SOURCES: " << sources << endl; */
 
         // drop node
         abstract_od[make_pair(0, pc_int)] = 0;
@@ -115,6 +124,16 @@ void Network::Compute_OD()
         {
             abstract_od[make_pair(node, pc_int)] = node;
         }
+
+	if (dest_drop)
+	{
+	    for (auto node: sources)
+	    {
+		abstract_od[make_pair(node, pc_int)] = 0;
+	    }
+
+	    continue;
+	}
 
 	// DFS through paths looking for egresses
         for (auto node : sources)
@@ -139,11 +158,11 @@ void Network::Compute_OD()
 		    break;
 		}
 
-		if (abstract_rules.find(make_pair(curr, pc_int)) == abstract_rules.end())
-		{
-		    abstract_od[make_pair(node, pc_int)] = curr;
-		    break;
-		}
+		/* if (abstract_rules.find(make_pair(curr, pc_int)) == abstract_rules.end()) */
+		/* { */
+		/*     abstract_od[make_pair(node, pc_int)] = curr; */
+		/*     break; */
+		/* } */
 
 		for (auto nexthop : abstract_rules[make_pair(curr, pc_int)])
 		{
