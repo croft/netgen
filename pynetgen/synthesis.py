@@ -216,6 +216,12 @@ class CppSynthesizerBase(AbstractSynthesizer):
             if p not in paths:
                 paths[p] = []
 
+            # UF topo definition will solve n->drop, macro will do otherwise
+            if int(f) not in self.abstract_network.node_strrep:
+                f = 0
+            if int(t) not in self.abstract_network.node_strrep:
+                t = 0
+
             paths[p].append((self.abstract_network.node_strrep[int(f)],
                              self.abstract_network.node_strrep[int(t)]))
 
@@ -224,11 +230,11 @@ class CppSynthesizerBase(AbstractSynthesizer):
                                   pc[2])
             counter.report()
 
-        if len(paths) > 0:
-            print "Model found:"
+        # if len(paths) > 0:
+        #     print "Model found:"
 
-        for p in paths.keys():
-            print "   pktcls={0},  {1}".format(p, paths[p])
+        # for p in paths.keys():
+        #     print "   pktcls={0},  {1}".format(p, paths[p])
 
         return paths
 

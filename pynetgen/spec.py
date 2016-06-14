@@ -10,6 +10,7 @@ from FAdo.reex import *
 
 from grammar import SpecGrammar
 from log import logger
+from profiling import PerfCounter
 
 # create a parse class with a custom alphabet as the lexer id rule
 def parser_factory(sigma):
@@ -371,7 +372,11 @@ class Specification(object):
         regex = expand_regex(self.lhs, topo, self.aliases)
         logger.debug("Lhs expanded: %s", regex)
 
+        pc = PerfCounter("match_classes")
+        pc.start()
         self.matched_classes = topo.match_classes(regex, self.sources)
+        pc.stop()
+
         for c in self.matched_classes.keys():
             logger.debug("Matched packet class: %s", c)
 
