@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <vector>
+#include <queue>
 #include <string>
 #include <iostream>
 #include <string.h>
@@ -31,8 +32,9 @@ class Network
 
 public:
     set<int> abstract_nodes;
+    set<int> switches;
     set<pair<int,int>> abstract_topology;
-    map<pair<int,int>,int> abstract_rules;
+    map<pair<int,int>,set<int>> abstract_rules;
 
     map<int,set<int>> abstract_immutable_nodes;
     map<int,set<int>> abstract_egress_nodes;
@@ -40,7 +42,7 @@ public:
 
     map<pair<int,int>,int> abstract_od;
     map<string,int> abstract_pc_map;
-
+    bool dest_drop;
 
     void Compute_OD();
 };
@@ -51,73 +53,106 @@ void Network::Compute_OD()
      * For each source node, search through packet class edges as a path
      * Once an egress node is reached, stop
      */
+    if (dest_drop)
+    {
+	for (auto pc_it = abstract_pc_map.begin(); pc_it != abstract_pc_map.end(); pc_it++)
+	{
+	    int pc_int = pc_it->second;
+	    set<int> sources = abstract_source_nodes[pc_int];
+
+	    abstract_od[make_pair(0, pc_int)] = 0;
+	    for (auto node: sources)
+	    {
+		abstract_od[make_pair(node, pc_int)] = 0;
+	    }
+	}
+
+	return;
+    }
+
     for (auto pc_it = abstract_pc_map.begin(); pc_it != abstract_pc_map.end(); pc_it++)
     {
         int pc_int = pc_it->second;
         set<int> egress = abstract_egress_nodes[pc_int];
         set<int> sources = abstract_source_nodes[pc_int];
-        map<int, int> pc_edges = map<int, int>();
         set<int> pc_egress = set<int>();
 
-        for (auto rule : abstract_rules)
-        {
-            pc_edges[rule.first.first] = rule.second;
-        }
+	// this is just so we don't have to generate all possile paths, but
+	// assumes egress is node n or n-1 in path of length n
+	for (auto rule : abstract_rules)
+	{
+	    for (auto link : rule.second)
+	    {
+		if (abstract_rules.find(make_pair(link, rule.first.second)) == abstract_rules.end())
+		{
+		    // if it's not an egress, there's still a rule for node->0, so skip it
+		    if (link == 0 && egress.find(rule.first.first) == egress.end())
+		    {
+			continue;
+		    }
 
-        for (auto edge : pc_edges)
-        {
-            if (egress.find(edge.first) != egress.end())
-            {
-                pc_egress.insert(edge.first);
-            }
+		    // if it's a switch add it, otherwise, add prev hop
+		    if (switches.find(link) != switches.end())
+		    {
+			// actually...for now ignore it
+			/* pc_egress.insert(link); */
+		    }
+		    else
+		    {
+			pc_egress.insert(rule.first.first);
+		    }
+		}
+	    }
+	}
 
-            if (egress.find(edge.second) != egress.end())
-            {
-                pc_egress.insert(edge.second);
-            }
-        }
-
-        abstract_egress_nodes[pc_int] = pc_egress;
+	abstract_egress_nodes[pc_int] = set<int>();
+	abstract_egress_nodes[pc_int] = pc_egress;
 
         // drop node
         abstract_od[make_pair(0, pc_int)] = 0;
 
-        for (auto node : egress)
+        for (auto node : pc_egress)
         {
             abstract_od[make_pair(node, pc_int)] = node;
         }
 
+	// DFS through paths looking for egresses
         for (auto node : sources)
         {
-            if (egress.find(node) != egress.end())
+            if (pc_egress.find(node) != pc_egress.end())
             {
                 abstract_od[make_pair(node, pc_int)] = node;
                 continue;
             }
 
-            int curr = node;
-            int prev = curr;
+	    queue<int> q = queue<int>();
+	    q.push(node);
 
-            while (pc_edges.find(curr) != pc_edges.end())
-            {
-                prev = curr;
-                curr = pc_edges.find(curr)->second;
+	    while (!q.empty())
+	    {
+		int curr = q.back();
+		q.pop();
 
-                if (prev == curr)
-                {
-                    break;
-                }
-            }
+		if (pc_egress.find(curr) != pc_egress.end())
+		{
+ 		    abstract_od[make_pair(node, pc_int)] = curr;
+		    break;
+		}
 
-            if (egress.find(curr) != egress.end())
-            {
-                abstract_od[make_pair(node, pc_int)] = curr;
-                continue;
-            }
+		if (abstract_rules.find(make_pair(curr, pc_int)) == abstract_rules.end())
+		{
+		    abstract_od[make_pair(node, pc_int)] = curr;
+		    break;
+		}
+
+		for (auto nexthop : abstract_rules[make_pair(curr, pc_int)])
+		{
+		    q.push(nexthop);
+
+		}
+	    }
         }
     }
-
-    /* cout << "\n\nAbstract OD\n" << abstract_od; */
 }
 
 #endif

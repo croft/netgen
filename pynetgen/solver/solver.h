@@ -126,8 +126,6 @@ public:
             }
             query = query && nvalue && pcvalue && n1value;
 #endif
-
-
         }
     }
 
@@ -228,7 +226,6 @@ public:
         {
             query = query && topology(n[index],n1[index]) == ctx.bool_val(true);
         }
-
     }
 
 
@@ -259,7 +256,7 @@ public:
         set_param("pp.min-alias-size", 1000000 );
         set_param("pp.max-depth", 1000000);
         solver s(ctx);
-        query = query.simplify();
+        //query = query.simplify();
         s.add(query);
         // cout << "\n\nQuery:\n" << s;
         // cin.get();
@@ -291,7 +288,6 @@ public:
 
             set<int> egress_nodes = network.abstract_egress_nodes[pc_int];
             set<int> abstract_nodes = network.abstract_nodes;
-
             query = query && functionality.auxilary_def();
             query = query && functionality.encode_null(pc_int);
 
@@ -313,7 +309,10 @@ public:
 
                     }
 
-                    query = query && implies( not_new, functionality.default_rec(node, pc_int, network.abstract_rules[make_pair(node,pc_int)]));
+		    for (auto link : network.abstract_rules[make_pair(node, pc_int)])
+		    {
+			query = query && implies( not_new, functionality.default_rec(node, pc_int, link));
+		    }
                 }
             }
             // //cout << "\n\n" << query<< "\n\n";
