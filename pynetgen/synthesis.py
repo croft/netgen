@@ -94,7 +94,8 @@ class AbstractNetwork(object):
     def set_sinks(self, pcs):
         pc_sinks = set()
         for pc in pcs:
-            for path in pc.powerset_paths(self.concrete_network.egresses):
+            for path in pc.powerset_paths(self.spec.sources,
+                                          self.concrete_network.egresses):
                 node = path[-1]
                 if node in self.concrete_network.switches and \
                    node in self.concrete_network.egresses:

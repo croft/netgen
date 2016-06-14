@@ -82,7 +82,7 @@ class PacketClass(object):
             dest[e] = e
 
         for src in sources:
-            for p in self.powerset_paths(egresses):
+            for p in self.powerset_paths(sources, egresses):
                 if p[0] != src:
                     continue
 
@@ -96,33 +96,36 @@ class PacketClass(object):
 
         return dest
 
-    def _powerset_paths(self, egresses):
+    def _powerset_paths(self, sources, egresses):
         nx = self.to_networkx()
-        srcs = self.edges.keys()
         dsts = set()
+
         for links in self.edges.values():
             for d in links:
                 # if d in egresses:
                 if d not in self.edges:
                     dsts.add(d)
 
-        for src in self.edges.keys():
-            for dst in self.edges[src]:
-                nx.add_edge(src, dst)
+        # for src in self.edges.keys():
+        #     for dst in self.edges[src]:
+        #         nx.add_edge(src, dst)
 
-        for n1 in srcs:
+        nodes = nx.nodes()
+        # if source isn't in this pc, skip
+        sources = [s for s in sources if s in nodes]
+        for n1 in sources:
             for n2 in dsts:
                 # ignores loops
                 for path in networkx.all_simple_paths(nx, n1, n2):
                     yield path
 
-    def powerset_paths(self, egresses):
-        for path in self._powerset_paths(egresses):
+    def powerset_paths(self, sources, egresses):
+        for path in self._powerset_paths(sources, egresses):
             if len(path) > 0:
                 yield path
 
-    def construct_strings(self, egresses):
-        for path in self.powerset_paths(egresses):
+    def construct_strings(self, sources, egresses):
+        for path in self.powerset_paths(sources, egresses):
             yield " ".join(path)
 
     def check_loops(self):
@@ -408,12 +411,13 @@ class Topology(object):
         pc_fg.stop()
         return self._classes
 
-    def match_classes(self, regex, sources=None):
+    def match_classes(self, regex, sources):
         matches = {}
         for p, pc in self.classes.iteritems():
-            for path in pc.powerset_paths(self.egresses):
-                if path[0] not in sources:
-                    continue
+            for path in pc.powerset_paths(sources, self.egresses):
+                # already filtering by sources
+                # if path[0] not in sources:
+                #     continue
 
                 pathstr = " ".join(path)
                 if re.search(regex, pathstr) is not None:
