@@ -67,15 +67,23 @@ class ProfiledExecution(object):
         global _execution
         _execution = self
 
+
     def print_summary(self):
         "Print results of collected performance counters"
+        print self.summary()
+
+    def summary(self, separator=True):
+        output = ""
+
         if len(self.counters) == 0:
-            print "No performance counters found"
-            return
+            summ += "No performance counters found\n"
+            return output
 
         agg = OrderedDict()
         summ = 0
-        print "{0}{1}{2}".format("-" * 15, self.name, "-" * 15)
+
+        if separator:
+            output += "{0}{1}{2}\n".format("-" * 15, self.name, "-" * 15)
 
         for counter in self.counters:
             summ += counter.time_ms
@@ -87,11 +95,16 @@ class ProfiledExecution(object):
                 agg[counter.name] = (count + 1, ms + counter.time_ms)
 
         for counter, tup in agg.iteritems():
-            print "{0}({1}): {2}ms".format(counter, tup[0], tup[1])
+            output += "{0}({1}): {2}ms\n".format(counter, tup[0], tup[1])
 
-        print "-" * (30 + len(self.name))
+        if separator:
+            output += "-" * (30 + len(self.name))
+            output += "\n"
+
         #print "Total: {0}ms".format(summ)
-        print "Total: {0}ms".format(self.time_ms)
+        output += "Total: {0}ms\n".format(self.time_ms)
+
+        return output
 
     def start(self):
         "Enable profiling and start receiving performance counters"
