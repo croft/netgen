@@ -131,6 +131,18 @@ public:
 
     void delta_satisfies_non_mutable()
     {
+	for (auto tup : network.abstract_immutable_nodes)
+	{
+	    int pcid = tup.first;
+
+	    for (int index = 0; index < k; index++)
+	    {
+		for (auto immut : network.abstract_immutable_nodes[pcid])
+		{
+		    query = query &&  n[index] != VALUE(immut);
+		}
+	    }
+	}
         //for ( auto pc_it = 0; pc_it <= network.abstract_pc_map.size(); pc_it++)
         // {
         // 	for (unsigned int index = 0; index < k; index++)
@@ -312,6 +324,9 @@ public:
 		    for (auto link : network.abstract_rules[make_pair(node, pc_int)])
 		    {
 			query = query && implies( not_new, functionality.default_rec(node, pc_int, link));
+
+			// XXX: ignore multipath
+			break;
 		    }
                 }
             }
