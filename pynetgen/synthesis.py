@@ -55,7 +55,6 @@ class AbstractNetwork(object):
         # add drop node
         for switch in self.node_strrep.keys():
             self.edges.append((switch, 0))
-            # self.edges.append((0, switch))
 
         # set default value 0
         for switch in self.node_strrep.keys():
@@ -93,28 +92,21 @@ class AbstractNetwork(object):
         self.class_pcrep = dict(self.class_pcrep)
 
     def set_sinks(self, pcs):
-        self.sinks = list(self._egresses)
         pc_sinks = set()
         for pc in pcs:
-            # for location, links in pc.graph.links.iteritems():
-            #     for link in links:
-            #         if link.isGateway:
-            #             pc_sinks.add(self.node_intrep[location])
-            #             break
-
-            for path in pc.powerset_paths():
-                for node in reversed(path):
-                    if node in self.concrete_network.switches:
-                        if node in self.concrete_network.egresses:
+            for path in pc.powerset_paths(self.concrete_network.egresses):
+                node = path[-1]
+                if node in self.concrete_network.switches and \
+                   node in self.concrete_network.egresses:
+                    if self.node_intrep[node] not in pc_sinks:
                             pc_sinks.add(self.node_intrep[node])
-                            break
+                    break
 
         # remove dups
         #self.sinks = list(set(self.sinks + list(pc_sinks)))
         self.sinks = list(pc_sinks)
         if self.spec.drop:
             self.sinks.append(0)
-
 
     # reset absnet to a single packet class network
     def reset(self, pc):
@@ -166,11 +158,22 @@ class CppSynthesizerBase(AbstractSynthesizer):
         egresses = net.sinks
         immutables = net.immutables
         topo = net.edges
+        switches = [net.node_intrep[n] for n in net.concrete_network.switches.keys()]
 
         classes = []
         for pcid, pc in net.class_pcrep.iteritems():
+            # need to specify all possible pairs, set default to 0
+            inactive = {}
+            for node in nodes:
+                inactive[node] = 0
+
             for m, n in pc.iteredges():
+                inactive[net.node_intrep[m]] = 1
                 classes.append((net.node_intrep[m], pcid, net.node_intrep[n]))
+
+            for node in inactive.keys():
+                if inactive[node] == 0:
+                    classes.append((node, pcid, 0))
 
         fsa = []
         for s1, t, s2 in net.fsa.transitions:
@@ -186,8 +189,10 @@ class CppSynthesizerBase(AbstractSynthesizer):
         finals = [int(s) for s in net.fsa.final]
         initial = int(net.fsa.initial)
         dead = 0
+        drop = 1 if net.spec.drop else 0
 
         return cppsolver.AbstractNetwork(nodes,
+                                         switches,
                                          sources,
                                          egresses,
                                          immutables,
@@ -198,13 +203,15 @@ class CppSynthesizerBase(AbstractSynthesizer):
                                          symbols,
                                          finals,
                                          initial,
-                                         dead)
+                                         dead,
+                                         drop)
 
     def solve(self):
         solver = self.solver_type(self.network)
         result = solver.solve()
 
         paths = {}
+
         for p, f, t in result:
             if p not in paths:
                 paths[p] = []
@@ -236,6 +243,12 @@ class CppCachingSynthesizer(CppSynthesizerBase):
         super(CppCachingSynthesizer, self).__init__(network,
                                                     spec,
                                                     cppsolver.CachingSolver)
+
+class CppMTCachingSynthesizer(CppSynthesizerBase):
+    def  __init__(self, network, spec):
+        super(CppMTCachingSynthesizer, self).__init__(network,
+                                                    spec,
+                                                    cppsolver.MultiThreadedCachingSolver)
 
 class PythonSynthesizer(AbstractSynthesizer):
     def __init__(self, network, spec):

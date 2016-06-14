@@ -49,7 +49,6 @@ class PacketClass(object):
         self.graph = fwd_graph
         self.eqclass = eqclass
         self.idx = idx
-        self._powerset = None
 
     @property
     def edges(self):
@@ -77,63 +76,54 @@ class PacketClass(object):
 
         return g
 
-    def original_dest(self, topo, sources, egress):
+    def original_dest(self, topo, sources, egresses):
         dest = {}
-        paths = self.powerset_paths()
-
-        for e in egress:
+        for e in egresses:
             dest[e] = e
 
         for src in sources:
-            for p in paths:
+            for p in self.powerset_paths(egresses):
+                if p[0] != src:
+                    continue
+
                 for pnode in p:
-                    if pnode in egress:
+                    if pnode in egresses:
                         dest[src] = pnode
                         break
 
                 if src in dest:
                     break
+
         return dest
 
-    def powerset_paths(self):
-        if self._powerset is not None:
-            return self._powerset
+    def _powerset_paths(self, egresses):
+        nx = self.to_networkx()
+        srcs = self.edges.keys()
+        dsts = set()
+        for links in self.edges.values():
+            for d in links:
+                # if d in egresses:
+                if d not in self.edges:
+                    dsts.add(d)
 
-        def rec_construct_paths(paths, path, node):
-            # rocketfuel has some self loops in packet class
-            # if len(path) > 0 and node == path[-1]:
-            #     paths.append(path)
-            #     return paths
+        for src in self.edges.keys():
+            for dst in self.edges[src]:
+                nx.add_edge(src, dst)
 
-            if node in path:
-                if Ignore_pc_loops:
-                    paths.append(path)
-                    return paths
+        for n1 in srcs:
+            for n2 in dsts:
+                # ignores loops
+                for path in networkx.all_simple_paths(nx, n1, n2):
+                    yield path
 
-                loop = path + [node]
-                raise Exception("Loop in packet classes {0}: {1}"
-                            .format(self.idx, loop))
+    def powerset_paths(self, egresses):
+        for path in self._powerset_paths(egresses):
+            if len(path) > 0:
+                yield path
 
-            if node not in self.edges:
-                path.append(node)
-                paths.append(path)
-                return paths
-
-            path.append(node)
-            for nexthop in self.edges[node]:
-                paths = rec_construct_paths(paths, list(path), nexthop)
-
-            return paths
-
-        paths = []
-        for source in self.edges.keys():
-            paths = rec_construct_paths(paths, [], source)
-
-        self._powerset = paths
-        return paths
-
-    def construct_strings(self):
-        return [" ".join(path) for path in self.powerset_paths()]
+    def construct_strings(self, egresses):
+        for path in self.powerset_paths(egresses):
+            yield " ".join(path)
 
     def check_loops(self):
         g = self.to_networkx()
@@ -280,6 +270,7 @@ class Topology(object):
         self.graph = None
         self._egresses = None
         self._classes = None
+        self._serialfiles = None
 
     @property
     def strrepr(self):
@@ -420,16 +411,21 @@ class Topology(object):
     def match_classes(self, regex, sources=None):
         matches = {}
         for p, pc in self.classes.iteritems():
-            for pathstr in pc.construct_strings():
-                if re.match(regex, pathstr) is not None:
-                    if sources is None:
-                        matches[p] = pc
-                        break
-                    else:
-                        for src in sources:
-                            if src in pc.edges.keys():
-                                matches[p] = pc
-                                break
+            for path in pc.powerset_paths(self.egresses):
+                if path[0] not in sources:
+                    continue
+
+                pathstr = " ".join(path)
+                if re.search(regex, pathstr) is not None:
+                    matches[p] = pc
+                    # if sources is None:
+                    #     matches[p] = pc
+                    #     break
+                    # else:
+                    #     for src in sources:
+                    #         if src in pc.edges.keys():
+                    #             matches[p] = pc
+                    #             break
                     break
 
         return matches
@@ -578,16 +574,20 @@ class Topology(object):
 
         if reset:
             self._classes = {}
+        elif self._classes is None:
+            # if we're not resetting, but this is the first time we've run
+            self._classes = {}
 
-        files = [os.path.join(indir, f) for f in
-                 os.listdir(indir)]
+        if self._serialfiles is None:
+            self._serialfiles = [os.path.join(indir, f) for f in
+                          os.listdir(indir)]
+            self._serialfiles.sort(key=lambda x: int(os.path.splitext(os.path.basename(x))[0]))
 
-        files.sort(key=lambda x: int(os.path.splitext(os.path.basename(x))[0]))
-        files = files[start:]
-        if limit is not None and len(files) > limit:
-            files = files[:limit]
+        subset = self._serialfiles[start:]
+        if limit is not None and len(subset) > limit:
+            subset = subset[:limit]
 
-        for f in files:
+        for f in subset:
             try:
                 pcid = os.path.splitext(os.path.basename(f))[0]
                 pcid = int(pcid)
