@@ -10,13 +10,13 @@ import spec
 import synthesis
 import topos
 
-def evaluate(toponame, dest)
+def evaluate(toponame, dest):
     specs = topo_specs(toponame)
     for spectype, specstr in specs.iteritems():
-        test_name = "time_{0}_{3}".format(toponame, spectype)
+        test_name = "time_{0}_{1}".format(toponame, spectype)
         destfile = os.path.join(dest, test_name)
         for trial in range(NUM_TRIALS):
-            run_test(toponame, test_name, specstr, destfile, trial)
+            run_test(test_name, toponame, topo_serialized_load, specstr, destfile, trial)
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:

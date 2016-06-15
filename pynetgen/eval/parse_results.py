@@ -94,18 +94,26 @@ def summarize_encodings(results):
         types[topo][theory][encoding].append(result)
 
     # output format: topo lia+uf lia+macro bv+uf bv+macro
-    output = "topo lia+uf lia+macro bv+uf bv+macro k\n"
-    for topo in sorted(types.keys()):
+    for topo in types.keys():
+        output = "topo lia+uf lia+macro bv+uf bv+macro k\n"
         output += topo + " "
+
+        # order lia, bf
         for theory in sorted(types[topo].keys(), reverse=True):
+
+            # order uf, macro
             for encoding in sorted(types[topo][theory].keys(), reverse=True):
+
                 elapseds = [e.elapsed for e in types[topo][theory][encoding]]
                 q25, median, q75 = numpy.percentile(elapseds, [25, 50, 75])
-                output += "{0} ".format(median)
+                q25 = (q25 / 1000.0)# / 60.0
+                q75 = (q75 / 1000.0)# / 60.0
+                median = (median / 1000.0)# / 60.0
+                output += "{0} {1} {2}  ".format(median, q25, q75)
 
         output += "\n"
-
-    print output
+        with open("encodings_{0}.dat".format(topo), 'w') as f:
+            f.write(output)
 
 def summarize_macrotime(path, name):
     pass

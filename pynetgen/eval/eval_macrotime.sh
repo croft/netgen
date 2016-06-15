@@ -4,18 +4,22 @@ set -e
 set -o nounset
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-RESULTS=results
+RESULTDIR=results
 TESTFILE=macrotime.py
 
-THEORIES="LIA"
-ENCODINGS="UF"
-TOPOS=("fattree" "rocketfuel" "stanford")
+THEORY="LIA"
+ENCODING="MACRO"
+#TOPOS=("fattree" "rocketfuel" "stanford")
+TOPOS=("rocketfuel" "stanford")
+
+OUTPUT=tmp.macrotime.out
 
 mkdir -p $DIR/$RESULTDIR
+rm -rf $OUTPUT
 
-for theory in ${THEORIES[*]}
+for topo in ${TOPOS[*]}
 do
-    echo "Testing $THEORY $ENCODING"
+    echo "Testing $THEORY $ENCODING $topo"
     cd $DIR
     cd ../solver/
     cp configs/config_${THEORY}_${ENCODING}.h config.h
@@ -23,5 +27,5 @@ do
     make all > /dev/null
 
     cd $DIR
-    python $TESTFILE $topo $results
+    python $TESTFILE $topo $RESULTDIR >> $OUTPUT 2>&1
 done

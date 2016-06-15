@@ -65,6 +65,23 @@ def topo_specs(toponame):
     else:
         raise Exception("Unsupport topo type {0}".format(toponame))
 
+def make_fattree(num_paths=-1):
+    topo = topos.FattreeTopo(k=12)
+    if num_paths == -1:
+        num_paths = len(topo.hosts)
+
+    for i in range(len(topo.hosts)/2):
+        if i > num_paths:
+            break
+
+        h1 = topo.hosts.keys()[i]
+        h2 = topo.hosts.keys()[len(topo.hosts.keys())-i-1]
+        topo.add_path(h1, h2)
+
+    topo.make_flowtable()
+    topo.compute_classes()
+    return topo
+
 def topo_single_pc(toponame):
     if toponame == "rocketfuel":
         topo = topos.As1755Topo(no_ft=True, path=rf_dir)
@@ -74,14 +91,26 @@ def topo_single_pc(toponame):
         topo.load_edges(sf_edges)
         topo.deserialize_classes(sf_cls, start=1, limit=1)
     elif toponame == "fattree":
-        topo = topos.FattreeTopo(k=12)
-        for i in range(len(topo.hosts)/2):
-            h1 = topo.hosts.keys()[i]
-            h2 = topo.hosts.keys()[len(topo.hosts.keys())-i-1]
-            topo.add_path(h1, h2)
-            break
-        topo.make_flowtable()
-        topo.compute_classes()
+        topo = make_fattree(1)
+    else:
+        raise Exception("Unsupport topo type {0}".format(toponame))
+
+    return topo
+
+def topo_serialized_load(toponame):
+    if toponame == "rocketfuel":
+        topo = topos.As1755Topo(no_ft=True, path=rf_dir)
+        topo.deserialize_classes("/home/croft1/src/gcc-next/datasets/as1755/classes",
+                                 start=3147,
+                                 limit=1)
+    elif toponame == "stanford":
+        topo = topos.StanfordTopo(no_ft=True)
+        topo.load_edges(sf_edges)
+        topo.deserialize_classes("/home/croft1/src/netgen/pynetgen/test/data/sclass",
+                                 start=1,
+                                 limit=1)
+    elif toponame == "fattree":
+        topo = make_fattree()
     else:
         raise Exception("Unsupport topo type {0}".format(toponame))
 
@@ -95,13 +124,7 @@ def topo_full_load(toponame):
         topo = topos.StanfordTopo()
         topo.compute_classes()
     elif toponame == "fattree":
-        topo = topos.FattreeTopo(k=12)
-        for i in range(len(topo.hosts)/2):
-            h1 = topo.hosts.keys()[i]
-            h2 = topo.hosts.keys()[len(topo.hosts.keys())-i-1]
-            topo.add_path(h1, h2)
-        topo.make_flowtable()
-        topo.compute_classes()
+        topo = make_fattree()
     else:
         raise Exception("Unsupport topo type {0}".format(toponame))
 
