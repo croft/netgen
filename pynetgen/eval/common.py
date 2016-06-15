@@ -46,9 +46,14 @@ stanford_specs = { "drop" : "not match(ip_src=a.b.c.d); yoza_rtr: .* => .* drop"
                    "fw": "not match(ip_src=a.b.c.d); poza_rtr: .* => .* bbrb_rtr .* od NM:{bbrb_rtr}"
                }
 
-fattree_specs = { "drop" : "not match(ip_src=a.b.c.d); s132: .* => .* drop",
-                  "avoid" : "not match(ip_src=a.b.c.d); s132: .* s19 .* => .* s0 .* od",
-                  "fw" : "not match(ip_src=a.b.c.d); s132: .* s19 .* => (N-s19)* od"
+# fattree_specs = { "drop" : "not match(ip_src=a.b.c.d); s132: .* => .* drop",
+#                   "avoid" : "not match(ip_src=a.b.c.d); s132: .* s19 .* => .* s0 .* od",
+#                   "fw" : "not match(ip_src=a.b.c.d); s132: .* s19 .* => (N-s19)* od"
+#               }
+
+fattree_specs = { "drop" : "not match(ip_src=a.b.c.d); s62: .* => .* drop od",
+                  "avoid" : "not match(ip_src=a.b.c.d); s62: .* s13 .* => (N-s13)* od",
+                  "fw" : "not match(ip_src=a.b.c.d); s62: .* s13 .* => (N-13)* s0 (N-13)* od"
               }
 
 rf_dir = os.path.join(CWD, "../../data_set/RocketFuel/AS-1755")
@@ -66,13 +71,12 @@ def topo_specs(toponame):
     else:
         raise Exception("Unsupport topo type {0}".format(toponame))
 
-def make_fattree(num_paths=-1):
-    topo = topos.FattreeTopo(k=12)
-    if num_paths == -1:
-        num_paths = len(topo.hosts)
+def make_fattree(num_paths=0):
+    #topo = topos.FattreeTopo(k=12)
+    topo = topos.FattreeTopo(k=8)
 
     for i in range(len(topo.hosts)/2):
-        if i > num_paths:
+        if num_paths > 0 and i >= num_paths:
             break
 
         h1 = topo.hosts.keys()[i]
