@@ -9,8 +9,7 @@ TESTFILE=macrotime.py
 
 THEORY="LIA"
 ENCODING="MACRO"
-#TOPOS=("fattree" "rocketfuel" "stanford")
-TOPOS=("rocketfuel" "stanford")
+TOPOS=("fattree" "rocketfuel" "stanford")
 
 OUTPUT=tmp.macrotime.out
 

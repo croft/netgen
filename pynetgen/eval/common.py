@@ -100,15 +100,11 @@ def topo_single_pc(toponame):
 def topo_serialized_load(toponame):
     if toponame == "rocketfuel":
         topo = topos.As1755Topo(no_ft=True, path=rf_dir)
-        topo.deserialize_classes("/home/croft1/src/gcc-next/datasets/as1755/classes",
-                                 start=3147,
-                                 limit=1)
+        topo.deserialize_classes("/home/croft1/src/gcc-next/datasets/as1755/classes")
     elif toponame == "stanford":
         topo = topos.StanfordTopo(no_ft=True)
         topo.load_edges(sf_edges)
-        topo.deserialize_classes("/home/croft1/src/netgen/pynetgen/test/data/sclass",
-                                 start=1,
-                                 limit=1)
+        topo.deserialize_classes("/home/croft1/src/netgen/pynetgen/test/data/sclass")
     elif toponame == "fattree":
         topo = make_fattree()
     else:
