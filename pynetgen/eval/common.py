@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import datetime
 import os
 import sys
 import time
@@ -127,6 +128,11 @@ def topo_full_load(toponame):
     return topo
 
 def run_test(name, toponame, topofunc, specstr, destination, trial):
+    print "*"*40
+    print "Starting Trial:", trial
+    print datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print "*"*40
+
     # NOTE: not recording pc computation time
     topo = topofunc(toponame)
 

@@ -196,7 +196,8 @@ void AbstractNetwork::set_pc(int pcid)
             int pcid = std::get<1>(tup);
             int to = std::get<2>(tup);
 
-            pair<int, int> key = make_pair(from, pcid);
+            // hardcode current PC to 1
+            pair<int, int> key = make_pair(from, 1);
 
             if (n1.abstract_rules.find(key) == n1.abstract_rules.end())
             {
