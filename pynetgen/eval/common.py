@@ -56,10 +56,10 @@ fattree_specs = { "drop" : "not match(ip_src=a.b.c.d); s62: .* => .* drop od",
                   "fw" : "not match(ip_src=a.b.c.d); s62: .* s13 .* => (N-13)* s0 (N-13)* od"
               }
 
-rf_dir = os.path.join(CWD, "../../data_set/RocketFuel/AS-1755")
-rf_cls = os.path.join(CWD, "../test/data/rf_classes")
-sf_edges = os.path.join(CWD, "../test/data/stanford_topo.edges")
-sf_cls = os.path.join(CWD, "../test/data/stanford_classes")
+rf_dir = os.path.join(CWD, "/home/croft1/src/netgen/data_set/RocketFuel/AS-1755")
+rf_cls = os.path.join(CWD, "/home/croft1/src/netgen/pynetgen/test/data/rf_classes")
+sf_edges = os.path.join(CWD, "/home/croft1/src/netgen/pynetgen/test/data/stanford_topo.edges")
+sf_cls = os.path.join(CWD, "/home/croft1/src/netgen/pynetgen/test/data/stanford_classes")
 
 def topo_specs(toponame):
     if toponame == "rocketfuel":
@@ -76,7 +76,7 @@ def make_fattree(num_paths=0):
     topo = topos.FattreeTopo(k=8)
 
     for i in range(len(topo.hosts)/2):
-        if num_paths > 0 and i >= num_paths:
+        if num_paths >= 0 and i >= num_paths:
             break
 
         h1 = topo.hosts.keys()[i]
