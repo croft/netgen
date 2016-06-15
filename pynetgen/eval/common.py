@@ -23,7 +23,7 @@ import topos
 from profiling import ProfiledExecution
 
 CWD = os.path.dirname(os.path.realpath(__file__))
-NUM_TRIALS = 1
+NUM_TRIALS = 10
 
 #synthesizerType = synthesis.CppSynthesizer
 synthesizerType = synthesis.CppCachingSynthesizer
@@ -40,20 +40,20 @@ rf_specs = { "drop" : "not match(ip_src=a.b.c.d); 10.0.4.218: .* => .* drop",
              "fw" : "not match(ip_src=a.b.c.d); 10.0.0.166: .* => .* 10.0.0.154 .* od"
          }
 
-stanford_specs = { "drop" : None,
+stanford_specs = { "drop" : "not match(ip_src=a.b.c.d); yoza_rtr: .* => .* drop",
                    "avoid" : "not match(ip_src=a.b.c.d); yoza_rtr: .* => (N-yozb_rtr)* od",
                    "fw": "not match(ip_src=a.b.c.d); poza_rtr: .* => .* bbrb_rtr .* od NM:{bbrb_rtr}"
                }
 
-fattree_specs = { "drop" : None,
-                  "avoid" : None,
-                  "fw" : None
+fattree_specs = { "drop" : "not match(ip_src=a.b.c.d); s132: .* => .* drop",
+                  "avoid" : "not match(ip_src=a.b.c.d); s132: .* s19 .* => .* s0 .* od",
+                  "fw" : "not match(ip_src=a.b.c.d); s132: .* s19 .* => (N-s19)* od"
               }
 
 rf_dir = os.path.join(CWD, "../../data_set/RocketFuel/AS-1755")
 rf_cls = os.path.join(CWD, "../test/data/rf_classes")
 sf_edges = os.path.join(CWD, "../test/data/stanford_topo.edges")
-sf_cls = os.path.join(CWD, "../data/stanford_classes")
+sf_cls = os.path.join(CWD, "../test/data/stanford_classes")
 
 def topo_specs(toponame):
     if toponame == "rocketfuel":
@@ -74,10 +74,13 @@ def topo_single_pc(toponame):
         topo.load_edges(sf_edges)
         topo.deserialize_classes(sf_cls, start=1, limit=1)
     elif toponame == "fattree":
-        topo = topos.FattreeTopo()
-        config = NetworkConfig(paths=[('h25', 'h34',  ['h25', 's14', 's6', 's0',
-                                                       's10', 's19', 'h34'])])
-        topo.apply_config(config)
+        topo = topos.FattreeTopo(k=12)
+        for i in range(len(topo.hosts)/2):
+            h1 = topo.hosts.keys()[i]
+            h2 = topo.hosts.keys()[len(topo.hosts.keys())-i-1]
+            topo.add_path(h1, h2)
+            break
+        topo.make_flowtable()
         topo.compute_classes()
     else:
         raise Exception("Unsupport topo type {0}".format(toponame))
@@ -92,10 +95,12 @@ def topo_full_load(toponame):
         topo = topos.StanfordTopo()
         topo.compute_classes()
     elif toponame == "fattree":
-        topo = topos.FattreeTopo()
-        config = NetworkConfig(paths=[('h25', 'h34',  ['h25', 's14', 's6', 's0',
-                                                       's10', 's19', 'h34'])])
-        topo.apply_config(config)
+        topo = topos.FattreeTopo(k=12)
+        for i in range(len(topo.hosts)/2):
+            h1 = topo.hosts.keys()[i]
+            h2 = topo.hosts.keys()[len(topo.hosts.keys())-i-1]
+            topo.add_path(h1, h2)
+        topo.make_flowtable()
         topo.compute_classes()
     else:
         raise Exception("Unsupport topo type {0}".format(toponame))
@@ -103,11 +108,12 @@ def topo_full_load(toponame):
     return topo
 
 def run_test(name, toponame, topofunc, specstr, destination, trial):
+    # NOTE: not recording pc computation time
+    topo = topofunc(toponame)
+
     elapsed = time.time()
     pe = ProfiledExecution(name)
     pe.start()
-
-    topo = topofunc(toponame)
     s = spec.Specification.parseString(topo, specstr)
     matched = len(s.matched_classes.keys())
 
@@ -117,6 +123,12 @@ def run_test(name, toponame, topofunc, specstr, destination, trial):
 
     solver = synthesizerType(topo, s)
     result = solver.solve()
+
+    total_changes = 0
+    print result
+    for path in result.values():
+        total_changes += len(path)
+
     # pprint.pprint(result)
     pe.stop()
     summary = pe.summary(separator=False)
@@ -130,6 +142,7 @@ def run_test(name, toponame, topofunc, specstr, destination, trial):
         f.write("----------------------------\n")
         f.write("Trial: {0}\n".format(trial))
         f.write(summary)
+        f.write("total_changes: {0}\n".format(total_changes))
         f.write("============================\n")
         f.write("Matched: {0}\n".format(matched))
         f.write("Elapsed: {0}\n".format(elapsed))
