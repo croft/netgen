@@ -377,8 +377,6 @@ class Topology(object):
         pc_rules = PerfCounter("add rules")
         pc_fg = PerfCounter("forwarding graph")
         pc_rules.start()
-
-        pc_rules.start()
         mtrie = trie.MultilevelTrie()
         for switch in self.switches.values():
             # TODO: cleanup
