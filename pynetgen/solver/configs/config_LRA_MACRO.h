@@ -12,5 +12,9 @@
 #define MACRO 5
 #define ENCODING MACRO
 
+#define UFTOPO 6
+#define MACROTOPO 7
+#define TOPO MACROTOPO
+
 
 #endif
