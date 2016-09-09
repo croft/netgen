@@ -359,6 +359,17 @@ public:
             //log(3) << "\n\n" << query<< "\n\n";
         }
     }
+    
+    
+    
+    void define_eqstate(const func_decl& eqstate, map<int,int> mapping)
+    {
+        for( auto n_it = network.abstract_nodes.begin(); n_it != network.abstract_nodes.end(); n_it ++ )
+        {
+            query = query && eqstate(VALUE(*n_it)) == VALUE(mapping[*n_it]);
+        }
+        
+    }
 
 
 };
