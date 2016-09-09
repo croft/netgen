@@ -728,12 +728,22 @@ model_t CachingSolver::iterative_solve(int pcid)
         begin = clock();
         s1.define_k_rules();
 
-#if ENCODING == MACRO
+#if TOPO == MACROTOPO
         s1.delta_satisfies_topology();
-#elif ENCODING == UF
+#elif TOPO == UFTOPO
         func_decl topology = z3::function("topology", SORT, SORT, ctx.bool_sort());
         s1.delta_satisfies_topology_uf(topology);
-#endif
+#endif        
+        
+        map<int,int> mapping; 
+        for( int i =0; i<= network.n1.abstract_nodes.size(); i++)
+            mapping[i] = i; 
+        //cout << mapping; 
+        
+        func_decl eqstate = z3::function("eqstate", SORT, SORT);
+        s1.define_eqstate(eqstate,mapping);
+       
+
         s1.delta_satisfies_non_mutable();
         s1.delta_satisfies_not_egress();
         s1.delta_satisfies_not_existing();
@@ -750,7 +760,8 @@ model_t CachingSolver::iterative_solve(int pcid)
                                                     rho,
                                                     delta,
                                                     network.a1,
-                                                    network.n1.abstract_nodes));
+                                                    network.n1.abstract_nodes,
+                                                    eqstate));
         s1.accept_automata(rho,network.a1);
 
         end = clock();
@@ -805,12 +816,23 @@ model_t CachingSolver::cached_solve(int pcid, model_t prev_model)
     s1.define_k_rules();
     s1.define_prev_model(prev_model);
 
-#if ENCODING == MACRO
+#if TOPO == MACROTOPO
     s1.delta_satisfies_topology();
-#elif ENCODING == UF
+#elif TOPO == UFTOPO
     func_decl topology = z3::function("topology", SORT, SORT, ctx.bool_sort());
     s1.delta_satisfies_topology_uf(topology);
-#endif
+#endif        
+        
+    map<int,int> mapping; 
+    for( int i =0; i<= network.n1.abstract_nodes.size(); i++)
+        mapping[i] = i; 
+    //cout << mapping; 
+    
+    func_decl eqstate = z3::function("eqstate", SORT, SORT);
+    s1.define_eqstate(eqstate,mapping);
+   
+
+    
     s1.delta_satisfies_non_mutable();
     s1.delta_satisfies_not_egress();
     s1.delta_satisfies_not_existing();
@@ -827,7 +849,8 @@ model_t CachingSolver::cached_solve(int pcid, model_t prev_model)
                                                 rho,
                                                 delta,
                                                 network.a1,
-                                                network.n1.abstract_nodes));
+                                                network.n1.abstract_nodes,
+                                                eqstate));
     s1.accept_automata(rho, network.a1);
 
     end = clock();
