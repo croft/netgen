@@ -323,382 +323,389 @@ std::mutex pcidq_lock;
 std::mutex cache_lock;
 std::mutex solutions_lock;
 
-class MultiThreadedCachingSolver : public SolverBase
-{
-public:
-    MultiThreadedCachingSolver(AbstractNetwork _network) : SolverBase(_network) { }
-    py::list solve();
+// class MultiThreadedCachingSolver : public SolverBase
+// {
+// public:
+//     MultiThreadedCachingSolver(AbstractNetwork _network) : SolverBase(_network) { }
+//     py::list solve();
 
-protected:
-    AbstractNetwork thread_nets[NUM_THREADS];
-    std::vector<model_t> cache;
-    py::list solutions;
-    std::vector<int> pcid_queue;
+// protected:
+//     AbstractNetwork thread_nets[NUM_THREADS];
+//     std::vector<model_t> cache;
+//     py::list solutions;
+//     std::vector<int> pcid_queue;
 
-    int next_pcid();
-    void solver_thread(int id);
-    void iterative_solve(int pcid, AbstractNetwork _network, model_t& ret);
-    void cached_solve(int pcid, model_t prev_model, AbstractNetwork _network, model_t& ret);
-};
+//     int next_pcid();
+//     void solver_thread(int id);
+//     void iterative_solve(int pcid, AbstractNetwork _network, model_t& ret);
+//     void cached_solve(int pcid, model_t prev_model, AbstractNetwork _network, model_t& ret);
+// };
 
-int MultiThreadedCachingSolver::next_pcid()
-{
-    pcidq_lock.lock();
-    int next = 0;
-    if (!pcid_queue.empty())
-    {
-        next = pcid_queue.back();
-        pcid_queue.pop_back();
-    }
+// int MultiThreadedCachingSolver::next_pcid()
+// {
+//     pcidq_lock.lock();
+//     int next = 0;
+//     if (!pcid_queue.empty())
+//     {
+//         next = pcid_queue.back();
+//         pcid_queue.pop_back();
+//     }
 
-    pcidq_lock.unlock();
-    return next;
-}
+//     pcidq_lock.unlock();
+//     return next;
+// }
 
-void MultiThreadedCachingSolver::solver_thread(int id)
-{
-    cout << "Starting thread " << id;
-    int cache_misses = 0;
-    int solves = 0;
-    int cache_hits = 0;
+// void MultiThreadedCachingSolver::solver_thread(int id)
+// {
+//     cout << "Starting thread " << id;
+//     int cache_misses = 0;
+//     int solves = 0;
+//     int cache_hits = 0;
 
-    AbstractNetwork _network = thread_nets[id];
-    int pcid = next_pcid();
-    while (pcid > 0)
-    {
-        model_t result;
+//     AbstractNetwork _network = thread_nets[id];
+//     int pcid = next_pcid();
+//     while (pcid > 0)
+//     {
+//         model_t result;
 
-        cache_lock.lock();
-        int len = cache.size();
-        cache_lock.unlock();
+//         cache_lock.lock();
+//         int len = cache.size();
+//         cache_lock.unlock();
 
-        int model_size = 0;
-        bool skip_cache = false;
+//         int model_size = 0;
+//         bool skip_cache = false;
 
-        if (cache.size() > 0)
-        {
-            model_size = cache.back().size();
-            skip_cache = model_size == 1;
-        }
+//         if (cache.size() > 0)
+//         {
+//             model_size = cache.back().size();
+//             skip_cache = model_size == 1;
+//         }
 
-        // if prev model k=1, skip
-        // only try as many prev solutions as k
-        // start at back of cache
-        for (int i = 0; i < len && !skip_cache && i < model_size; i++)
-        {
-            cache_lock.lock();
-            model_t prev_model = cache[len-i-1];
-            cache_lock.unlock();
+//         // if prev model k=1, skip
+//         // only try as many prev solutions as k
+//         // start at back of cache
+//         for (int i = 0; i < len && !skip_cache && i < model_size; i++)
+//         {
+//             cache_lock.lock();
+//             model_t prev_model = cache[len-i-1];
+//             cache_lock.unlock();
 
-            cached_solve(pcid, prev_model, _network, result);
-            if (result.empty())
-            {
-                cache_misses++;
-            }
-            else
-            {
-                cache_hits++;
-                break;
-            }
+//             cached_solve(pcid, prev_model, _network, result);
+//             if (result.empty())
+//             {
+//                 cache_misses++;
+//             }
+//             else
+//             {
+//                 cache_hits++;
+//                 break;
+//             }
 
-            cout << id << " done cache" << endl;
-        }
+//             cout << id << " done cache" << endl;
+//         }
 
-        if (result.empty())
-        {
-            solves++;
-            iterative_solve(pcid, _network, result);
+//         if (result.empty())
+//         {
+//             solves++;
+//             iterative_solve(pcid, _network, result);
 
-            if (!result.empty())
-            {
-                cache_lock.lock();
-                //if (cache.size() < 5)
-                {
-                    cache.push_back(result);
-                }
-                cache_lock.unlock();
-            }
-        }
+//             if (!result.empty())
+//             {
+//                 cache_lock.lock();
+//                 //if (cache.size() < 5)
+//                 {
+//                     cache.push_back(result);
+//                 }
+//                 cache_lock.unlock();
+//             }
+//         }
 
-        if (result.empty())
-        {
-            cout << "No model found" << endl;
-        }
-        else
-        {
-            solutions_lock.lock();
-            for (auto tup : result)
-            {
-                solutions.append(py::make_tuple(pcid,
-                                                std::get<0>(tup),
-                                                std::get<1>(tup)));
-            }
-            solutions_lock.unlock();
-        }
+//         if (result.empty())
+//         {
+//             cout << "No model found" << endl;
+//         }
+//         else
+//         {
+//             solutions_lock.lock();
+//             for (auto tup : result)
+//             {
+//                 solutions.append(py::make_tuple(pcid,
+//                                                 std::get<0>(tup),
+//                                                 std::get<1>(tup)));
+//             }
+//             solutions_lock.unlock();
+//         }
 
-        pcid = next_pcid();
-    }
+//         pcid = next_pcid();
+//     }
 
-    return;
-}
+//     return;
+// }
 
-void MultiThreadedCachingSolver::iterative_solve(int pcid, AbstractNetwork _network, model_t& ret)
-{
-    clock_t begin, end;
-    double elapsed_ms;
-    _network.set_pc(pcid);
+// void MultiThreadedCachingSolver::iterative_solve(int pcid, AbstractNetwork _network, model_t& ret)
+// {
+//     clock_t begin, end;
+//     double elapsed_ms;
+//     _network.set_pc(pcid);
 
-    for(int k=1; k <= _network.n1.abstract_nodes.size() ; k++)
-    {
-        std::cout << "Starting phase: " << k << endl;
-        context ctx;
-        Solver s1(ctx, _network.n1, k);
+//     for(int k=1; k <= _network.n1.abstract_nodes.size() ; k++)
+//     {
+//         std::cout << "Starting phase(MultiThreadedCachingSolver::iterative_solve): " << k << endl;
+//         context ctx;
+//         Solver s1(ctx, _network.n1, k);
 
-        begin = clock();
-        s1.define_k_rules();
+//         begin = clock();
+//         s1.define_k_rules();
 
-#if ENCODING == MACRO
-        s1.delta_satisfies_topology();
-#elif ENCODING == UF
-        func_decl topology = z3::function("topology", SORT, SORT, ctx.bool_sort());
-        s1.delta_satisfies_topology_uf(topology);
-#endif
-        s1.delta_satisfies_non_mutable();
-        s1.delta_satisfies_not_egress();
-        s1.delta_satisfies_not_existing();
+// #if ENCODING == MACRO
+//         s1.delta_satisfies_topology();
+// #elif ENCODING == UF
+//         func_decl topology = z3::function("topology", SORT, SORT, ctx.bool_sort());
+//         s1.delta_satisfies_topology_uf(topology);
+// #endif
+//         s1.delta_satisfies_non_mutable();
+//         s1.delta_satisfies_not_egress();
+//         s1.delta_satisfies_not_existing();
 
-        func_decl cycle = z3::function("cycle", SORT, SORT, SORT);
-        s1.execute_recursive(Cyclicity(ctx,cycle));
+//         func_decl cycle = z3::function("cycle", SORT, SORT, SORT);
+//         s1.execute_recursive(Cyclicity(ctx,cycle));
 
-        func_decl dest = z3::function("dest", SORT, SORT, SORT);
-        s1.execute_recursive(Compute_Dest(ctx, dest, _network.n1));
+//         func_decl dest = z3::function("dest", SORT, SORT, SORT);
+//         s1.execute_recursive(Compute_Dest(ctx, dest, _network.n1));
 
-        func_decl rho = z3::function("rho", SORT, SORT, SORT);
-        func_decl delta = z3::function("delta", SORT, SORT, SORT);
-        s1.execute_recursive(Modified_Functionality(ctx,
-                                                    rho,
-                                                    delta,
-                                                    _network.a1,
-                                                    _network.n1.abstract_nodes));
-        s1.accept_automata(rho,_network.a1);
+//         func_decl rho = z3::function("rho", SORT, SORT, SORT);
+//         func_decl delta = z3::function("delta", SORT, SORT, SORT);
+//         s1.execute_recursive(Modified_Functionality(ctx,
+//                                                     rho,
+//                                                     delta,
+//                                                     _network.a1,
+//                                                     _network.n1.abstract_nodes));
+//         s1.accept_automata(rho,_network.a1);
 
-        end = clock();
-        elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
-        perfCounters.push_back(make_tuple(k, "query constr", elapsed_ms));
+//         end = clock();
+//         elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
+//         perfCounters.push_back(make_tuple(k, "query constr", elapsed_ms));
 
-        cout << "solving" << endl;
-        begin = clock();
-        Z3_model m = s1.solve_z3();
-        end = clock();
-        elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
-        perfCounters.push_back(make_tuple(k, "z3 solve", elapsed_ms));
+//         cout << "solving" << endl;
+//         begin = clock();
+//         Z3_model m = s1.solve_z3();
+//         end = clock();
+//         elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
+//         perfCounters.push_back(make_tuple(k, "z3 solve", elapsed_ms));
 
-        if(m)
-        {
-            model m1(ctx, m);
-            // cout << "\n\nModel\n" << m1;
-            cout << "Model found" << endl;
-            for( int index = 0; index < k; index++)
-            {
-                int int_to, int_from;
-                Z3_get_numeral_int(ctx, m1.eval(s1.n[index], true), &int_to);
-                Z3_get_numeral_int(ctx, m1.eval(s1.n1[index], true), &int_from);
-                ret.push_back(std::make_tuple(int_to, int_from));
-            }
+//         if(m)
+//         {
+//             model m1(ctx, m);
+//             // cout << "\n\nModel\n" << m1;
+//             cout << "Model found" << endl;
+//             for( int index = 0; index < k; index++)
+//             {
+//                 int int_to, int_from;
+//                 Z3_get_numeral_int(ctx, m1.eval(s1.n[index], true), &int_to);
+//                 Z3_get_numeral_int(ctx, m1.eval(s1.n1[index], true), &int_from);
+//                 ret.push_back(std::make_tuple(int_to, int_from));
+//             }
 
-            break;
-        }
-    }
-}
+//             break;
+//         }
+//     }
+// }
 
-void MultiThreadedCachingSolver::cached_solve(int pcid, model_t prev_model, AbstractNetwork _network,
-    model_t& ret)
-{
-    clock_t begin, end;
-    double elapsed_ms;
-    _network.set_pc(pcid);
-    int k = prev_model.size();
+// void MultiThreadedCachingSolver::cached_solve(int pcid, model_t prev_model, AbstractNetwork _network,
+//     model_t& ret)
+// {
+//     clock_t begin, end;
+//     double elapsed_ms;
+//     _network.set_pc(pcid);
+//     int k = prev_model.size();
 
-    context ctx;
-    Solver s1(ctx, _network.n1, k);
+//     context ctx;
+//     Solver s1(ctx, _network.n1, k);
 
-    begin = clock();
+//     begin = clock();
 
-    s1.define_k_rules();
-    s1.define_prev_model(prev_model);
+//     s1.define_k_rules();
+//     s1.define_prev_model(prev_model);
 
-#if ENCODING == MACRO
-    s1.delta_satisfies_topology();
-#elif ENCODING == UF
-    func_decl topology = z3::function("topology", SORT, SORT, ctx.bool_sort());
-    s1.delta_satisfies_topology_uf(topology);
-#endif
-    s1.delta_satisfies_non_mutable();
-    s1.delta_satisfies_not_egress();
-    s1.delta_satisfies_not_existing();
+// // #if ENCODING == MACRO
+// //     s1.delta_satisfies_topology();
+// // #elif ENCODING == UF
+// //     func_decl topology = z3::function("topology", SORT, SORT, ctx.bool_sort());
+// //     s1.delta_satisfies_topology_uf(topology);
+// // #endif
+    
+//     s1.delta_satisfies_topology();
+    
+//     s1.delta_satisfies_non_mutable();
+//     s1.delta_satisfies_not_egress();
+//     s1.delta_satisfies_not_existing();
 
-    func_decl cycle = z3::function("cycle", SORT, SORT, SORT);
-    s1.execute_recursive(Cyclicity(ctx, cycle));
+//     func_decl cycle = z3::function("cycle", SORT, SORT, SORT);
+//     s1.execute_recursive(Cyclicity(ctx, cycle));
 
-    func_decl dest = z3::function("dest", SORT, SORT, SORT);
-    s1.execute_recursive(Compute_Dest(ctx, dest, _network.n1));
+//     func_decl dest = z3::function("dest", SORT, SORT, SORT);
+//     s1.execute_recursive(Compute_Dest(ctx, dest, _network.n1));
 
-    func_decl rho = z3::function("rho", SORT, SORT, SORT);
-    func_decl delta = z3::function("delta", SORT, SORT, SORT);
-    s1.execute_recursive(Modified_Functionality(ctx,
-                                                rho,
-                                                delta,
-                                                _network.a1,
-                                                _network.n1.abstract_nodes));
-    s1.accept_automata(rho, _network.a1);
+//     func_decl rho = z3::function("rho", SORT, SORT, SORT);
+//     func_decl delta = z3::function("delta", SORT, SORT, SORT);
+//     s1.execute_recursive(Modified_Functionality(ctx,
+//                                                 rho,
+//                                                 delta,
+//                                                 _network.a1,
+//                                                 _network.n1.abstract_nodes));
+//     s1.accept_automata(rho, _network.a1);
 
-    end = clock();
-    elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
-    perfCounters.push_back(make_tuple(k, "check query constr", elapsed_ms));
+//     end = clock();
+//     elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
+//     perfCounters.push_back(make_tuple(k, "check query constr", elapsed_ms));
 
-    cout << "checking" << endl;
-    begin = clock();
-    Z3_model m = s1.solve_z3();
-    end = clock();
-    elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
-    perfCounters.push_back(make_tuple(k, "check z3", elapsed_ms));
+//     cout << "checking" << endl;
+//     begin = clock();
+//     Z3_model m = s1.solve_z3();
+//     end = clock();
+//     elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
+//     perfCounters.push_back(make_tuple(k, "check z3", elapsed_ms));
 
-    if(m)
-    {
-        model m1(ctx, m);
-        cout << "Check SAT" << endl;
-        for( int index = 0; index < k; index++)
-        {
-            int int_to, int_from;
-            Z3_get_numeral_int(ctx, m1.eval(s1.n[index], true), &int_to);
-            Z3_get_numeral_int(ctx, m1.eval(s1.n1[index], true), &int_from);
-            ret.push_back(std::make_tuple(int_to, int_from));
-        }
-    }
-    else
-    {
-        cout << "Check UNSAT" << endl;
-    }
-}
+//     if(m)
+//     {
+//         model m1(ctx, m);
+//         cout << "Check SAT" << endl;
+//         for( int index = 0; index < k; index++)
+//         {
+//             int int_to, int_from;
+//             Z3_get_numeral_int(ctx, m1.eval(s1.n[index], true), &int_to);
+//             Z3_get_numeral_int(ctx, m1.eval(s1.n1[index], true), &int_from);
+//             ret.push_back(std::make_tuple(int_to, int_from));
+//         }
+//     }
+//     else
+//     {
+//         cout << "Check UNSAT" << endl;
+//     }
+// }
 
-py::list MultiThreadedCachingSolver::solve()
-{
-    SIZE = ceil((float)log2(network.n1.abstract_nodes.size()))+2;
-    std::thread threads[NUM_THREADS];
+// py::list MultiThreadedCachingSolver::solve()
+// {
+//     SIZE = ceil((float)log2(network.n1.abstract_nodes.size()))+2;
+//     std::thread threads[NUM_THREADS];
 
-    for (auto pcid : network.pcids)
-    {
-        pcid_queue.push_back(pcid);
-    }
+//     for (auto pcid : network.pcids)
+//     {
+//         pcid_queue.push_back(pcid);
+//     }
 
-    for (int i = 0; i < NUM_THREADS; i++)
-    {
-        // give thread private abstractnetwork
-        thread_nets[i] = AbstractNetwork(network);
-        threads[i] = std::thread(&MultiThreadedCachingSolver::solver_thread, this, i);
-    }
+//     for (int i = 0; i < NUM_THREADS; i++)
+//     {
+//         // give thread private abstractnetwork
+//         thread_nets[i] = AbstractNetwork(network);
+//         threads[i] = std::thread(&MultiThreadedCachingSolver::solver_thread, this, i);
+//     }
 
-    for (int i = 0; i < NUM_THREADS; i++)
-    {
-        threads[i].join();
-    }
+//     for (int i = 0; i < NUM_THREADS; i++)
+//     {
+//         threads[i].join();
+//     }
 
-    cout << "CACHE SIZE: " << cache.size() << endl;
+//     cout << "CACHE SIZE: " << cache.size() << endl;
 
-    return solutions;
-}
+//     return solutions;
+// }
 
-class DefaultSolver : public SolverBase
-{
-public:
-    DefaultSolver(AbstractNetwork _network) : SolverBase(_network) { }
-    py::list solve();
-};
+// class DefaultSolver : public SolverBase
+// {
+// public:
+//     DefaultSolver(AbstractNetwork _network) : SolverBase(_network) { }
+//     py::list solve();
+// };
 
-py::list DefaultSolver::solve()
-{
-    py::list ret;
-    SIZE = ceil((float)log2(network.n1.abstract_nodes.size()))+2;
-    cout << "\nSIZE = " << SIZE << "\n";
-    clock_t begin, end;
-    double elapsed_ms;
+// py::list DefaultSolver::solve()
+// {
+//     py::list ret;
+//     SIZE = ceil((float)log2(network.n1.abstract_nodes.size()))+2;
+//     cout << "\nSIZE = " << SIZE << "\n";
+//     clock_t begin, end;
+//     double elapsed_ms;
 
-    for (auto pcid : network.pcids)
-    {
-        network.set_pc(pcid);
+//     for (auto pcid : network.pcids)
+//     {
+//         network.set_pc(pcid);
 
-        for(int k=1; k <= network.n1.abstract_nodes.size() ; k++)
-        {
-            std::cout << "Starting phase: " << k << endl;
-            context ctx;
-            Solver s1(ctx, network.n1, k);
+//         for(int k=1; k <= network.n1.abstract_nodes.size() ; k++)
+//         {
+//             std::cout << "Starting phase(DefaultSolver::solve): " << k << endl;
+//             context ctx;
+//             Solver s1(ctx, network.n1, k);
 
-            begin = clock();
-            s1.define_k_rules();
+//             begin = clock();
+//             s1.define_k_rules();
 
-#if ENCODING == MACRO
-            s1.delta_satisfies_topology();
-#elif ENCODING == UF
-            func_decl topology = z3::function("topology", SORT, SORT, ctx.bool_sort());
-            s1.delta_satisfies_topology_uf(topology);
-#endif
-            s1.delta_satisfies_non_mutable();
-            s1.delta_satisfies_not_egress();
-            s1.delta_satisfies_not_existing();
+// #if ENCODING == MACRO
+//             s1.delta_satisfies_topology();
+// #elif ENCODING == UF
+//             func_decl topology = z3::function("topology", SORT, SORT, ctx.bool_sort());
+//             s1.delta_satisfies_topology_uf(topology);
+// #endif
+//             s1.delta_satisfies_non_mutable();
+//             s1.delta_satisfies_not_egress();
+//             s1.delta_satisfies_not_existing();
 
-            func_decl cycle = z3::function("cycle", SORT, SORT, SORT);
-            s1.execute_recursive(Cyclicity(ctx, cycle));
+//             // func_decl eqstate = z3::function("eqstate", SORT, SORT);
+//             // s1.define_eqstate(eqstate);
 
-            func_decl dest = z3::function("dest", SORT, SORT, SORT);
-            s1.execute_recursive(Compute_Dest(ctx, dest, network.n1));
 
-            func_decl rho = z3::function("rho", SORT, SORT, SORT);
-            func_decl delta = z3::function("delta", SORT, SORT, SORT);
-            s1.execute_recursive(Modified_Functionality(ctx,
-                                                        rho,
-                                                        delta,
-                                                        network.a1,
-                                                        network.n1.abstract_nodes));
-            s1.accept_automata(rho, network.a1);
+//             func_decl cycle = z3::function("cycle", SORT, SORT, SORT);
+//             s1.execute_recursive(Cyclicity(ctx, cycle));
 
-            end = clock();
-            elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
-            perfCounters.push_back(make_tuple(k, "query constr", elapsed_ms));
+//             func_decl dest = z3::function("dest", SORT, SORT, SORT);
+//             s1.execute_recursive(Compute_Dest(ctx, dest, network.n1));
 
-            cout << "solving" << endl;
-            begin = clock();
-            Z3_model m = s1.solve_z3();
-            end = clock();
-            elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
-            perfCounters.push_back(make_tuple(k, "z3 solve", elapsed_ms));
+//             func_decl rho = z3::function("rho", SORT, SORT, SORT);
+//             func_decl delta = z3::function("delta", SORT, SORT, SORT);
+//             s1.execute_recursive(Modified_Functionality(ctx,
+//                                                         rho,
+//                                                         delta,
+//                                                         network.a1,
+//                                                         network.n1.abstract_nodes));
+//             s1.accept_automata(rho, network.a1);
 
-            // if (pcid > 1 && k == 2)
-            if (k == 2)
-            {
-                // cout << network.n1.abstract_rules << endl;
-                //s1.print_query();
-            }
+//             end = clock();
+//             elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
+//             perfCounters.push_back(make_tuple(k, "query constr", elapsed_ms));
 
-            if(m)
-            {
-                model m1(ctx, m);
-                // cout << "\n\nModel\n" << m1;
-                cout << "Model found" << endl;
-                for( int index = 0; index < k; index++)
-                {
-                    const char* from = Z3_get_numeral_string (ctx, m1.eval(s1.n[index], true));
-                    const char* to = Z3_get_numeral_string(ctx, m1.eval(s1.n1[index], true));
+//             cout << "solving" << endl;
+//             begin = clock();
+//             Z3_model m = s1.solve_z3();
+//             end = clock();
+//             elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
+//             perfCounters.push_back(make_tuple(k, "z3 solve", elapsed_ms));
 
-                    ret.append(py::make_tuple(pcid, from, to));
-                }
+//             // if (pcid > 1 && k == 2)
+//             if (k == 2)
+//             {
+//                 // cout << network.n1.abstract_rules << endl;
+//                 //s1.print_query();
+//             }
 
-                break;
-            }
-        }
-    }
+//             if(m)
+//             {
+//                 model m1(ctx, m);
+//                 // cout << "\n\nModel\n" << m1;
+//                 cout << "Model found" << endl;
+//                 for( int index = 0; index < k; index++)
+//                 {
+//                     const char* from = Z3_get_numeral_string (ctx, m1.eval(s1.n[index], true));
+//                     const char* to = Z3_get_numeral_string(ctx, m1.eval(s1.n1[index], true));
 
-    return ret;
-}
+//                     ret.append(py::make_tuple(pcid, from, to));
+//                 }
+
+//                 break;
+//             }
+//         }
+//     }
+
+//     return ret;
+// }
 
 class CachingSolver : public SolverBase
 {
@@ -977,10 +984,10 @@ BOOST_PYTHON_MODULE(cppsolver)
                                 int,
                                 int>());
 
-    py::class_<DefaultSolver>("DefaultSolver",
-                          py::init<AbstractNetwork>())
-    .def("solve", &DefaultSolver::solve)
-    .def("get_perf_counters", &DefaultSolver::get_perf_counters);
+    // py::class_<DefaultSolver>("DefaultSolver",
+    //                       py::init<AbstractNetwork>())
+    // .def("solve", &DefaultSolver::solve)
+    // .def("get_perf_counters", &DefaultSolver::get_perf_counters);
 
 
     py::class_<CachingSolver>("CachingSolver",
@@ -988,9 +995,9 @@ BOOST_PYTHON_MODULE(cppsolver)
     .def("solve", &CachingSolver::solve)
     .def("get_perf_counters", &CachingSolver::get_perf_counters);
 
-    py::class_<MultiThreadedCachingSolver>("MultiThreadedCachingSolver",
-                          py::init<AbstractNetwork>())
-    .def("solve", &MultiThreadedCachingSolver::solve)
-    .def("get_perf_counters", &MultiThreadedCachingSolver::get_perf_counters);
+    // py::class_<MultiThreadedCachingSolver>("MultiThreadedCachingSolver",
+    //                       py::init<AbstractNetwork>())
+    // .def("solve", &MultiThreadedCachingSolver::solve)
+    // .def("get_perf_counters", &MultiThreadedCachingSolver::get_perf_counters);
 
 }
