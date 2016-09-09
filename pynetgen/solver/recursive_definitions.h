@@ -75,6 +75,7 @@ public:
     Automata &a1;
     func_decl & delta;
     set<int> & abstract_nodes;
+    func_decl& eqstate;
 
     // expr & delta_expr;
     // expr_vector & delta_vars;
@@ -85,8 +86,8 @@ public:
     // Modified_Functionality(context & ctx_i, func_decl& rho_i,func_decl& delta_i, Automata& a1_i, set<int>& abstract_nodes_i, expr & delta_expri, expr_vector & delta_varsi)
     // :ctx(ctx_i), rho(rho_i), delta(delta_i), a1(a1_i), abstract_nodes(abstract_nodes_i), delta_expr(delta_expri), delta_vars(delta_varsi)
 
-    Modified_Functionality(context & ctx_i, func_decl& rho_i,func_decl& delta_i, Automata& a1_i, set<int>& abstract_nodes_i)
-        :ctx(ctx_i), rho(rho_i), delta(delta_i), a1(a1_i), abstract_nodes(abstract_nodes_i)
+    Modified_Functionality(context & ctx_i, func_decl& rho_i,func_decl& delta_i, Automata& a1_i, set<int>& abstract_nodes_i,func_decl& eqstate_i)
+        :ctx(ctx_i), rho(rho_i), delta(delta_i), a1(a1_i), abstract_nodes(abstract_nodes_i), eqstate(eqstate_i)
     {
 
         // k = ki;
@@ -146,7 +147,7 @@ public:
 
         for( auto tran_it = a1.transitions.begin(); tran_it != a1.transitions.end(); tran_it++)
         {
-            query = query && delta(VALUE(tran_it->first.first),VALUE(tran_it->first.second) ) == VALUE(tran_it->second) ;
+            query = query && delta(VALUE(tran_it->first.first),eqstate(VALUE(tran_it->first.second)) /*this is changing*/) == VALUE(tran_it->second) ;
 
         }
 
@@ -175,14 +176,14 @@ public:
     {
         //expr query = rho(ctx.int_val(node), ctx.int_val(pc)) == ctx.int_val(a1.transitions[make_pair(a1.start_state,node)]);
 
-        expr query = rho(VALUE(node), VALUE(pc)) == delta(VALUE(a1.start_state), VALUE(node)) ;
+        expr query = rho(VALUE(node), VALUE(pc)) == delta(VALUE(a1.start_state), eqstate(VALUE(node)) /*this is changing */) ;
         return query;
     }
 
 
     expr change_rec(const int node,const int pc, const expr n_to) const
     {
-        expr query = rho( VALUE(node), VALUE(pc) ) == delta( rho( n_to, VALUE(pc)), VALUE(node)) ;
+        expr query = rho( VALUE(node), VALUE(pc) ) == delta( rho( n_to, VALUE(pc)), eqstate(VALUE(node))/*this is chaning*/) ;
         return query;
 
         // stringstream program;
@@ -205,7 +206,7 @@ public:
         // 	return ctx.bool_val(true);
         // }
 
-        expr query = (rho(VALUE(node),VALUE(pc)) ==   delta( rho(VALUE(n_to),VALUE(pc)),VALUE(node)));
+        expr query = (rho(VALUE(node),VALUE(pc)) ==   delta( rho(VALUE(n_to),VALUE(pc)),eqstate(VALUE(node))/*this is chaning*/ ));
         return query;
 
 
