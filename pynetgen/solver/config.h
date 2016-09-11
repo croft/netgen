@@ -14,7 +14,12 @@
 
 #define UFTOPO 6
 #define MACROTOPO 7
-#define TOPO MACROTOPO
+#define ARRAYTOPO 8 
+#define TOPO UFTOPO
+
+#define WOEQSTATE 9
+#define EQSTATE 10
+#define STATE WOEQSTATE
 
 
 #endif
