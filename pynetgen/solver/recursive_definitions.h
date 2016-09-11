@@ -75,7 +75,10 @@ public:
     Automata &a1;
     func_decl & delta;
     set<int> & abstract_nodes;
+ 
+ #if STATE == EQSTATE   
     func_decl& eqstate;
+ #endif   
 
     // expr & delta_expr;
     // expr_vector & delta_vars;
@@ -86,9 +89,16 @@ public:
     // Modified_Functionality(context & ctx_i, func_decl& rho_i,func_decl& delta_i, Automata& a1_i, set<int>& abstract_nodes_i, expr & delta_expri, expr_vector & delta_varsi)
     // :ctx(ctx_i), rho(rho_i), delta(delta_i), a1(a1_i), abstract_nodes(abstract_nodes_i), delta_expr(delta_expri), delta_vars(delta_varsi)
 
+#if STATE == EQSTATE
     Modified_Functionality(context & ctx_i, func_decl& rho_i,func_decl& delta_i, Automata& a1_i, set<int>& abstract_nodes_i,func_decl& eqstate_i)
         :ctx(ctx_i), rho(rho_i), delta(delta_i), a1(a1_i), abstract_nodes(abstract_nodes_i), eqstate(eqstate_i)
-    {
+    { } 
+#elif STATE == WOEQSTATE
+    Modified_Functionality(context & ctx_i, func_decl& rho_i,func_decl& delta_i, Automata& a1_i, set<int>& abstract_nodes_i)
+        :ctx(ctx_i), rho(rho_i), delta(delta_i), a1(a1_i), abstract_nodes(abstract_nodes_i)
+    { } 
+#endif
+    
 
         // k = ki;
         // int count=0;
@@ -137,7 +147,7 @@ public:
         // 		// 	delta_expr = ctx.int_val(0);
         // 	}
         // }
-    }
+         //}
 
     //creates delta
     expr auxilary_def() const
@@ -147,8 +157,12 @@ public:
 
         for( auto tran_it = a1.transitions.begin(); tran_it != a1.transitions.end(); tran_it++)
         {
-            query = query && delta(VALUE(tran_it->first.first),eqstate(VALUE(tran_it->first.second)) /*this is changing*/) == VALUE(tran_it->second) ;
 
+#if STATE == EQSTATE
+            query = query && delta(VALUE(tran_it->first.first),eqstate(VALUE(tran_it->first.second)) /*this is changing*/) == VALUE(tran_it->second) ;
+#elif STATE == WOEQSTATE
+            query = query && delta(VALUE(tran_it->first.first),VALUE(tran_it->first.second)) == VALUE(tran_it->second) ;
+#endif
         }
 
         return query;
@@ -176,14 +190,24 @@ public:
     {
         //expr query = rho(ctx.int_val(node), ctx.int_val(pc)) == ctx.int_val(a1.transitions[make_pair(a1.start_state,node)]);
 
+#if STATE == EQSTATE
         expr query = rho(VALUE(node), VALUE(pc)) == delta(VALUE(a1.start_state), eqstate(VALUE(node)) /*this is changing */) ;
+#elif STATE == WOEQSTATE
+        expr query = rho(VALUE(node), VALUE(pc)) == delta(VALUE(a1.start_state), VALUE(node)) ;
+#endif        
         return query;
     }
 
 
     expr change_rec(const int node,const int pc, const expr n_to) const
     {
+        
+ 
+#if STATE == EQSTATE
         expr query = rho( VALUE(node), VALUE(pc) ) == delta( rho( n_to, VALUE(pc)), eqstate(VALUE(node))/*this is chaning*/) ;
+#elif STATE == WOEQSTATE
+        expr query = rho( VALUE(node), VALUE(pc) ) == delta( rho( n_to, VALUE(pc)), (VALUE(node))) ;
+#endif       
         return query;
 
         // stringstream program;
@@ -206,7 +230,12 @@ public:
         // 	return ctx.bool_val(true);
         // }
 
+#if STATE == EQSTATE
         expr query = (rho(VALUE(node),VALUE(pc)) ==   delta( rho(VALUE(n_to),VALUE(pc)),eqstate(VALUE(node))/*this is chaning*/ ));
+#elif STATE == WOEQSTATE
+        expr query = (rho(VALUE(node),VALUE(pc)) ==   delta( rho(VALUE(n_to),VALUE(pc)),(VALUE(node))/*this is chaning*/ ));
+#endif       
+        
         return query;
 
 
