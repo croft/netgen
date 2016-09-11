@@ -16,6 +16,7 @@
 #include "z3++.h"
 #include "recursive_definitions.h"
 #include "config.h"
+#include <algorithm>
 
 using namespace std;
 namespace py = boost::python;
@@ -744,14 +745,57 @@ model_t CachingSolver::iterative_solve(int pcid)
         
 #if STATE == EQSTATE     
         map<int,int> mapping; 
-        mapping[0] = 0; 
-        mapping[1] = 1; 
-        
-        for( int i = 0; i<= network.n1.abstract_nodes.size(); i++)
-        {  
-               mapping[i] = i; 
+        map<pair<int,int>,set<int>> same_transition; 
+        for (auto s_it1 = network.a1.states.begin(); s_it1 != network.a1.states.begin(); s_it1++ )
+        {
+            for( auto s_it2 = network.a1.states.begin(); s_it2 != network.a1.states.begin(); s_it2++ )
+            {
+                same_transition[make_pair(*s_it1,*s_it2)] = std::set<int>();
+            }
         }
-         
+    
+        for ( auto t_it = network.a1.transitions.begin();  t_it != network.a1.transitions.end(); t_it ++ )
+        {
+            if(t_it->first.first == 0 ||t_it->second == 0 )
+                continue; 
+            same_transition[make_pair(t_it->first.first,t_it->second)].insert(t_it->first.second);
+        }
+
+        int count_index =1;
+        set<int> set_inter;
+        int total_size; 
+        do
+        { 
+            set_inter = network.n1.abstract_nodes;
+            for( auto st_it = same_transition.begin(); st_it != same_transition.end(); st_it++ )
+            {
+                set<int> temp_set;
+                set_intersection(set_inter.begin(), set_inter.end(), st_it->second.begin(), st_it->second.end(),inserter(temp_set,temp_set.begin()));
+                if(temp_set.empty())
+                {  
+                    continue;
+                } 
+                set_inter = temp_set;
+            }
+
+            total_size = 0;
+            for( auto st_it = same_transition.begin(); st_it != same_transition.end(); st_it++ )
+            {   
+                set<int> res_set;
+                set_difference(st_it->second.begin(),st_it->second.end(),set_inter.begin(), set_inter.end(),inserter(res_set,res_set.begin()) );
+                st_it->second = res_set;
+                total_size = total_size + st_it->second.size();
+            }
+            
+            for( auto s_it = set_inter.begin(); s_it!= set_inter.end(); s_it++)
+            {
+                mapping[*s_it] = count_index;
+            }
+            count_index++;
+        }while(total_size!=0);
+        
+        mapping[0] = 0;   
+
         func_decl eqstate = z3::function("eqstate", SORT, SORT);
         s1.define_eqstate(eqstate,mapping);
 #endif
@@ -849,17 +893,60 @@ model_t CachingSolver::cached_solve(int pcid, model_t prev_model)
 #endif        
         
 #if STATE == EQSTATE     
-    map<int,int> mapping; 
-    mapping[0] = 0; 
-    mapping[1] = 1; 
+        map<int,int> mapping; 
+        map<pair<int,int>,set<int>> same_transition; 
+        for (auto s_it1 = network.a1.states.begin(); s_it1 != network.a1.states.begin(); s_it1++ )
+        {
+            for( auto s_it2 = network.a1.states.begin(); s_it2 != network.a1.states.begin(); s_it2++ )
+            {
+                same_transition[make_pair(*s_it1,*s_it2)] = std::set<int>();
+            }
+        }
     
-    for( int i = 0; i<= network.n1.abstract_nodes.size(); i++)
-    {  
-           mapping[i] = i; 
-    }
-     
-    func_decl eqstate = z3::function("eqstate", SORT, SORT);
-    s1.define_eqstate(eqstate,mapping);
+        for ( auto t_it = network.a1.transitions.begin();  t_it != network.a1.transitions.end(); t_it ++ )
+        {
+            if(t_it->first.first == 0 ||t_it->second == 0 )
+                continue; 
+            same_transition[make_pair(t_it->first.first,t_it->second)].insert(t_it->first.second);
+        }
+
+        int count_index =1;
+        set<int> set_inter;
+        int total_size; 
+        do
+        { 
+            set_inter = network.n1.abstract_nodes;
+            for( auto st_it = same_transition.begin(); st_it != same_transition.end(); st_it++ )
+            {
+                set<int> temp_set;
+                set_intersection(set_inter.begin(), set_inter.end(), st_it->second.begin(), st_it->second.end(),inserter(temp_set,temp_set.begin()));
+                if(temp_set.empty())
+                {  
+                    continue;
+                } 
+                set_inter = temp_set;
+            }
+
+            total_size = 0;
+            for( auto st_it = same_transition.begin(); st_it != same_transition.end(); st_it++ )
+            {   
+                set<int> res_set;
+                set_difference(st_it->second.begin(),st_it->second.end(),set_inter.begin(), set_inter.end(),inserter(res_set,res_set.begin()) );
+                st_it->second = res_set;
+                total_size = total_size + st_it->second.size();
+            }
+            
+            for( auto s_it = set_inter.begin(); s_it!= set_inter.end(); s_it++)
+            {
+                mapping[*s_it] = count_index;
+            }
+            count_index++;
+        }while(total_size!=0);
+        
+        mapping[0] = 0;   
+
+        func_decl eqstate = z3::function("eqstate", SORT, SORT);
+        s1.define_eqstate(eqstate,mapping);
 #endif
     
     s1.delta_satisfies_non_mutable();
