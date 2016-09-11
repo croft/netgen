@@ -1,0 +1,26 @@
+sudo apt-get update
+sudo apt-get install git -y
+git clone https://shambwaditya9@bitbucket.org/shambwaditya9/netgen.git
+export PYTHONPATH=/home/shambo_9/netgen/Lib/z3Linux/bin
+sudo apt-get install g++ make --fix-missing -y
+wget 'http://downloads.sourceforge.net/project/boost/boost/1.60.0/boost_1_60_0.tar.gz'
+mv boost_1_60_0.tar.gz\?r\=http%3A%2F%2Fwww.boost.org%2Fusers%2Fhistory%2Fversion_1_60_0.html boost_1_60_0.tar.gz
+tar -xzf boost_1_60_0.tar.gz
+cd boost_1_60_0
+./bootstrap.sh --prefix=/home/shambo_9/boost_1_60_0
+./b2 install
+cd ~
+sudo apt-get install python-dev build-essential python-dev python-setuptools python-pip libboost-python-dev libboost-thread-dev -y
+sudo pip install ipaddr FAdo graphviz networkx pyparsing fnss netaddr
+
+
+nano Makefile
+
+PY_INCL=/usr/include/python2.7/
+BOOST_DIR=/home/shambo_9/boost_1_60_0
+BOOST_INCLUDE=$(BOOST_DIR)/include
+BOOST_LIB=$(BOOST_DIR)/stage/lib
+Z3_DIR=/home/shambo_9/netgen/Lib/z3Linux
+Z3_LIB_DIR=$(Z3_DIR)/bin
+Z3_INC_DIR=$(Z3_DIR)/include
+
