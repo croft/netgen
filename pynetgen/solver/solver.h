@@ -364,6 +364,8 @@ public:
     
     void define_eqstate(const func_decl& eqstate, map<int,int> mapping)
     {
+        query = query && eqstate(VALUE(0)) == VALUE(mapping[0]);
+        
         for( auto n_it = network.abstract_nodes.begin(); n_it != network.abstract_nodes.end(); n_it ++ )
         {
             query = query && eqstate(VALUE(*n_it)) == VALUE(mapping[*n_it]);
