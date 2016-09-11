@@ -742,15 +742,20 @@ model_t CachingSolver::iterative_solve(int pcid)
         s1.delta_satisfies_topology_uf(topology);
 #endif        
         
+#if STATE == EQSTATE     
         map<int,int> mapping; 
-        for( int i =0; i<= network.n1.abstract_nodes.size(); i++)
-            mapping[i] = i; 
-        //cout << mapping; 
+        mapping[0] = 0; 
+        mapping[1] = 1; 
         
+        for( int i = 0; i<= network.n1.abstract_nodes.size(); i++)
+        {  
+               mapping[i] = i; 
+        }
+         
         func_decl eqstate = z3::function("eqstate", SORT, SORT);
         s1.define_eqstate(eqstate,mapping);
-       
-
+#endif
+        
         s1.delta_satisfies_non_mutable();
         s1.delta_satisfies_not_egress();
         s1.delta_satisfies_not_existing();
@@ -763,12 +768,24 @@ model_t CachingSolver::iterative_solve(int pcid)
 
         func_decl rho = z3::function("rho", SORT, SORT, SORT);
         func_decl delta = z3::function("delta", SORT, SORT, SORT);
+        
+#if STATE == EQSTATE     
         s1.execute_recursive(Modified_Functionality(ctx,
                                                     rho,
                                                     delta,
                                                     network.a1,
                                                     network.n1.abstract_nodes,
                                                     eqstate));
+        
+#elif STATE == WOEQSTATE
+         s1.execute_recursive(Modified_Functionality(ctx,
+                                                    rho,
+                                                    delta,
+                                                    network.a1,
+                                                    network.n1.abstract_nodes));
+         
+#endif         
+         
         s1.accept_automata(rho,network.a1);
 
         end = clock();
@@ -807,6 +824,7 @@ model_t CachingSolver::iterative_solve(int pcid)
     return ret;
 }
 
+//     s1.define_prev_model(prev_model);
 model_t CachingSolver::cached_solve(int pcid, model_t prev_model)
 {
     model_t ret = model_t();
@@ -830,15 +848,19 @@ model_t CachingSolver::cached_solve(int pcid, model_t prev_model)
     s1.delta_satisfies_topology_uf(topology);
 #endif        
         
+#if STATE == EQSTATE     
     map<int,int> mapping; 
-    for( int i =0; i<= network.n1.abstract_nodes.size(); i++)
-        mapping[i] = i; 
-    //cout << mapping; 
+    mapping[0] = 0; 
+    mapping[1] = 1; 
     
+    for( int i = 0; i<= network.n1.abstract_nodes.size(); i++)
+    {  
+           mapping[i] = i; 
+    }
+     
     func_decl eqstate = z3::function("eqstate", SORT, SORT);
     s1.define_eqstate(eqstate,mapping);
-   
-
+#endif
     
     s1.delta_satisfies_non_mutable();
     s1.delta_satisfies_not_egress();
@@ -852,13 +874,26 @@ model_t CachingSolver::cached_solve(int pcid, model_t prev_model)
 
     func_decl rho = z3::function("rho", SORT, SORT, SORT);
     func_decl delta = z3::function("delta", SORT, SORT, SORT);
+    
+#if STATE == EQSTATE     
     s1.execute_recursive(Modified_Functionality(ctx,
                                                 rho,
                                                 delta,
                                                 network.a1,
                                                 network.n1.abstract_nodes,
                                                 eqstate));
-    s1.accept_automata(rho, network.a1);
+    
+#elif STATE == WOEQSTATE
+     s1.execute_recursive(Modified_Functionality(ctx,
+                                                rho,
+                                                delta,
+                                                network.a1,
+                                                network.n1.abstract_nodes));
+     
+#endif         
+     
+    s1.accept_automata(rho,network.a1);
+        
 
     end = clock();
     elapsed_ms = double(end - begin) / (CLOCKS_PER_SEC/1000);
