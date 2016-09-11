@@ -35,6 +35,18 @@ public:
     map<pair<int,int>,int> transitions;
     set<int> final_states;
     int dead_state;
+    
+    
+    friend std::ostream& operator<< (std::ostream& stream, const Automata& a1) {
+        stream << "\nAutomata \nstates:" << a1.states;
+        stream << "\nstart state: " << a1.start_state;
+        stream << "\nsymbols:" <<  a1.symbols;
+        stream << "\ntransitions: " << a1.transitions;
+        stream << "\nfinal_states: " << a1.final_states;
+        stream << "\ndead_state: " << a1.dead_state;
+    }
+        
+        
 };
 
 #endif
