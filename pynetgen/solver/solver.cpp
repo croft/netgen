@@ -741,7 +741,10 @@ model_t CachingSolver::iterative_solve(int pcid)
 #elif TOPO == UFTOPO
         func_decl topology = z3::function("topology", SORT, SORT, ctx.bool_sort());
         s1.delta_satisfies_topology_uf(topology);
+#elif TOPO == ARRAYTOPO
+        s1.delta_satisfies_topology_array();
 #endif        
+
         
 #if STATE == EQSTATE     
         map<int,int> mapping; 

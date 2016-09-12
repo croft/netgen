@@ -240,6 +240,70 @@ public:
         }
     }
 
+    void delta_satisfies_topology_array()
+    {
+            
+        std::stringstream topo_str;
+        set<pair<int,int>> abstract_topology = network.abstract_topology;
+
+        std::string sort_string;
+
+#if THEORY == LIA
+        sort_string = string(" Int ");
+#elif THEORY == BV
+        sort_string = string(" (_ BitVec " + std::to_string(SIZE) + " ) ");
+#elif THEORY == LRA
+        sort_string = string(" Real ");
+#endif
+
+        topo_str << "(declare-const TempTopo (Array " << sort_string <<"  " << sort_string <<"  Bool))\n";
+        topo_str << "(declare-const topology (Array " << sort_string <<"  " << sort_string <<"  Bool))\n";
+        //topo_str << "(assert (not (default TempTopo)))\n";
+        topo_str << "(assert (= TempTopo ((as const (Array " << sort_string << " " << sort_string << " Bool )) false)))\n";
+        
+        topo_str << "(assert ( = topology ";
+        
+        for ( auto at_it = abstract_topology.begin(); at_it != abstract_topology.end(); at_it++)
+        {   
+            topo_str << " ( store ";
+        }
+        topo_str << " TempTopo ";
+        for ( auto at_it = abstract_topology.begin(); at_it != abstract_topology.end(); at_it++)
+        {
+            std::stringstream v1, v2;
+
+#if THEORY == LIA
+            v1 << ctx.int_val(at_it->first);
+            v2 << ctx.int_val(at_it->second);
+#elif THEORY == BV
+            v1 << ctx.bv_val(at_it->first,SIZE);
+            v2 << ctx.bv_val(at_it->second,SIZE);
+#elif THEORY == LRA
+            v1 << ctx.real_val(at_it->first);
+            v2 << ctx.real_val(at_it->second);
+#endif
+            topo_str <<  v1.str() << " " << v2.str() << " true ) ";
+            //topo_str <<"(assert (select TempTopo " << v1.str() << " " << v2.str() << "))\n";
+        }
+        
+        topo_str << " )) \n";
+        //topo_str << "(assert ( = topology (store TempTopo 0 0 false)))\n";
+        
+        for(unsigned index = 0; index < k; index++ )
+        {
+            topo_str << "\n(declare-const " << n[index]    << sort_string << " )";
+            topo_str << "\n(declare-const " << n1[index]   << sort_string << " )";
+            topo_str << "\n(assert ( select topology " << n[index] << " " << n1[index] << "))";
+        }
+        Z3_ast asty;
+        asty = Z3_parse_smtlib2_string(ctx, topo_str.str().c_str(), 0, 0, 0, 0, 0, 0);
+        expr ex(ctx, asty);
+
+        query = query && ex;
+        //cout << "string" << topo_str.str() << "\n\n\ntranslated" << ex; 
+        //exit(0);
+
+    }
 
 
 
