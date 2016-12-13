@@ -18,7 +18,8 @@ from config_parser.juniper_parser import juniperRouter
 from config_parser.transfer_function_to_openflow import OpenFlow_Rule_Generator
 
 import trie
-from fields import HeaderField, int2mac, ip2int, int2ip, wc2ip
+from trie import Rule
+from fields import HeaderField, int2mac, ip2int, int2ip, wc2ip, is_ip, mask2wc
 from log import logger
 from network import Topology, Switch, Host, FlowEntry, pairwise, PacketClass
 
@@ -648,14 +649,15 @@ class As1755Topo(Topology):
                 dst = tokens[2]
                 wc = tokens[3]
                 nexthop = tokens[5]
-                priority = int(tokens[7])
+                #priority = int(tokens[7])
+                priority = 32 - mask2wc(wc)
 
                 if '/' in dst:
                     dst_tokens = dst.split('/')
                     block = int(dst_tokens[1])
                     dst = dst_tokens[0]
 
-                    if wc2ip(32-block) != wc:
+                    if wc2ip(block) != wc:
                         raise Exception("Error: inconsistency in wildcard")
 
                 if tokens[4] != switch:

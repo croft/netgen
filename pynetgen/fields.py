@@ -2,6 +2,7 @@
 
 import ipaddr
 import netaddr
+import re
 import socket
 import struct
 
@@ -22,10 +23,18 @@ def int2mac(mac):
     return ':'.join(s.encode('hex') for s in h.decode('hex'))
 
 def wc2ip(wc):
+    wc = 32-wc
     if wc == 0:
         return int2ip(int("1"*32, 2))
 
     return int2ip(int("1"*32, 2) ^ int("1"*wc, 2))
+
+def mask2wc(mask):
+    octets = mask.split(".")
+    binary_str = ''
+    for octet in octets:
+        binary_str += bin(int(octet))[2:].zfill(8)
+    return len(binary_str.rstrip('0'))
 
 def mac_to_binstr(mac):
     return netaddr.EUI(mac).bits().replace("-", "")
@@ -35,6 +44,10 @@ def mac2int(mac):
     if mac == "0":
         return 0
     return int(mac_to_binstr(mac))
+
+def is_ip(ip):
+    r = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", ip)
+    return r is not None
 
 class FieldDefinition(object):
     def __init__(self):
