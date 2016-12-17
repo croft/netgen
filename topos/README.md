@@ -3,25 +3,28 @@
 ### Topologies
 
 Networks with dataplane state:
+
 * Veriflow Rocketfuel AS 1755 (from BGP replay)
 * Stanford
 * Internet2
 
 Topologies:
+
 * Fattree
 * 10 Rocketfuel topos:
-  * AS 1221 (#nodes: 5023, #edges: 21526)
-  * AS 1239 (#nodes: 16943, #edges: 71620)
-  * AS 1755 (#nodes: 957, #edges: 3914)
-  * AS 2914 (#nodes: 10830, #edges: 52140)
-  * AS 3257 (#nodes: 1223, #edges: 4600)
-  * AS 3356 (#nodes: 5328, #edges: 36526)
-  * AS 3967 (#nodes: 1480, #edges: 7218)
-  * AS 4755 (#nodes: 592, #edges: 2204)
-  * AS 6461 (#nodes: 2720, #edges: 10312)
-  * AS 7018 (#nodes: 20593, #edges: 78984)
+  1. AS 1221 (#nodes: 5023, #edges: 21526)
+  2. AS 1239 (#nodes: 16943, #edges: 71620)
+  3. AS 1755 (#nodes: 957, #edges: 3914)
+  4. AS 2914 (#nodes: 10830, #edges: 52140)
+  5. AS 3257 (#nodes: 1223, #edges: 4600)
+  6. AS 3356 (#nodes: 5328, #edges: 36526)
+  7. AS 3967 (#nodes: 1480, #edges: 7218)
+  8. AS 4755 (#nodes: 592, #edges: 2204)
+  9. AS 6461 (#nodes: 2720, #edges: 10312)
+  10. AS 7018 (#nodes: 20593, #edges: 78984)
 
 Generating dataplane state:
+
 * Random: N paths created between random pairs of nodes, rules compressed
 * RouteViews: RIB feeds replayed by randomly assigning IPs to nodes, rules compressed
 * Note: rules are compressed to avoid only exact-match rules, resulting in one packet class per flow
