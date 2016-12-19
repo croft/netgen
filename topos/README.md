@@ -42,3 +42,12 @@ Generating dataplane state:
 * Waypoint: traffic starting from _src_ should traverse node _w_
 * Symmetry: a path from _src_ to _dst_ takes the same path as _dst_ to _src_
 * Asymmetry: a path from _src_ to _dst_ uses a different path than _dst_ to _src_
+
+
+### Specifications
+
+* Reachability requirement in the presence of migration. Assume traffic from Vi can reach Vj, where Vi and Vj are two virtual machines that reside in the DC. Vi is connected to the DC via a set of edge switches {S1,S2, ...}, and Vj is connected to the DC via {D1,D2,...}. Now, if Vj migrates to a new location {D1',D2',...}, The NetGen policy will be like: match{src_IP = Vi_IP}, {S1,S2,...}: .*(D1+D2+...) => .*(D1'+D2'+...)
+* Waypoint requirement in the face of middle-box scaling-out/in. Assume traffic from Vi to Vj is required to pass a firewall FW. Originally, the FW is implemented in two locations F1,F2. Now, if the DC adds a third one (for better performance) F3, the NetGen policy could be:
+match(*), {S1,S2,...}: .* (F1+F2).* => .* (F1+F2+F3).* A similar NetGen policy can be used for the case of scaling in firewall implementation from three to two.
+* Change of waypoint policy with new functionality. Assume the original waypoint requirement is FW >> LB (traffic sequentially passes firewall and load balancer). Now, a monitoring middlebox is introduced and the intention is to have LB and the monitor (MN) to process traffic in either order. The NetGen policy will be like:
+match(*): {S1,S2,...}: .* FW LB .* => .* FW ((LB MN) + (MN LB)) .*
