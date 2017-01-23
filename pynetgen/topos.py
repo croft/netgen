@@ -416,21 +416,124 @@ class FattreeTopo(Topology):
         self._egresses = []
         self._make_topo()
 
-    @classmethod
-    def make_connections(cls, instance, density):
-        # f = math.factorial
-        # n = len(instance.hosts.keys())
-        # r = 2
-        # combinations = f(n) / (f(r) * f(n-r))
-        # count = int(density * combinations)
-        # pairs = list(itertools.combinations(instance.hosts.keys(), 2))
-        # for p in random.sample(pairs, count):
-        #     print p[0], p[1]
-        #     instance.add_path(p[0], p[1])
-        count = int(density * len(instance.hosts.keys()))
-        for p,v in pairwise(random.sample(instance.hosts.keys(), count)):
-            logger.debug("Creating connection (src, dst) = (%s, %s)", p, v)
-            instance.add_path(p,v)
+    # @classmethod
+    # def make_connections(cls, instance, density):
+    #     # f = math.factorial
+    #     # n = len(instance.hosts.keys())
+    #     # r = 2
+    #     # combinations = f(n) / (f(r) * f(n-r))
+    #     # count = int(density * combinations)
+    #     # pairs = list(itertools.combinations(instance.hosts.keys(), 2))
+    #     # for p in random.sample(pairs, count):
+    #     #     print p[0], p[1]
+    #     #     instance.add_path(p[0], p[1])
+    #     count = int(density * len(instance.hosts.keys()))
+    #     for p,v in pairwise(random.sample(instance.hosts.keys(), count)):
+    #         logger.debug("Creating connection (src, dst) = (%s, %s)", p, v)
+    #         instance.add_path(p,v)
+
+    def populate_rules_ribfeeds(self, num_connections=10000):
+        make_ribfeed_paths(self, sorted(self.hosts.keys()), num_connections)
+        self.make_flowtable()
+
+    def populate_rules(self):
+        cores = (self.size/2)**2
+        aggs = (self.size/2) * self.size
+        edges = (self.size/2) * self.size
+
+        for pod in range(0, self.size):
+            if pod not in self.pods:
+                self.pods[pod] = []
+
+            agg_offset = cores + self.size/2 * pod
+            edge_offset = cores + aggs + self.size/2 * pod
+            host_offset = cores + aggs + edges + (self.size/2)**2 * pod
+
+            wc = 24
+            mask = ip2int(wc2ip(wc))
+
+            for agg in range(0, self.size/2):
+                core_offset = agg * self.size/2
+                aggname = "s{0}".format(agg_offset + agg)
+
+                for core in range(0, self.size/2):
+                    corename = "s{0}".format(core_offset + core)
+                    dst_ip = ip2int("10.0.{0}.0".format(pod))
+                    r = Rule()
+                    r.ruleType = Rule.FORWARDING
+                    r.nextHop = aggname
+                    r.location = corename
+                    r.priority = 33 - wc
+                    r.fieldMask[HeaderField.Index["NW_DST"]] = mask
+                    r.fieldValue[HeaderField.Index["NW_DST"]] = dst_ip
+                    self.switches[corename].ft.append(r)
+
+                for pod2 in range(0, self.size):
+                    if pod2 != pod:
+                        core = random.randrange(0, self.size/2)
+                        corename = "s{0}".format(core_offset + core)
+                        while corename in self.idle_core_switches:
+                            core = random.randrange(0, self.size/2)
+                            corename = "s{0}".format(core_offset + core)
+
+                        dst_ip = ip2int("10.0.{0}.0".format(pod2))
+                        r = Rule()
+                        r.ruleType = Rule.FORWARDING
+                        r.nextHop = corename
+                        r.location = aggname
+                        r.priority = 33 - wc
+                        r.fieldMask[HeaderField.Index["NW_DST"]] = mask
+                        r.fieldValue[HeaderField.Index["NW_DST"]] = dst_ip
+                        self.switches[aggname].ft.append(r)
+
+            for edge in range(0, self.size/2):
+                edgename = "s{0}".format(edge_offset + edge)
+                for h in range(0, self.size/2):
+                    hostname = "h{0}".format(host_offset + self.size/2 * edge + h)
+
+                    self.pods[pod].append(hostname)
+                    self.pods_rev[hostname] = (pod, len(self.pods[pod]))
+
+                    dst_ip = ip2int(self.hosts[hostname].ip)
+                    wc = 32
+                    mask = ip2int(wc2ip(wc))
+                    r = Rule()
+                    r.ruleType = Rule.FORWARDING
+                    r.nextHop = hostname
+                    r.location = edgename
+                    r.priority = 33 - wc
+                    r.fieldMask[HeaderField.Index["NW_DST"]] = mask
+                    r.fieldValue[HeaderField.Index["NW_DST"]] = dst_ip
+                    self.switches[edgename].ft.append(r)
+
+                    for agg in range(0, self.size/2):
+                        aggname = "s{0}".format(agg_offset + agg)
+                        r = Rule()
+                        r.ruleType = Rule.FORWARDING
+                        r.nextHop = edgename
+                        r.location = aggname
+                        r.priority = 33 - wc
+                        r.fieldMask[HeaderField.Index["NW_DST"]] = mask
+                        r.fieldValue[HeaderField.Index["NW_DST"]] = dst_ip
+                        self.switches[aggname].ft.append(r)
+
+
+                for pod2 in range(0, self.size):
+                    dst_ip = ip2int("10.0.{0}.0".format(pod2))
+                    wc = 24
+                    mask = ip2int(wc2ip(wc))
+
+                    agg = random.randrange(0, self.size/2)
+                    aggname = "s{0}".format(agg_offset + agg)
+
+                    r = Rule()
+                    r.ruleType = Rule.FORWARDING
+                    r.nextHop = aggname
+                    r.location = edgename
+                    r.priority = 33 - wc
+                    r.fieldMask[HeaderField.Index["NW_DST"]] = mask
+                    r.fieldValue[HeaderField.Index["NW_DST"]] = dst_ip
+                    self.switches[edgename].ft.append(r)
 
     def _make_topo(self):
         self.graph = self._generate_graph()
@@ -523,7 +626,9 @@ class SosrTopo(Topology):
         self.build_from_graph(g)
 
 class RocketfuelTopo(Topology):
-    dataset_path = "rocketfuel_maps"
+    dataset_path = os.path.normpath(os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "rocketfuel_maps"))
 
     def __init__(self, asnum=1755):
         super(RocketfuelTopo, self).__init__()
@@ -555,6 +660,77 @@ class RocketfuelTopo(Topology):
         return [os.path.splitext(cch)[0] for cch in
                 os.listdir(RocketfuelTopo.dataset_path)
                 if cch[0].isdigit() and os.path.splitext(cch)[1] == '.cch']
+
+    def populate_rules_ribfeeds(self, num_connections=10000):
+        make_ribfeed_paths(self, sorted(self.nodes.keys()), num_connections)
+        self.make_flowtable()
+
+    def populate_rules(self):
+        pass
+
+def make_ribfeed_paths(topo, nodes, rib_size):
+    prefix_file = "rib_feeds/rib_prefixes.txt"
+    ip_file = "rib_feeds/rib_nodes.txt"
+    edge_file = "rib_feeds/rib_edges.txt"
+
+    if rib_size > 1900000:
+        print "Warning: max number of connections with ribfeeds is 1.9M, specified ", rib_size
+        rib_size = 1900000
+
+    if not os.path.isfile(edge_file):
+        print "ERROR: no edge file", edge_file
+        return []
+
+    with open(prefix_file) as f:
+        prefixes = [p.strip() for p in f.readlines()]
+
+    with open(ip_file) as f:
+        ips = [ip.strip() for ip in f.readlines()]
+
+    with open(edge_file) as f:
+        edges = []
+        for i, line in enumerate(f):
+            edges.append(line.strip())
+
+    ipmap = {}
+    size = len(ips)
+    if len(nodes) < len(ips):
+        size = len(nodes)
+
+    sample = random.sample(nodes, size)
+    for i in range(size):
+        ipmap[ips[i]] = nodes[i]
+
+    prefixmap = {}
+    paths = []
+
+    count = 0
+    for line in edges:
+        if count > rib_size:
+            break
+
+        tokens = line.split()
+        ip = tokens[0]
+        prefix = tokens[1]
+
+        if ip not in ipmap:
+            continue
+
+        if prefix not in prefixmap:
+            node = random.choice(nodes)
+            prefixmap[prefix] = node
+
+        src = ipmap[ip]
+        dst = prefixmap[prefix]
+
+        if src == dst:
+            continue
+        try:
+            topo.add_path(src, dst)
+            paths.append((src, dst))
+            count += 1
+        except networkx.NetworkXNoPath:
+            pass
 
 def mp_parse_switch((topo, fname)):
     return topo.parse_switch_file(fname)
@@ -700,3 +876,10 @@ class As1755Topo(Topology):
 
         with open(dest, 'w') as f:
             f.writelines(s)
+
+# if __name__ == "__main__":
+#     t = FattreeTopo(k=4)
+#     # t = RocketfuelTopo(asnum=1755)
+#     t.populate_rules_ribfeeds(10)
+#     print len(t.classes.values())
+
