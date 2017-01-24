@@ -8,7 +8,7 @@ from log import logger
 from synthesis import PythonSynthesizer, CppSynthesizer, CppCachingSynthesizer
 from network import NetworkConfig
 from topos import (StanfordTopo, Internet2Topo,
-                   FattreeTopo, DiamondTopo,
+                   FattreeTopo, DiamondTopo, LineTopo,
                    DiamondExtendedTopo, ThintreeTopo,
                    SosrTopo)
 
@@ -30,6 +30,17 @@ def run(name, topo, config, specstr):
 def test_fattree_perf():
     logger.setLogLevel("info")
 
+def testLineTopo():
+    #line topo
+    topo = LineTopo()
+    config = NetworkConfig(paths=[('s1', 's5', ['s1', 's2', 's3', 's4', 's5'])]
+                            )
+    specstr = "not match(ip_src=a.b.c.d); s1: .* s3 .* => (N-s3)* s6 (N-s3)* od"
+    print topo, config, specstr
+    run("linetopo", topo, config, specstr)
+
+
+def testForwardPath(self):
     # fattree 4 ------------------------------------------------------
     topo = FattreeTopo(k=4)
     config = NetworkConfig(paths=[('h25', 'h34', None),
