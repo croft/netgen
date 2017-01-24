@@ -1,0 +1,33 @@
+Label(n,st,rf,vstr) 
+<- 
+Label(n1,st1,rf1,vstr1), 
+Network[n]=n1, 
+int:ne_2(n, 0),
+Homomorphism[n1]=hmn1, 
+Automata_delta[st1,hmn1]=st,  
+string:at[vstr1,n] = 48, 
+vstr = (string:substring[vstr1,0,n] + "1" + string:substring[vstr1,n+1,string:length[vstr1]-n]) , 
+rf = rf1 + 1. 
+
+
+Label(n,st,rf,vstr) 
+<- 
+Label(n1,st1,rf1,vstr1), 
+Topology(n, n1), 
+int:ne_2(n, 0),
+Homomorphism[n1]=hmn1, 
+Automata_delta[st1,hmn1]=st,  
+string:at[vstr1,n] = 48, 
+vstr = (string:substring[vstr1,0,n] + "1" + string:substring[vstr1,n+1,string:length[vstr1]-n]) , 
+rf = rf1 + 1. 
+
+
+// Label(n,st,rf,vstr) 
+// <-
+// Topology(n, n1), 
+// Label(n1,st1,rf1,vstr1), 
+// Homomorphism[n1] = hmn1, 
+// Automata_delta[st1,hmn1]=st, 
+// string:at[vstr1,n+1] = 48, 
+// vstr = (string:substring[vstr1,0,n+1] + "1" + string:substring[vstr1,n+2,string:length[vstr1]-n+1]) , 
+// rf = rf1 + 1. 

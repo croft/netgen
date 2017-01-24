@@ -1,0 +1,6 @@
+Network[n] = n1 -> int(n), int(n1).
+Topology(n,n1) -> int(n), int(n1).
+Homomorphism[n] = val -> int(n), int(val).
+Automata_delta[n,s] = n1 -> int(n), int(s), int(n1).
+Topology(n,n1) <- Topology(n1,n). 
+Label(n,st,rf,vstr) -> int(n), int(st), int(rf), string(vstr).
