@@ -12,3 +12,10 @@ Parsers/VeriFlow-v0.2/VeriFlow/data
 Parsers/data
 *.tablereg
 data_set/RocketFuel
+.vscode
+cppsolver.so
+.clang-format
+.clang_complete
+GPATH
+GRTAGS
+GTAGS
