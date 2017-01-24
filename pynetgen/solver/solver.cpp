@@ -13,10 +13,17 @@
 #include "solver.h"
 #include "network.h"
 #include "automata.h"
-#include "z3++.h"
-#include "recursive_definitions.h"
-#include "config.h"
+// #include "z3++.h"
 #include <algorithm>
+#include <array>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <memory>
+#include <stdexcept>
+#include "config.h"
+#include "recursive_definitions.h"
+#include <ctime>
 
 using namespace std;
 namespace py = boost::python;
@@ -57,19 +64,19 @@ std::set<T> pylist_to_set(const py::object &obj)
         return st;
 }
 
-// std::vector<tuple<int, int>> pylist_to_tuplist2(const py::object &obj)
-// {
-//         std::vector<tuple<int, int>> vect(len(obj));
-//         int j, k;
-//         for (unsigned long i = 0; i < vect.size(); i++) {
-//                 j = py::extract<int>(obj[i][0]);
-//                 k = py::extract<int>(obj[i][1]);
-//                 vect[i] = make_tuple(j, k);
-//                 // cout << vect[i] << endl;
-//         }
+std::vector<std::tuple<int,int>> pylist_to_tuplist2(const py::object &obj)
+{
+        std::vector<std::tuple<int, int>> vect(len(obj));
+        int j, k;
+        for (unsigned long i = 0; i < vect.size(); i++) {
+                j = py::extract<int>(obj[i][0]);
+                k = py::extract<int>(obj[i][1]);
+                vect[i] = make_tuple(j, k);
+                // cout << vect[i] << endl;
+        }
 
-//         return vect;
-// }
+        return vect;
+}
 
 std::vector<std::tuple<int, int, int>> pylist_to_tuplist3(const py::object &obj)
 {
@@ -115,6 +122,24 @@ std::set<std::pair<int, int>> pylist_to_set_pair(const py::object &obj)
 
         return spr;
 }
+
+
+// -----------------------------------------------------------------------------
+// Execute system commands and returns the outout as a string
+// -----------------------------------------------------------------------------
+std::string exec(string input)
+{       
+        const char *cmd = input.c_str(); 
+        std::array<char, 128> buffer;
+        std::string result;
+        std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+        if (!pipe) throw std::runtime_error("popen() failed!");
+        while (!feof(pipe.get())) {
+                if (fgets(buffer.data(), 128, pipe.get()) != NULL) result += buffer.data();
+        }
+        return result;
+}
+
 
 // -----------------------------------------------------------------------------
 
