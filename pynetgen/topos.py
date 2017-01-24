@@ -315,6 +315,22 @@ class DiamondExtendedTopo(Topology):
 
         self.build_from_graph(g)
 
+
+class LineTopo(Topology):
+    def __init__(self):
+        super(LineTopo, self).__init__()
+        g = networkx.Graph()
+        g.add_nodes_from(['s1', 's2', 's3', 's4', 's5', 's6'])
+        g.add_edges_from([('s1','s2'),
+                          ('s2','s3'),
+                          ('s3','s4'),
+                          ('s4','s5'),
+                          ('s2','s6'),
+                          ('s6','s4')])
+
+        self.build_from_graph(g) 
+        
+        
 class DoubleDiamondTopo(Topology):
     def __init__(self):
         super(DoubleDiamondTopo, self).__init__()
