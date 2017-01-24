@@ -1,0 +1,203 @@
+import "blox/connect/ConnectBlox.proto";
+import "blox/connect/BloxCommand.proto";
+import "blox/common/Common.proto";
+package lb.web.connectblox;
+
+option java_package = "com.logicblox.bloxweb.connectblox";
+
+
+//
+// ATTENTION - anything added/removed here should be reflected in fake.proto!
+//
+
+//
+// Services to work with a workspace
+//
+
+message ExecRequest {
+  required blox.connect.ExecBlock execute = 1;
+  optional string workspace_name = 2;
+}
+
+message ExecResponse {
+  required blox.connect.ExecBlockResponse response = 1;
+  // English error, not necessarily suitable for presentation to the user
+  optional string error = 2;
+  optional string error_code = 3;
+}
+
+message ExecInactiveRequest {
+  repeated blox.connect.ExecInactiveBlock block = 3;
+  optional string workspace_name = 2;
+
+  // here for legacy reasons; use block instead
+  optional blox.connect.ExecInactiveBlock exec_inactive = 1;
+}
+
+message ExecInactiveResponse {
+  repeated blox.connect.ExecInactiveBlockResponse block = 4;
+  // English error, not necessarily suitable for presentation to the user
+  optional string error = 2;
+  optional string error_code = 3;
+  // here for legacy issues; guaranteed to be present if request has exec_inactive
+  optional blox.connect.ExecInactiveBlockResponse response = 1;
+}
+
+message PredicateInfoRequest
+{
+  required string qualified_name = 1;
+  optional string workspace_name = 2;
+}
+
+message PredicateInfoResponse
+{
+  optional blox.common.protocol.PredicateInfo info = 1;
+  // English error, not necessarily suitable for presentation to the user
+  optional string error = 2;
+  optional string error_code = 3;
+}
+
+message ListPredicatesRequest
+{
+  repeated string qualified_name = 1; // if empty return all predicates
+  optional string workspace_name = 2;
+}
+
+message ListPredicatesResponse
+{
+  repeated blox.common.protocol.PredicateInfo info = 1;
+  // English error, not necessarily suitable for presentation to the user
+  optional string error = 2;
+  optional string error_code = 3;
+}
+
+message AddBlockRequest
+{
+  required blox.connect.AddBlock add_block = 1;
+  optional string workspace_name = 2;
+}
+
+message AddBlockResponse
+{
+  required blox.connect.AddBlockResponse response = 1;
+  optional string error = 2;
+  optional string error_code = 3;
+}
+
+message RemoveBlockRequest
+{
+  required blox.connect.RemoveBlock remove_block = 1;
+  optional string workspace_name = 2;
+}
+
+message RemoveBlockResponse
+{
+  required blox.connect.RemoveBlockResponse response = 1;
+  optional string error = 2;
+  optional string error_code = 3;
+}
+
+
+
+//
+// Services to manipulate workspaces (messages in ConnectBlox.proto)
+//
+
+
+message ListWorkspacesRequest
+{
+  optional string option = 1;
+}
+
+message ListWorkspacesResponse
+{
+  optional blox.connect.ListWorkSpacesResponse workspaces = 1;
+  // English error, not necessarily suitable for presentation to the user
+  optional string error = 2;
+  optional string error_code = 3;
+}
+
+message CreateWorkspaceRequest {
+  required blox.connect.CreateWorkSpace create_workspace = 1;
+}
+
+message CreateWorkspaceResponse {
+  required blox.connect.CreateWorkSpaceResponse response = 1;
+  optional string error = 2;
+  optional string error_code = 3;
+}
+
+message DeleteWorkspaceRequest {
+  required blox.connect.DeleteWorkSpace delete_workspace = 1;
+}
+
+message DeleteWorkspaceResponse {
+  required blox.connect.DeleteWorkSpaceResponse response = 1;
+  optional string error = 2;
+  optional string error_code = 3;
+}
+
+message ImportWorkspaceRequest {
+  required blox.connect.ImportWorkSpace import_workspace = 1;
+}
+
+message ImportWorkspaceResponse {
+  required blox.connect.ImportWorkSpaceResponse response = 1;
+  optional string error = 2;
+  optional string error_code = 3;
+}
+
+message ExportWorkspaceRequest {
+  required blox.connect.ExportWorkSpace export_workspace = 1;
+}
+
+message ExportWorkspaceResponse {
+  required blox.connect.ExportWorkSpaceResponse response = 1;
+  optional string error = 2;
+  optional string error_code = 3;
+}
+
+
+//
+// Services to work with branches
+//
+
+message CreateBranchRequest {
+  required blox.connect.CreateNamedBranch request = 1;
+}
+
+message CreateBranchResponse {
+  required blox.connect.CreateNamedBranchResponse response = 1;
+  optional string error = 2;
+  optional string error_code = 3;
+}
+
+message CloseBranchRequest {
+  required blox.connect.CloseNamedBranch request = 1;
+}
+
+message CloseBranchResponse {
+  required blox.connect.CloseNamedBranchResponse response = 1;
+  optional string error = 2;
+  optional string error_code = 3;
+}
+
+message GetBranchNamesRequest {
+  required blox.connect.GetBranchNames request = 1;
+}
+
+message GetBranchNamesResponse {
+  required blox.connect.GetBranchNamesResponse response = 1;
+  optional string error = 2;
+  optional string error_code = 3;
+}
+
+message ReplaceDefaultBranchRequest {
+  required blox.connect.RevertDatabase request = 1;
+}
+
+message ReplaceDefaultBranchResponse {
+  required blox.connect.RevertDatabaseResponse response = 1;
+  optional string error = 2;
+  optional string error_code = 3;
+}

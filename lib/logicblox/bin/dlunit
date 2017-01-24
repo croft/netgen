@@ -1,0 +1,5 @@
+#!/usr/bin/env bash 
+
+_BIN=$(cd $(dirname $BASH_SOURCE); pwd)
+
+exec ${_BIN}/lb-server dlunit "$@"

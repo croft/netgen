@@ -1,0 +1,45 @@
+package com.logicblox.json;
+
+message JsonMessageArray {
+    repeated JsonMessage message = 1;
+}
+
+message JsonMessage {
+    enum ValueType {
+        STRING = 0;
+        INTEGER = 1;
+        FLOAT = 2;
+        BOOLEAN = 3;
+        OBJECT = 4;
+        ARRAY = 5;
+        NULL = 6;
+    }
+
+    /*
+        json object: { 
+            key1: 1,
+            key2: [
+                "string",
+                { foo: 1 }
+            ],
+            key3: {
+                bar: 2
+            }
+        }
+        
+        equivalent json proto: {
+            id: [2, 3, 4, 5, 6, 7, 8]
+            parent_id: [1, 1, 1, 3, 3, 6, 4]
+            key: ["key1", "key2", "key3", "0", "1", "foo", "bar"]
+            type: [INTEGER, ARRAY, OBJECT, STRING, OBJECT, INTEGER, INTEGER]
+            value: [1, '["string", { foo: 1 }]', '{bar: 2}', "string", '{foo: 1}', "1", "2"]
+        }
+    */
+
+    repeated int64 id = 1;
+    repeated int64 parent_id = 2;
+    repeated string key = 3;
+    repeated ValueType type = 4;
+    repeated string value = 5;
+    optional string message_type = 6;
+}

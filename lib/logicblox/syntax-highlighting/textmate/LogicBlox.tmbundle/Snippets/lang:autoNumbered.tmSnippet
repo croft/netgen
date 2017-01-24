@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>lang:autoNumbered(\`${1:predicateName}).$0</string>
+	<key>name</key>
+	<string>lang:autoNumbered</string>
+	<key>scope</key>
+	<string>source.logicblox</string>
+	<key>tabTrigger</key>
+	<string>auto</string>
+	<key>uuid</key>
+	<string>B3E2F6C8-E5CF-45F0-A3A2-487C54F2210E</string>
+</dict>
+</plist>

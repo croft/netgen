@@ -1,0 +1,9 @@
+package lb.web.error;
+
+option java_package = "com.logicblox.bloxweb";
+
+message Response{
+        // use nonstandard field numbers to avoid clash with normal messages
+        optional string error = 666;
+        optional string error_code = 667;
+}

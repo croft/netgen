@@ -1,0 +1,29 @@
+/**
+ * The protobuf meta protocol is used by clients to obtain information
+ * on a service.
+ */
+package lb.web.protometa;
+
+option java_package = "com.logicblox.bloxweb.protobuf";
+
+message ProtoBufMetaRequest {
+  optional ProtoBufProtocolRequest protocol = 1;
+}
+
+message ProtoBufProtocolRequest {
+}
+
+message ProtoBufMetaResponse {
+  optional ProtoBufProtocolResponse protocol = 1;
+}
+
+message ProtoBufProtocolResponse {
+  // Note that the descriptors are in fact FileDescriptorSets, i.e.,
+  // they are the bytes for the whole protocol buffer spec. The message
+  // descriptors can be found by looking up messages by name.
+  optional string request_message_name = 1;
+  optional bytes request_descriptor = 2;
+
+  optional string response_message_name = 3;
+  optional bytes response_descriptor = 4;
+}

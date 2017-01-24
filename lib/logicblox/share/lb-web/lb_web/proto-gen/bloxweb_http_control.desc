@@ -1,0 +1,21 @@
+
+€
+lb/web/http_control.protolb.web.http"c
+Request
+method (	$
+uri (2.lb.web.http.RequestURI"
+header (2.lb.web.http.Field"C
+Response
+status_code ("
+header (2.lb.web.http.Field"$
+Field
+name (	
+value (	"m
+
+RequestURI
+full (	
+service_prefix (	
+
+extra_path (	%
+	parameter (2.lb.web.http.FieldB
+com.logicblox.bloxweb

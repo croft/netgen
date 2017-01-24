@@ -1,0 +1,281 @@
+package lb.web.admin;
+
+import "lb/web/internal/specification.proto";
+
+option java_package = "com.logicblox.bloxweb";
+
+/**
+ * Request/response
+ */
+message Request
+{
+  optional StartServiceRequest start = 1;
+  optional StopServiceRequest stop = 2;
+  optional ServiceSpecRequest spec = 3;
+  optional ConfigUpdateRequest config = 4;
+  optional InstallHandlerRequest install_handlers = 5;
+  optional StatusRequest status = 6;
+  optional ListServicesRequest list = 7;
+  optional ListHandlersRequest list_handlers = 8;
+  optional ListEndpointsRequest list_endpoints = 9;
+  optional EnableServiceRequest enable = 10;
+  optional DisableServiceRequest disable = 11;
+  optional InstallConfigRequest install_config = 12;
+  optional ActivationRequest activation = 13;
+}
+
+message Response
+{
+  optional string exception = 1;
+  optional ServiceSpecResponse spec = 2;
+  optional InstallHandlerResponse install_handlers = 3;
+  optional ListServicesResponse list = 4;
+  optional ListHandlersResponse list_handlers = 5;
+  optional ListEndpointsResponse list_endpoints = 6;
+  optional InstallConfigResponse install_config = 7;
+  optional ConfigUpdateResponse update_config = 8;
+}
+
+/**
+ * Install service handlers described in a configuration file.
+ */
+message InstallHandlerRequest
+{
+  optional string config = 1;
+  optional string jar = 2;
+}
+
+message InstallHandlerResponse
+{
+  repeated string handler = 1;
+}
+
+/**
+ * Install a new configuration file (handlers, static workspaces, etc)
+ */
+message InstallConfigRequest
+{
+  optional string config = 1;
+  optional string jar = 2;
+}
+
+message InstallConfigResponse
+{
+  repeated string handler = 1;
+  repeated string workspace = 2;
+  repeated string extension = 3;
+}
+
+
+/**
+ * Status request (currently has no content)
+ */
+message StatusRequest
+{
+}
+
+/**
+ * List services request
+ */
+message ListServicesRequest
+{
+}
+
+
+message ListServicesResponse
+{
+  repeated lb.web.internal.ServiceInstance config = 1;
+}
+
+/**
+ * List handlers request
+ */
+message ListHandlersRequest
+{
+  // optionally list only the handler with this id
+  optional string id = 1;
+  // optionally also get handler configuration
+  optional ConfigKind get_config = 2;
+
+  enum ConfigKind
+  {
+    // get only the values of the section that defines the handler
+    LOCAL = 0;
+    // get all values visible by the handler, including global values
+    GLOBAL = 1;
+  }
+}
+
+message ListHandlersResponse
+{
+  repeated HandlerInstance handler = 1;
+}
+
+message HandlerInstance
+{
+  required string id = 1;
+  required string classname = 2;
+
+  // if request has get_config, contains the handler section configs
+  repeated Config config = 3;
+}
+
+message Config
+{
+  required string key = 1;
+  required string value = 2;
+}
+
+/**
+ * List endpoints request
+ */
+message ListEndpointsRequest
+{
+}
+
+message ListEndpointsResponse
+{
+  repeated EndpointInstance endpoint = 1;
+}
+
+message EndpointInstance
+{
+  required string id = 1;
+  required string type = 2;
+  repeated string group = 3;
+  optional int64 port = 4;
+  optional bool authenticated = 5;
+}
+
+
+
+/**
+ * (Re-)Load service configuration and start serving.
+ *
+ * If workspace and request list is empty, then the configuration for
+ * all workspaces is reloaded.
+ */
+message StartServiceRequest
+{
+  // List of workspaces to reload the service configuration for. This
+  // field exists for backwards compatibility and should be avoided.
+  repeated string workspace = 1;
+
+  // List of more specific requests to reload services.
+  repeated ScanRequest request = 2;
+}
+
+message ScanRequest
+{
+  required string workspace = 1;
+
+  repeated string host_workspace = 2;
+
+  // default is true
+  optional bool load_services = 3;
+
+  // default is true
+  optional bool load_realms = 4;
+
+  // default is true
+  optional bool load_cors = 5;
+}
+
+/**
+ * Stop serving services from a certain workspace.
+ *
+ * If both lists are empty, then all services are stopped.
+ */
+message StopServiceRequest
+{
+  // List of workspaces to stop serving.
+  repeated string workspace = 1;
+
+  // List of host workspaces to stop serving. Note that as opposed to
+  // the start service request, the host_workspace field is
+  // independent of the workspace field. Services will be stopped for
+  // the union of workspace and host_workspace.
+  repeated string host_workspace = 2;
+}
+
+/**
+ * Request service specification details
+ */
+message ServiceSpecRequest
+{
+  required string service = 1;
+  optional string endpoint = 2;
+  required string http_method = 3;
+}
+
+message ServiceSpecResponse
+{
+  optional Specification spec = 1;
+}
+
+message Specification
+{
+  // TODO revise once we have a protobuf spec for service
+  // specifications
+  // Note that the descriptors are in fact FileDescriptorSets, i.e.,
+  // they are the bytes for the whole protocol buffer spec. The message
+  // descriptors can be found by looking up messages by name.
+  optional string request_message_name = 1;
+  optional bytes request_descriptor = 2;
+  optional string response_message_name = 3;
+  optional bytes response_descriptor = 4;
+}
+
+message EnableServiceRequest
+{
+  required string service = 1;
+  optional string endpoint = 2;
+  required string http_method = 3;
+}
+
+message DisableServiceRequest
+{
+  required string service = 1;
+  optional string endpoint = 2;
+  // default is SERVICE_UNAVAILABLE code 503
+  optional int64 status = 3;
+  required string http_method = 4;
+}
+
+/**
+ * Update the configuration (note: this does not persist)
+ */
+message ConfigUpdateRequest
+{
+  message Log
+  {
+    required string category = 1;
+    required bool enabled = 2;
+  }
+
+  optional Log log = 1;
+  optional string database_log_level = 2;
+
+  optional bool monitor = 3;
+  repeated string predicate_name = 4;
+  optional string ws_name = 5;
+  optional bool remove = 6;
+}
+
+message ConfigUpdateResponse
+{
+  repeated string predicate_name = 1;
+}
+
+/**
+ * Request to activate or deactivate the web app.
+ * There's no specific response to this request. If there's an error,
+ * the response union will have an exception.
+ */
+message ActivationRequest
+{
+  // represents the desired state of the web app. Thus, if true, the
+  // web app will be activated (if it was not already active). If false,
+  // it will be deactivated.
+  required bool activated = 1;
+}

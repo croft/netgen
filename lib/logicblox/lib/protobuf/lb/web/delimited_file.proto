@@ -1,0 +1,104 @@
+package lb.web.delim;
+
+import "blox/options.proto";
+
+option java_package = "com.logicblox.bloxweb.delim";
+
+message FileBinding
+{
+  required string name = 1;
+  required FileDefinition file = 2;
+  repeated PredicateBinding predicate = 3 [(blox.options.set) = true];
+  repeated DefaultValue default_value = 4 [(blox.options.set) = true];
+  optional bool ignore_idb_on_import = 5 [default = false];
+}
+
+message FileDefinition
+{
+  required string name = 1;
+  required string delimiter = 2;
+  repeated FileColumn column = 3;
+  optional string mode = 4;
+}
+
+message FileColumn
+{
+  required string header = 1;
+  required Format format = 2;
+  required bool required = 3;
+  required bool can_be_absent = 4;
+  optional string description = 5;
+}
+
+message PredicateBinding
+{
+  required string predicate_name = 1;
+  repeated ColumnBinding column = 2;
+  optional bool export = 3 [default = true];
+  optional bool import = 4 [default = true];
+  optional bool no_retraction_on_post = 9 [default = false];
+
+  repeated Filter filter = 8 [(blox.options.set) = true];
+}
+
+message ColumnBinding
+{
+  repeated string header = 1;
+  optional EntityCreation entity_creation = 2;
+
+  optional string import_function = 4;
+  optional string import_function_inverse = 5;
+  optional string export_function = 6;
+  optional string export_function_inverse = 7;
+}
+
+message Filter
+{
+  required string predicate_name = 1;
+  repeated string header = 2;
+
+  // not supported yet
+  optional bool negated = 3 [default = false];
+}
+
+message DefaultValue
+{
+  required string header = 1;
+  optional string import_default_value = 2;
+  optional string export_default_value = 3;
+}
+
+message Format
+{
+  required string id = 1;
+  repeated string param = 2;
+
+  // ALPHA_NUMERIC = 0;
+  // STRING = 1;
+  // INTEGER = 2;
+  // FLOAT = 3;
+  // BOOLEAN = 4;
+  // 0+
+  // NONNEGATIVE_INTEGER = 5;
+  // 1+
+  // >0
+  // POSITIVE_INTEGER = 6;
+  // 0.0f+
+  // NONNEGATIVE_FLOAT = 7;
+  // >0.0f
+  // POSITIVE_FLOAT = 8;
+  // DECIMAL = 9;
+  // 0.0+
+  // NONNEGATIVE_DECIMAL = 10;
+  // >0.0
+  // POSITIVE_DECIMAL = 11;
+  // UUID = 12;
+}
+
+enum EntityCreation
+{
+  NONE = 0;
+  ACCUMULATE = 1;
+  RETRACT = 2;
+  TOTAL = 3;
+}

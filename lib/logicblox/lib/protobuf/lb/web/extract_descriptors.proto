@@ -1,0 +1,10 @@
+package lb.web;
+
+option java_package = "com.logicblox.bloxweb";
+
+// This is just a stub for a major problem with blobs in ConnectBlox.
+message MessageProtocol
+{
+  required string name = 2;
+  required bytes descriptor_bytes = 3;
+}

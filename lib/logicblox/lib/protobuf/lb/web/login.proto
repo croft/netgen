@@ -1,0 +1,21 @@
+package lb.web.login;
+
+option java_package = "com.logicblox.bloxweb";
+
+
+
+
+message Request
+{
+  required string realm = 1;
+  optional string username = 2;
+  optional string password = 3;
+  optional bool logout =4;
+}
+
+message Response
+{
+  required bool success = 1;
+  optional string key = 2;
+  optional string exception = 3;
+}

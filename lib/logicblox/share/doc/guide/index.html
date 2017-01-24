@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The lb-workflow Guide</title>
+
+    <link href="lb-favicon.png"    rel="shortcut icon" type="image/x-icon" />
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="lb-workflow.css"   rel="stylesheet">    
+  </head>
+  <body>
+    <div class="container header-container">
+      <div class="row header">
+        <div class="col-lg-2">
+          <a href="http://logicblox.com"><img src="lblogo.png" alt="LogicBlox, Inc."></a>
+        </div>
+        <div class="col-lg-10">
+          <a href="index.html"><h1 class="text-center">The lb-workflow Guide</h1></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container contents-container">
+      <div class="row">
+        <div class="col-lg-2 sidebar">
+          <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
+            <ul class="nav">
+              <li class="sidebar-group-header">Workflows
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="#1691792409" title="driver_meta_example">driver_meta_example</a></li>
+                    <li class="other"><a href="#1981208497" title="driver_meta_global_example">driver_meta_global_example</a></li>
+                    <li class="other"><a href="#1101025288" title="forall_max_example">forall_max_example</a></li>
+                    <li class="other"><a href="#3343801" title="main">main</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Standard Library
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="control_1096407654.html" title="control.wf">control.wf</a></li>
+                    <li class="other"><a href="jobs_2064022591.html" title="jobs.wf">jobs.wf</a></li>
+                    <li class="other"><a href="log_1948900833.html" title="log.wf">log.wf</a></li>
+                    <li class="other"><a href="stdlib_623000472.html" title="stdlib.wf">stdlib.wf</a></li>
+                    <li class="other"><a href="string_1421446234.html" title="string.wf">string.wf</a></li>
+                    <li class="other"><a href="tasks_1083303394.html" title="tasks.wf">tasks.wf</a></li>
+                    <li class="other"><a href="tdx_1729519909.html" title="tdx.wf">tdx.wf</a></li>
+                    <li class="other"><a href="testing-tasks_1856821761.html" title="testing-tasks.wf">testing-tasks.wf</a></li>
+                    <li class="other"><a href="workbooks_290480778.html" title="workbooks.wf">workbooks.wf</a></li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="col-lg-10 contents">
+          <div class="lb-workflow-block">
+<h1>The lb-workflow Guide</h1><h2>Overview</h2><p><em>lb-workflow</em> is a language and toolset to specify and execute complete batch procedures. <em>Figure 1</em> shows an overview of lb-workflow&rsquo;s architecture. In lb-workflow, batch procedures are called <em>workflows</em> and are specified in the <em>lb-workflow language</em>. The workflow specification is translated into logic and installed in a workspace. The state of the execution of the workflow is very precisely maintained in the workspace. The lb-workflow <em>driver</em> is a process that continuously polls the workspace for <em>tasks</em> to execute. The driver executes tasks, mostly via service invocations, and returns results to the workspace. The termination of a task may enable new tasks, which are subsequently polled and executed by the driver.</p><p>The lb-workflow workspace exposes an lb-web protobuf <em>status service</em> that provides detailed information about installed workflows. The <em>lb-workflow console</em> is a utility to monitor and interact with the workflow. It uses the status service to query the workspace, and executes actions directly in the workspace (e.g., to cancel tasks). Currently, the console is implemented as a command line utility, but it is designed so that it can be replaced with a separate administration user-interface that is multi-tenant.</p>
+<div class="row"><div class="col-xs-6 col-md-2"></div><div class="col-xs-6 col-md-8">
+  <img src="img/overview.png" title="Architecture overview" alt="Architecture overview" width="600" class="framed">
+</div><div class="col-xs-6 col-md-2"></div></div><p><div class="row"><div class="col-xs-6 col-md-2"></div><div class="col-xs-6 col-md-8">  <strong>Figure 1 - Architecture overview.</strong> Arrows represent invocations; large arrow-heads indicate the direction of the  request, whereas small arrow-heads indicate the response. Colored elements represent independent processes; only the  lb-workflow workspace persists its data. Services most often include lb-web services. </div><div class="col-xs-6 col-md-2"></div></div><br/></p><p>A workflow specification is a tree of <em>processes</em>. A process can be a <em>task</em> &ndash; processes that instruct the driver to execute some functionality &ndash; or <em>compositional operators</em> &ndash; processes that tie other processes together. </p><p>For example, there is a task to export TDX files, and there are operators to execute tasks in sequence or in parallel.</p>
+<ul>
+  <li>since the focus of lb-workflow is on orchestration, most tasks involve service invocations. There are also some simple utility tasks, but the focus is to push all that complexity to the services.</li>
+</ul>          </div>
+          <div class="lb-workflow-block" id="3343801">
+<p><strong>Example 1 - A sequence of 2 tasks.</strong> The first task is enabled when the workflow starts. When the driver polls for  work to do, it will receive instructions to start this task. The driver will then execute the task, which in this case  means printing &ldquo;Hello World!&rdquo; to its output, and will send a <em>success</em> action to the workspace. Logic in the workspace  will respond by enabling the second task. This time, the execution of the task will cause the driver to print &ldquo;Oops!&rdquo;  and send a <em>fail</em> action. The workflow will stop execution and will await for user intervention. </p><p>Note that <em>lb.Log</em> and <em>lb.Fail</em> tasks are designed to facilitate tests and should <strong>not be used  in production</strong>.</p><pre><code class="lb-workflow"><span class="keyword">main</span> {
+  <span class="task modal-hook" data-target="#popup_lb_Log"><a href="tasks_1083303394.html#1111066964">lb.Log</a></span>(msg = <span class="string">"Hello World!"</span>)
+  <span class="keyword">;</span>
+  <span class="task modal-hook" data-target="#popup_lb_Fail"><a href="testing-tasks_1856821761.html#83529546">lb.Fail</a></span>(msg = <span class="string">"Oops!"</span>)
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block">
+<p>In lb-workflow you specify a bunch of &ldquo;tasks&rdquo; and then compose them together.</p><p>A task is an instance of some predefined (by the lb-workflow stdlib) operation. For example, there&rsquo;s a task type that  calls a TDX service for import and another that calls it for export; there are task types to communicate with steve  jobs (create jobs and wait for their termination), to create workbooks, etc. There are also trivial task types, like l  ogging or getting env variable values.</p><p>Then you have composition operators, which are the usual sequential (denoted by &lsquo;;&rsquo;), parallel ( || ) and forall (for looping).</p><p>So a workflow is a tree of these &ldquo;processes&rdquo; (process is just the name we use to talk about tasks and composition operators together). The leaves of the tree are tasks, and the inner nodes are composition operators. For example, this  is a simplification of the tree we would create for a trivial workflow that logs something, then exports some data in  parallel with creating some workbook, then imports some data. Note that the leaves are tasks.</p><p>seq  Log  par  TdxExport  CreateWorkbook  TdxImport</p><p>This specification is then installed in a workspace that contains the lb-workflow library. This library implements the semantics of the composition operators and exposes essentially 2 services: 1) a &ldquo;poll&rdquo; service that clients can use to ask which tasks are ready to execute and 2) an &ldquo;outcome&rdquo; service that allows clients to report the outcome of the execution of a task. Then there is the so called &ldquo;driver&rdquo;, which is a Java program that constantly asks the workspace for &ldquo;stuff to do&rdquo;, executes them, and sends back the result. This shouldn&rsquo;t surprise you much, because it is similar to the architecture of WAG.</p><p>So, in our example, when the workflow starts, the workspace will report that Log is ready. The driver would execute tha t and send some &ldquo;success&rdquo; event. Then the workspace will report that TdxExport and CreateWorkbook are ready, so the d river starts tasks in parallel for them. Only when they both reported successful outcomes to the workflow, will it allow  TdxImport to be ready.</p><p>What I omitted so far is that task execution is not atomic at all. In fact, there&rsquo;s a fairly complex state machine that  describes the life-cycle of a task. For example, a task is in state INIT when it is ready to execute, then it moves to  StartRequested when the driver will attempt to start it; it moves to Executing if the driver acknowledges that it  started, and moves to CleanupRequested when the driver responds success. Finally, it moves to END when the driver  finished cleaning up for the task.</p><h3>Principles</h3>
+<ul>
+  <li>driver can die</li>
+  <li>minimal processing, it&rsquo;s all about orchestration</li>
+</ul><p>lb-workflow is a language to specify complete batch procedures, and a tool to execute those batch procedures with extensive administrative features to inspect status, intervene, and handle failures.</p><p>Workflows use task implementations to get the actual work done. The generic parts of lb-workflow do nothing but coordinate the execution of these task implementations. Currently, almost all the task implementations call out to services, for example to import CSV data, to install workspaces, etc. The implementation of lb-workflow is modular, in the sense that it can be extended with tasks.</p><p>The state of the execution of a workflow is very precisely maintained in a database. The driver daemon continuously polls the database for work to do. The lb-workflow command-line utility interacts with the workflow database to start the execution of a workflow, abort workflows, etc.</p><p>The workflow database is designed so that potentially the command-line lb-workflow utility can be replaced with a separate administration user-interface that is multi-tenant. The functions performed from that user-interface would be  similar to the commands supported by the command-line utility.</p><p>A single workflow database can contain multiple workflows, for example for a monthly vs week vs daily batch procedure.</p>          </div>
+          <div class="lb-workflow-block">
+<h2>The lb-workflow workspace</h2>
+<ul>
+  <li>goal is to have very detailed information about the state and history of the workflow: all relevant info persisted to  allow restarting, monitoring, etc</li>
+  <li>everything that should persist is in the workspace - the driver can die</li>
+  <li>supports multiple workflows with a single workspace</li>
+</ul>
+<div class="row"><div class="col-xs-6 col-md-2"></div><div class="col-xs-6 col-md-8">
+  <img src="img/workspace.png" title="The lb-workflow workspace" alt="The lb-workflow workspace" width="600" class="framed">
+</div><div class="col-xs-6 col-md-2"></div></div><p><div class="row"><div class="col-xs-6 col-md-2"></div><div class="col-xs-6 col-md-8">  <strong>Figure 2 - The lb-workflow workspace.</strong> Multiple workflow specifications can be installed by-name in a workspace  (e.g. <em>daily</em> and <em>backup</em> workflows). They conform to the <em>lb-workflow schema</em>. A workflow can then be instantiated  (started) multiple times. Each workflow instance gives rise to a process tree which is identified by a <em>root process  instance</em>. The leaves of the process tree are <em>tasks</em>, and the inner nodes are <em>composition operators</em>. Each task  instance has its state tracked by its own state machine. Thus, the state of individual task instances are independent  from each other (as illustrated by <em>failed</em> instances in red). </div><div class="col-xs-6 col-md-2"></div></div><br/></p>
+<ul>
+  <li>describe the simple process tree for the Example 1</li>
+</ul><p><br/></p>
+<div class="row"><div class="col-xs-6 col-md-2"></div><div class="col-xs-6 col-md-8">
+  <img src="img/simple-state-machine.png" title="SimpleTask State Machine" alt="SimpleTask State Machine" width="600" class="framed">
+</div><div class="col-xs-6 col-md-2"></div></div><p><div class="row"><div class="col-xs-6 col-md-2"></div><div class="col-xs-6 col-md-8">  <strong>Figure 3 - SimpleTask State Machine.</strong> Each process instance of a <em>SimpleTask</em> has its state tracked by this state  machine. When the task is enabled (ready to execute), the state machine is instantiated and the state is <em>INIT</em>.  Arrows in blue represent transitions that are automatically triggered by actions performed by the driver, which  include the normal control flow that leads to the successful <em>END</em> state. Arrows in green represent actions triggered  by the console, when manual intervention is required due to failure. Arrows in red are internal transitions  triggered by having the root process instance of the tree aborted, which causes all tasks in the tree to be  automatically aborted as well. </div><div class="col-xs-6 col-md-2"></div></div><br/></p>
+<ul>
+  <li><em>!start</em> is an output action.</li>
+  <li>when in <em>StartRequested</em>, the driver is trying to execute the task. It will answer with <em>success</em> or <em>fail</em>.</li>
+  <li><em>startup</em> is needed for when the driver crashes.</li>
+  <li>failure handling: <em>retry</em> vs <em>ignore</em>; <em>ack_failure</em></li>
+  <li>END vs ABORTED: Note that the <em>END</em> state allows the workflow to continue (i.e., it enables subsequent  processes), whereas <em>ABORTED</em> represents a dead-end: the workflow instance is completely aborted and cannot be  restarted.</li>
+</ul><p><br/></p>
+<div class="row"><div class="col-xs-6 col-md-2"></div><div class="col-xs-6 col-md-8">
+  <img src="img/high-level-state-machine.png" title="BaseTask State Machine" alt="BaseTask State Machine" width="600" class="framed">
+</div><div class="col-xs-6 col-md-2"></div></div><p><div class="row"><div class="col-xs-6 col-md-2"></div><div class="col-xs-6 col-md-8">  <strong>Figure 4 - BaseTask State Machine.</strong> This state machine represents the state of a <em>BaseTask</em> instance. This is more  complex than SimpleTask because it supports task cancellation, and because the driver keeps state about BaseTask  executions. Nodes in gray are abstract states; they represent a high level state of the task and have no direct  counterpart in the actual state machine. Below we will show the concrete states and transitions under some of these  abstract states. </div><div class="col-xs-6 col-md-2"></div></div><br/></p>
+<ul>
+  <li>note that the last action before <em>END</em> or <em>ABORT</em> is an output, <em>!cleanup</em>.</li>
+  <li>the other difference is support for <em>cancel</em></li>
+</ul><p><br/></p>
+<div class="row"><div class="col-xs-6 col-md-2"></div><div class="col-xs-6 col-md-8">
+  <img src="img/base-exec-state-machine.png" title="BaseTask Task Execution State Machine" alt="BaseTask Task Execution State Machine" width="600" class="framed">
+</div><div class="col-xs-6 col-md-2"></div></div><p><div class="row"><div class="col-xs-6 col-md-2"></div><div class="col-xs-6 col-md-8">  <strong>Figure 5 - BaseTask Task Execution State Machine.</strong> This is a refinement of the <em>Task Execution</em> abstract state of  the BaseTask state machine. It focuses on the normal execution steps, when no exceptions occur, such as failures or  cancellations. Arrows without a target state connect to the <em>Failure</em>, <em>Cancel</em> or <em>Abort</em> abstract states described  before. </div><div class="col-xs-6 col-md-2"></div></div><br/></p>
+<ul>
+  <li>the actual execution of the task only starts when the request was acknowledged.</li>
+  <li>these tasks often hold resources, so there&rsquo;s a final cleanup step that allows tasks to release resources</li>
+  <li>when the driver restarts, if the task is still in StartRequested, it can safely go back to <em>INIT</em> because we know that the driver never started it. If it is in Executing, a previous instance of the driver may have started it, so the task goes to <em>failed</em> to await manual intervention (to be retried or ignored). If in CleanupRequested, we know the the task was successfully executed by a previous instance, so it stays in that state so that the new driver eventually cleans it up.</li>
+  <li>at any point, <em>abort</em> may be requested. If the task is in INIT, it can go directly to ABORTED.</li>
+  <li>a task can be cancelled while it is being executed (StartRequested or Executing), but not after it&rsquo;s been executed (CleanupRequested).</li>
+</ul><p><br/></p>
+<div class="row"><div class="col-xs-6 col-md-2"></div><div class="col-xs-6 col-md-8">
+  <img src="img/base-abort-state-machine.png" title="BaseTask Abort State Machine" alt="BaseTask Abort State Machine" width="600" class="framed">
+</div><div class="col-xs-6 col-md-2"></div></div><p><div class="row"><div class="col-xs-6 col-md-2"></div><div class="col-xs-6 col-md-8">  <strong>Figure 6 - BaseTask Abort State Machine.</strong> This is a refinement of the <em>Abort</em> abstract state of the BaseTask state  machine. Once an internal <em>abort</em> action is triggered, the task starts the abort process, which invariably leads to  the <em>ABORTED</em> end state. </div><div class="col-xs-6 col-md-2"></div></div><br/></p>
+<ul>
+  <li><em>!do_cancel</em> allows the driver to attempt to cancel the task gracefully.</li>
+  <li><em>!cleanup</em> allows the driver to release resources and remove internal records of the task</li>
+  <li>note that <em>success</em> and <em>fail</em> transitions are handled to ensure that the task is aborted even if the driver  concurrently finished its execution.</li>
+  <li>Cancel and Failure abstract states are very similar; see stdlib.wf code.</li>
+</ul>          </div>
+          <div class="lb-workflow-block">
+<h2>The lb-workflow Language</h2><h3>Processes</h3>
+<ul>
+  <li><p>Tasks</p></li>
+  <li><p>Control Flow &ndash; Seq &ndash; Par &ndash; ForAll &ndash; Restartable</p></li>
+</ul><h3>Workflows</h3>
+<ul>
+  <li>mostly for modularization; gets abstracted away by the compiler</li>
+  <li>explain a bit about instantiation</li>
+  <li>the main workflow</li>
+</ul><h3>Parameters (cardinality, typing, varargs)</h3><h3>Instance Variables, Variable References</h3><h3>Process Reference (implicit bindings, alternative output syntax)</h3><h3>Predicate Bindings</h3><h3>Types: String Templates, Predicate Bindings, Boolean, Integer, Set Literals</h3><h3>Imports</h3>          </div>
+          <div class="lb-workflow-block">
+<h2>The Driver</h2>
+<ul>
+  <li>designed to be a daemon</li>
+  <li>what happens to tasks when the driver crashes (send the startup action when it restarts)</li>
+  <li>currently talks directly to the workspace; we may change to use services</li>
+  <li>explain some command line arguments:
+  <ul>
+    <li>auto-terminate</li>
+    <li>frequency</li>
+    <li>profile</li>
+    <li>max-retries, commit-mode</li>
+  </ul></li>
+</ul>          </div>
+          <div class="lb-workflow-block">
+<h2>The Status Service</h2>
+<ul>
+  <li>explain the protocol a bit</li>
+  <li>explain how to select workflows and processes</li>
+</ul>          </div>
+          <div class="lb-workflow-block">
+<h2>The lb-workflow Console</h2>
+<ul>
+  <li>mostly about the action command</li>
+</ul>          </div>
+          <div class="lb-workflow-block">
+<h2>Documentation Generator</h2>
+<ul>
+  <li>Markdown</li>
+</ul>          </div>
+          <div class="lb-workflow-block">
+<h2>Testing</h2>
+<ul>
+  <li>Explain the python framework</li>
+</ul>          </div>
+          <div class="lb-workflow-block" id="1101025288">
+<h2>Techniques</h2><h3>Controlling Concurrency</h3><p>lb-workflow is designed to maximize task concurrency: the <code>||</code> (_parallel_) operator executes tasks concurrently; the <code>forall</code> operator by default executes all children in parallel. This may lead to excessive concurrency, for example, if multiple nodes execute requests againt a server that is not capable to handle them concurrently. lb-workflow provides 2 ways of controlling concurrency: <em>forall max</em> and <em>concurrency groups</em>.</p><p>The forall operator accepts a <code>max</code> parameter that limits the number of children that are enabled concurrently. The value must be an integer. It can be a constant or a variable (as long as the variable is resolved statically). Consider the following workflow:</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">forall_max_example</span>() {
+  <span class="keyword">forall</span>&lt;max=<span class="number">1</span>&gt;(i <span class="keyword">in</span> {<span class="number">1</span><span class="separator">,</span> <span class="number">2</span>}) {
+    <span class="task modal-hook" data-target="#popup_lb_string_Join"><a href="string_1421446234.html#1663446897">lb.string.Join</a></span>(
+      parts = {
+        <span class="string">"</span><span class="varref">$(i)</span><span class="string">"</span>
+      }
+    )
+    <span class="keyword">;</span>
+    <span class="task modal-hook" data-target="#popup_lb_tdx_Import"><a href="tdx_1729519909.html#1542137885">lb.tdx.Import</a></span>(input = {<span class="string">"..."</span>})
+  }
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1691792409">
+<p>The children of the forall are <code>Seq</code> nodes with 2 children, one for <code>Join</code> and one for <code>Import</code>. But since only one of these Seq nodes can be executing at a certain point in time, a the next Join will only start after the previous Import finished. So the workflow is really just a serialization of the Seq nodes: Join; Import; Join; Import&hellip; But often what you really want is to control the concurrency on the Import, whereas Joins could all run in parallel.</p><p>So there&rsquo;s another way to control concurrency which is called <em>concurrency groups</em>. When you have a task you can pass meta information to the driver. So you could remove the forall max, and control the concurrency at the task level:</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">driver_meta_example</span>() {
+  <span class="keyword">forall</span>(i <span class="keyword">in</span> {<span class="number">1</span><span class="separator">,</span> <span class="number">2</span>}) {
+    <span class="task modal-hook" data-target="#popup_lb_string_Join"><a href="string_1421446234.html#1663446897">lb.string.Join</a></span>(
+      parts = {
+        <span class="string">"</span><span class="varref">$(i)</span><span class="string">"</span>
+      }
+    )
+    <span class="keyword">;</span>
+    <span class="task modal-hook" data-target="#popup_lb_tdx_Import"><a href="tdx_1729519909.html#1542137885">lb.tdx.Import</a></span>(
+      input = {<span class="string">"..."</span>}<span class="separator">,</span>
+      driver_meta = <span class="string">"{ group: 'foo', max: 1}"</span>
+    )
+  }
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1981208497">
+<p>All the Joins would run in parallel, but the driver would execute at most one Import concurrently.</p><p>Now, there are 2 caveats</p><p>1) groups are global and the &ldquo;last max wins&rdquo;. This means that if somewhere else in your tree you have some other task that participates in the same group, it is indeed the same group. This is great because you can control access to a certain server globally by using the server name as the group name for example. Also, when the driver picks such a task, it reads the max value and overwrites the previous max of the group, so you should use max consistently.</p><p>The following example shows the consequences of these features. The 2 foralls are executed in parallel. The driver can pick Export and Import tasks in parallel but, since they are in the same group, only one of them will execute at a certain point in time, even if they are in distinct branches of the process tree. Also note that the max value is used consistently in all tasks with the <em>foo</em> group.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">driver_meta_global_example</span>() {
+  (
+    <span class="keyword">forall</span>(j <span class="keyword">in</span> {<span class="number">3</span><span class="separator">,</span> <span class="number">4</span>}) {
+      <span class="task modal-hook" data-target="#popup_lb_tdx_Export"><a href="tdx_1729519909.html#1646495758">lb.tdx.Export</a></span>(
+        input = {<span class="string">"..."</span>}<span class="separator">,</span>
+        driver_meta = <span class="string">"{ group: 'foo', max: 1 }"</span>
+      )
+    }
+  ) <span class="keyword">||</span> (
+    <span class="keyword">forall</span>(i <span class="keyword">in</span> {<span class="number">1</span><span class="separator">,</span> <span class="number">2</span>}) {
+      <span class="task modal-hook" data-target="#popup_lb_string_Join"><a href="string_1421446234.html#1663446897">lb.string.Join</a></span>(
+        parts = {
+          <span class="string">"</span><span class="varref">$(i)</span><span class="string">"</span>
+        }
+      )
+      <span class="keyword">;</span>
+      <span class="task modal-hook" data-target="#popup_lb_tdx_Import"><a href="tdx_1729519909.html#1542137885">lb.tdx.Import</a></span>(
+        input = {<span class="string">"..."</span>}<span class="separator">,</span>
+        driver_meta = <span class="string">"{ group: 'foo', max: 1 }"</span>
+      )
+    }
+  )
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block">
+<p>2) this only works in tasks, not workflows. That&rsquo;s because only tasks are executed by the driver. But the workbook API has actually some workflows, like lb.wb.CreateWorkbook, which encapsulate one or more tasks. I don&rsquo;t know exactly what&rsquo;s the best way to expose driver_meta in that level. We could export multiple optional driver_metas, one for each task that the workflow calls, for example. Or perhaps expose a single driver meta and use it for tasks that we know we may want to control (e.g. do not use in the ParseJsonObject, use it only in the JsonService).</p><h3>Predicate Bindings</h3><h3>Replaying Workflow Runs</h3><h3>Type Checking with Protobufs</h3>          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" 
+                                    id="popup_lb_tdx_Import" 
+                                    tabindex="-1" 
+                                    role="dialog" 
+                                    aria-labelledby="lb.tdx.Import" 
+                                    aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content contents">
+          <div class="modal-body">
+          <div class="lb-workflow-block" id="1542137885">
+<p>Import CSV files with TDX services.</p><p>This task takes a set of TDXInput specifications of files to import using TDX services. It supports several parameters to control whether files should be imported in a single transaction or multiple, whether to use the the asynchronous protocol or not, how to react to failures, etc. For example, this declaration would import sales and returns data in a single transaction using the corresponding services:</p>
+<pre><code>lb.tdx.Import(
+   txn_service  = &quot;/txn&quot;,
+   input = {
+     &quot;{ service: &#39;/sales&#39;
+        file:    &#39;data/sales.csv.gz&#39;
+        error:   &#39;data/out/sales-errors.csv&#39;
+      }&quot;,
+      &quot;{ service: &#39;/returns&#39;
+        file:    &#39;data/returns.csv&#39;
+        error:   &#39;data/out/returns-errors.csv.gz&#39;
+      }&quot;
+   }
+ )
+</code></pre><p>One important aspect to note is that the task infers the type of the files based on file extension, and it is permitted to import gzipped files while exporting clear text error files, and vice-versa.</p><p>Refer to the documentation below for details on what is controlled by each parameter.</p>
+<hr/><p>@param <code>input</code> a set of TDXInput messages that represent files to import, together with the service to be called for  the file and an optional location to store error records. The TDXInput message also allows to override certain  configurations for a single file, such as <code>allow_partial_import</code>, <code>unmatched_import_reaction</code>, <code>full</code> and  <code>error_file_only_on_error</code>. Note that the <code>file</code> attribute of TDXInput works as a pattern that accepts <code>*</code>  and <code>?</code> wildcards. The task will lookup files that match this pattern, and will import all the matching files  using the same service (see comments on TDXInput for details). The type of the file and error file are defined  by the extension: <code>.gz</code> and <code>.gzip</code> are considered gzip files, otherwise they are considered plain CSV files.  Files can be local file paths (e.g. <code>data/returns.csv</code>), file URIs (e.g. <code>file:///data/returns.csv</code>) and cloud  store locations (e.g. <code>s3://project/data/returns.csv</code>). File paths are resolved locally and file URIs are  resolved in the server.</p><p>@param <code>txn_service</code> the URI prefix of the transaction service to use (e.g.: <code>&quot;/txn&quot;</code>). If this is set, then all  TDXInput entries in <code>input</code> will be processed in a single database transaction. Otherwise, each entry will be  processed in its own transaction, and all will be executed in parallel. In this case, the task will only  succeed if every part also succeeds.</p><p>@param <code>transport</code> the URI that describes the service location. Currently only TCP transport is supported, so the URI  must be an HTTP service (e.g. the default is <code>&quot;http://localhost:8080&quot;</code>).</p><p>@param <code>async</code> whether to use the asynchronous transaction protocol. This is only valid if there is a <code>txn_service</code>  configured. It is highly recommended that you use the asynchronous protocol as it has much better performance  characteristics for client and server; the synchronous protocol should only be used for legacy servers that do  not support the asynchronous protocol.</p><p>@param <code>poll_delay</code> when using the asynchronous transaction protocol, the client will send all the specification of  the files to import in a transaction and will then start polling until the transaction is over. This parameter  determines the duration to wait between polls. Note that the client polls immediately after the  commit requests returns, so short transactions may never need to wait.</p><p>@param <code>timeout</code> the maximum duration that the import should take. The meaning of this parameter differs slightly  between asynchronous and synchronous transactions:</p>
+<ul>
+  <li><p>For <code>asynchronous</code> transactions, this means how long the client should keep polling for the transaction to  terminate (see <code>poll_delay</code>), and the default is to continue indefinitely. Also note that the timeout is only  checked once a polling request returned that the transaction is ongoing, which means that the precision of  <code>timeout</code> is that of <code>poll_delay</code> (e.g. if <em>poll_delay</em> is 5 seconds, the client checks the timeout only every 5  seconds, so a 6 seconds <em>timeout</em> will only expire after 10 seconds). This timeout is also used for individual  part requests and for the commit request.</p></li>
+  <li><p>For <code>synchronous</code> transactions and for <code>individual parts</code> (i.e. when no <code>txn_service</code> is set), this timeout is  used as the timeout of the HTTP connection for all requests. This means that the connection is kept at most this  number of seconds and will then be dropped, which will cause the transaction to potentially abort, and the  task to fail. This includes requests for parts as well as commit.</p></li>
+</ul><p>@param <code>key</code> alias for the key in the server used to decrypt the files to be imported.</p><p>@param <code>full</code> whether the import should overwrite previous data in the target predicates (i.e. use PUT). This is the  default value that is applied to all input messages, but an input message can override it if needed.</p><p>@param <code>allow_partial_import</code> whether the import request should continue even in the presence of error reconds. If  this is true, the records (CSV rows) that do not contain errors will be imported and the error records will be  discarded (or returned in an error file, if that is configured in the TDXInput). This is the default value  that is applied to all input messages, but an input message can override it if needed.</p><p>@param <code>error_file_only_on_error</code> whether error files should be returned (or exported to s3) only if there&rsquo;s actually  an import error. The default behavior (false) is to always return an error file, even if it contains only the  headers. This is the value applied to every TDXInput entry that has an <code>error</code> attribute specifying the error  file, but can be overridden individually by TDXInput entries.</p><p>@param <code>unmatched_import_reaction</code> how to react when an input message&rsquo;s pattern is unmatched by a real file to  import. This is the default value applied to all input messages, but an input message can override it if  needed. The value must be a string representing a Reaction enum (<code>&quot;FAIL&quot;</code>, <code>&quot;WARN&quot;</code> or <code>&quot;IGNORE&quot;</code>).</p><p>@return <code>import_errors</code> a boolean flag that indicates whether there were import errors in any of the service calls.  This flag is only available if the service allows partial import (otherwise any error will cause the task to  fail). Also, the flag is <strong>only bound if it is true</strong>; it is unbound if there are no import errors. That&rsquo;s  because lb-workflow does not currently have a way to compare values and it is more useful to have a bound  variable to mean true and an unbound to mean false.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.tdx.Import</span>(
+    input<span class="keyword">*</span><span class="keyword">:</span> <span class="message-type" >TDXInput</span><span class="separator">,</span>
+    txn_service<span class="keyword">?</span><span class="separator">,</span>
+    transport = <span class="string">"http://localhost:8080"</span><span class="separator">,</span>
+    async = <span class="boolean">true</span><span class="separator">,</span>
+    poll_delay<span class="keyword">:</span> <span class="message-type" >Duration</span><span class="keyword">?</span><span class="separator">,</span>
+    timeout<span class="keyword">:</span> <span class="message-type" >Duration</span><span class="keyword">?</span><span class="separator">,</span>
+    key<span class="keyword">?</span><span class="separator">,</span>
+    full = <span class="boolean">false</span><span class="separator">,</span>
+    allow_partial_import<span class="keyword">?</span><span class="separator">,</span>
+    error_file_only_on_error = <span class="boolean">false</span><span class="separator">,</span>
+    unmatched_import_reaction<span class="keyword">:</span> <span class="message-type" >Reaction</span> = <span class="string">"FAIL"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (import_errors<span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.tdx.Import"</span>
+  )
+</code></pre>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" 
+                                    id="popup_lb_tdx_Export" 
+                                    tabindex="-1" 
+                                    role="dialog" 
+                                    aria-labelledby="lb.tdx.Export" 
+                                    aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content contents">
+          <div class="modal-body">
+          <div class="lb-workflow-block" id="1646495758">
+<p>Export CSV files from TDX services.</p><p>This task takes a set of TDXInput specifications of files to export using TDX services. It supports several parameters to control whether files should be imported in a single transaction or multiple, whether to use the the asynchronous protocol or not, etc. For example, this declaration would export sales and returns data in a single transaction using the corresponding services:</p>
+<pre><code>lb.tdx.Export(
+   txn_service  = &quot;/txn&quot;,
+   input = {
+     &quot;{ service: &#39;/sales&#39;
+        file:    &#39;data/sales.csv.gz&#39;
+      }&quot;,
+      &quot;{ service: &#39;/returns&#39;
+        file:    &#39;data/returns.csv&#39;
+      }&quot;
+   }
+ )
+</code></pre><p>One important aspect to note is that the task infers the type of the files based on file extension.</p><p>Refer to the documentation below for details on what is controlled by each parameter.</p>
+<hr/><p>@param <code>input</code> a set of TDXInput messages that represent files to export, together with the service to be called for  the file. The file attribute must not contain patterns (as in <code>lb.tdx.Import</code>) and the other attributes are  ignored. The type of the file is defined by the extension: <code>.gz</code> and <code>.gzip</code> are considered gzip files,  otherwise they are considered plain CSV files. Files can be local file paths (e.g. <code>data/returns.csv</code>), file  URIs (e.g. <code>file:///data/returns.csv</code>) and cloud store locations (e.g. <code>s3://project/data/returns.csv</code>). File  paths are resolved locally and file URIs are resolved in the server.</p><p>@param <code>txn_service</code> the URI prefix of the transaction service to use (e.g.: <code>&quot;/txn&quot;</code>). If this is set, then all  TDXInput entries in <code>input</code> will be processed in a single database transaction. Otherwise, each entry will be  processed in its own transaction, and all will be executed in parallel. In this case, the task will only  succeed if every part also succeeds.</p><p>@param <code>transport</code> the URI that describes the service location. Currently only TCP transport is supported, so the URI  must be an HTTP service (e.g. the default is <code>&quot;http://localhost:8080&quot;</code>).</p><p>@param <code>async</code> whether to use the asynchronous transaction protocol. This is only valid if there is a <code>txn_service</code>  configured. It is highly recommended that you use the asynchronous protocol as it has much better performance  characteristics for client and server; the synchronous protocol should only be used for legacy servers that do  not support the asynchronous protocol.</p><p>@param <code>poll_delay</code> when using the asynchronous transaction protocol, the client will send all the specification of  the files to export in a transaction and will then start polling until the transaction is over. This parameter  determines the number of seconds to wait between polls. Note that the client polls immediately after the  commit requests returns, so short transactions may never need to wait.</p><p>@param <code>timeout</code> the maximum number of seconds that the export should take. The meaning of this parameter differs  slightly between asynchronous and synchronous transactions:</p>
+<ul>
+  <li><p>For <code>asynchronous</code> transactions, this means how long the client should keep polling for the transaction to  terminate (see <code>poll_delay</code>), and the default is to continue indefinitely. Also note that the timeout is only  checked once a polling request returned that the transaction is ongoing, which means that the precision of  <code>timeout</code> is that of <code>poll_delay</code> (e.g. if <em>poll_delay</em> is 5 seconds, the client checks the timeout only every 5  seconds, so a 6 seconds <em>timeout</em> will only expire after 10 seconds).</p></li>
+  <li><p>For <code>synchronous</code> transactions and for <code>individual parts</code> (i.e. when no <code>txn_service</code> is set), this timeout is  used as the timeout of the HTTP connection for all requests. This means that the connection is kept at most this  number of seconds and will then be dropped, which will cause the transaction to potentially abort, and the  task to fail.</p></li>
+</ul><p>@param <code>key</code> alias for the key in the server used to encrypt the files when they are exported.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.tdx.Export</span>(
+    input<span class="keyword">*</span><span class="keyword">:</span> <span class="message-type" >TDXInput</span><span class="separator">,</span>
+    txn_service<span class="keyword">?</span><span class="separator">,</span>
+    transport = <span class="string">"http://localhost:8080"</span><span class="separator">,</span>
+    async = <span class="boolean">true</span><span class="separator">,</span>
+    poll_delay<span class="keyword">:</span> <span class="message-type" >Duration</span><span class="keyword">?</span><span class="separator">,</span>
+    timeout<span class="keyword">:</span> <span class="message-type" >Duration</span><span class="keyword">?</span><span class="separator">,</span>
+    key<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.tdx.Export"</span>
+  )
+</code></pre>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" 
+                                    id="popup_lb_string_Join" 
+                                    tabindex="-1" 
+                                    role="dialog" 
+                                    aria-labelledby="lb.string.Join" 
+                                    aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content contents">
+          <div class="modal-body">
+          <div class="lb-workflow-block" id="1663446897">
+<p>Create a string by joining a set of parts using a separator.</p><p>The separator will be applied between the parts. Note that parts is a set, so there is no inherent order. However, this task guarantees that the join order is based on alphanumerically sorting of the input as strings.</p>
+<hr/><p>@param <code>parts</code> the set of parts to join.</p><p>@param <code>separator</code> the string to insert between each part.</p><p>@return <code>out</code> the resulting joined string.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.string.Join</span>(parts<span class="keyword">*</span><span class="separator">,</span> separator = <span class="string">", "</span><span class="separator">,</span> driver_meta<span class="keyword">?</span>): (out) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.string.Join"</span>
+  )
+</code></pre>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" 
+                                    id="popup_lb_Fail" 
+                                    tabindex="-1" 
+                                    role="dialog" 
+                                    aria-labelledby="lb.Fail" 
+                                    aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content contents">
+          <div class="modal-body">
+          <div class="lb-workflow-block" id="83529546">
+<p>Fail task will fail until the retryCount is exceeded, after which it will succeed. With a retryCount of 0, this task will immediately succeed. With a retryCount of -1, this task will never succeed.</p>
+<hr/><p>@param <code>msg</code> message of failure</p><p>@param <code>exception</code> if true, do not return a successful future, but throw an exception</p><p>@param <code>sync_exception</code> if true, throw an exception, not a failed future</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.Fail</span>(
+    msg = <span class="string">"</span><span class="string">"</span><span class="separator">,</span>
+    id = <span class="string">"</span><span class="string">"</span><span class="separator">,</span>
+    retry_count = <span class="number">-1</span><span class="separator">,</span>
+    exception = <span class="boolean">false</span><span class="separator">,</span>
+    sync_exception = <span class="boolean">false</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.Fail"</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+</code></pre>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" 
+                                    id="popup_lb_Log" 
+                                    tabindex="-1" 
+                                    role="dialog" 
+                                    aria-labelledby="lb.Log" 
+                                    aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content contents">
+          <div class="modal-body">
+          <div class="lb-workflow-block" id="1111066964">
+<p>Write a message to the logger.</p>
+<hr/><p>@param msg (required)  the message to be written to the logger</p><p>@param level (defaults to &ldquo;info&rdquo;)  log level for the message. one of error, warning, debug, or info</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.Log</span>(msg<span class="separator">,</span> level = <span class="string">"info"</span><span class="separator">,</span> driver_meta<span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.Log"</span>
+  )
+</code></pre>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="jquery.min.js"></script>
+    <script src="jquery.hoverIntent.minified.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('[data-toggle="popover"]').popover();   
+    });
+    $(".modal-hook").hoverIntent({
+      over: function () {
+        var target = $(this).attr("data-target");
+        $(target).modal("show");
+      },
+      interval: 700
+    });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+package bloxweb.email;
+
+option java_package = "com.logicblox.bloxweb.email";
+option optimize_for = SPEED;
+
+/**
+ * Send email request
+ */
+message SendEmailRequest
+{
+  required string from = 1;
+  repeated string reply_to = 2;
+
+  repeated string to = 3;
+  repeated string cc = 4;
+  repeated string bcc = 5;
+
+  required string subject = 6;
+  required string body = 7;
+}
+
+/**
+ * Error
+ *
+ * TODO put this somewhere in a shared library (see copies elsewhere)
+ */
+message VoidResponse
+{
+  optional string error = 1;
+  optional string error_code = 2;
+}

@@ -1,0 +1,19 @@
+package fl.com;
+
+message StringTable {
+  repeated string point=1;
+}
+
+message TableAcknowledge {
+  enum Signal {
+    CHUNK_DECODE_OK=0;
+    CHUNK_DECODE_ERROR=1;
+    TRANSMISSION_COMPLETE=2;
+  };
+  required Signal log=1;
+}
+
+message TableInfo {
+  required string name=1;
+  required string header=2;
+}

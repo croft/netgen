@@ -1,0 +1,21 @@
+package blox.connect;
+option optimize_for = SPEED;
+option java_outer_classname = "ProtoBufException";
+option java_package = "com.logicblox.connect";
+
+message ExceptionContainer
+{
+  required string message = 1;
+  optional WorkspaceException workspace = 2;
+}
+
+message WorkspaceException
+{
+   required string name = 1;
+   required Code code = 2;
+
+   enum Code {
+		 DOES_NOT_EXIST = 1;
+		 ALREADY_EXISTS = 2;
+	 }
+}

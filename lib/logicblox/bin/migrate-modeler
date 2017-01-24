@@ -1,0 +1,76 @@
+#!/usr/bin/env python
+
+import argparse
+import sys
+import os
+
+sys.path.insert(0, '%s/python' % os.environ.get('LOGICBLOX_HOME'))
+
+import migration_scripts
+
+
+def noop():
+    return 'Nothing to do'
+
+
+# releases is an ordered array, listing all the versions that we can migrate to and from.
+# the 'upgrade' field is the function that should be executed to migrate from
+# the version immediately before that to that version.
+#
+# migrating from 4.3.11 to 4.3.13 will execute the migration functions set in
+# 4.3.12 (migrating from 4.3.11 to 4.3.12) and 4.3.13 (migrating from 4.3.12 to 4.3.13)
+releases = [
+    {'r': '4.3.1'},
+    {'r': '4.3.2'},
+    {'r': '4.3.3'},
+    {'r': '4.3.4'},
+    {'r': '4.3.5'},
+    {'r': '4.3.6'},
+    {'r': '4.3.7'},
+    {'r': '4.3.8'},
+    {'r': '4.3.9'},
+    {'r': '4.3.10'},
+    {'r': '4.3.11'},
+    {'r': '4.3.12'},
+    {'r': '4.3.13', 'upgrade': migration_scripts._4_3_13},
+    {'r': '4.3.14'},
+    {'r': '4.3.15'},
+    {'r': '4.3.16', 'upgrade': migration_scripts._4_3_16}
+]
+
+
+def run_upgrade(fn):
+    if fn is not None:
+        return fn()
+
+
+def find_steps(from_version, to_version):
+    r_helper = [r['r'] for r in releases]
+    from_version_i = r_helper.index(from_version)
+    to_version_i = r_helper.index(to_version)
+    for i in range(from_version_i, to_version_i):
+        upgrade_fn = releases[i + 1].get('upgrade', None)
+        if upgrade_fn is None:
+            upgrade_fn = noop
+        yield {'fn': upgrade_fn, 'from_release': r_helper[i], 'to_release': r_helper[i + 1]}
+
+
+def main(from_version, to_version):
+    upgrade_steps = find_steps(from_version, to_version)
+    for step in upgrade_steps:
+        print 'Upgrading from %s to %s' % (step['from_release'], step['to_release'])
+        print '----------------------------------------------------'
+        print run_upgrade(step['fn'])
+        print '----------------------------------------------------'
+        print 'Done'
+        print '----------------------------------------------------'
+
+if __name__ == '__main__':
+    supported_versions = [r['r'] for r in releases]
+    parser = argparse.ArgumentParser(
+        usage="Acceptable versions: %s" % ', '.join(supported_versions))
+    parser.add_argument("FROM_VERSION")
+    parser.add_argument("TO_VERSION")
+    args = parser.parse_args()
+
+    main(args.FROM_VERSION, args.TO_VERSION)

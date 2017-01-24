@@ -1,0 +1,82 @@
+#! /usr/bin/env python2.7
+import os
+os.environ['PATH'] = '/no-such-path/4kw0r586mzsizna036gzxbjrzl3zipsx-openjdk-8u60b24/bin/:' + os.environ['PATH']
+#!/usr/bin/env python2.7
+"""
+Copyright 2013 LogicBlox, Inc.
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or 
+without modification, are permitted provided that the following 
+conditions are met:
+
+Redistributions of source code must retain the above copyright 
+notice, this list of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright 
+notice, this list of conditions and the following disclaimer 
+in the documentation and/or other materials provided with the 
+distribution.
+
+Neither the name of LogicBlox nor the names of its contributors 
+may be used to endorse or promote products derived from this 
+software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
+"""
+import os
+import sys
+from cStringIO import StringIO
+
+if not 'LOGICBLOX_HOME' in os.environ:
+    lbhome = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    os.environ['LOGICBLOX_HOME'] = lbhome
+
+sys.path.insert(0, os.path.join(os.environ.get('LOGICBLOX_HOME'), 'lib', 'python'))
+
+from cli import lb_main
+from cli import lb_exception, util
+from interactive import lb_interactive_console
+
+util.set_sigint_handler()
+
+try:
+    from interactive import lb_interactive_console
+except:
+    lb_interactive_available = False
+else:
+    lb_interactive_available = True
+
+# if no arguments, run interactive
+if lb_interactive_available and len(sys.argv) == 1 and '_ARGCOMPLETE' not in os.environ:
+    interactive = lb_interactive_console.LbInteractive(stop_on_error=False)
+    interactive.cmdloop()
+
+# if the first argument's extension is .lb, run all arguments as files
+# each file is run as it's own loop (interactive exits after each file)
+elif lb_interactive_available and len(sys.argv) > 1 and sys.argv[1][-3:] == ".lb":
+    for fileName in sys.argv[1:]:
+        # filename must end in .lb 
+        if fileName[-3:] == ".lb":
+            try:
+                # suppress stdout
+               sys.stdin = stdin=open(fileName)
+               mystdout = StringIO()
+               interactive = lb_interactive_console.LbInteractive(
+                  stop_on_error=True, use_rawinput=False, stdout=mystdout, current_directory=os.path.dirname(fileName))
+               error = interactive.cmdloop()
+               if error:
+                  exit(1)
+            except lb_exception.LBReportedException, ex:
+               # error has already been reported in terminal
+               pass
+            except Exception as ex:
+                sys.stderr.write("%s\n" % str(ex))
+        else:
+            sys.stderr.write("File must have extension .lb\n")
+        print
+else:
+    sys.exit(lb_main.main(sys.argv[1:], lb_interactive_available))

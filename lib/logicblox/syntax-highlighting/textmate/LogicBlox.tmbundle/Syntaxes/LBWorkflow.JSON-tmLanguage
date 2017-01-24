@@ -1,0 +1,142 @@
+{ "name": "lb-workflow",
+  "scopeName": "source.wf",
+  "fileTypes": ["wf"],
+  "patterns": [{
+    "begin": "\/\\*",
+    "end": "\\*\/",
+    "name": "comment.block",
+    "comment": "A block comment."
+  },{
+    "match": "\/\/.*",
+    "name": "comment.single",
+    "comment": "A single line comment."
+  },{
+    "match": "((^|\\s)import\\s|(^|\\s)synchronizer\\s|(^|\\s)task\\s|(^|\\s)workflow\\s|(^|\\s)main\\s|(^|\\s)main\\(|extends\\s)",
+    "captures": {
+      "1": {
+        "name": "keyword"
+      }
+    },
+    "comment": "Language keywords"
+    },{
+    "match": "\\srestartable\\s",
+    "name": "keyword",
+    "comment": "Restartable composition"
+  },{
+    "match": "\\s*\\}\\s*(with)\\s*(cleanup)\\s*\\{",
+    "captures": {
+      "1": {"name": "keyword"},
+      "2": {"name": "keyword"}
+    },
+    "comment": "Restartable composition with cleanup"
+  },{
+    "match": ";",
+    "name": "keyword",
+    "comment": "Sequential composition"
+  },{
+    "match": "\\|\\|",
+    "name": "keyword",
+    "comment": "Parallel composition"
+  },{
+    "match": "(forall)\\s*\\(\\s*[a-zA-Z0-9_]+\\s*(in)",
+    "captures": {
+      "1": {"name": "keyword"},
+      "2": {"name": "keyword"}
+    },
+    "comment": "Forall composition"
+  },{
+    "match": "(forall)\\s*<\\s*(max)\\s*=\\s*[a-zA-Z0-9_]+\\s*>\\(\\s*[a-zA-Z0-9_]+\\s*(in)",
+    "captures": {
+      "1": {"name": "keyword"},
+      "2": {"name": "variable.parameter"},
+      "3": {"name": "keyword"}
+    },
+    "comment": "Forall composition with max setting"
+  },{
+    "begin": "\"",
+    "end": "\"",
+    "patterns": [{
+        "match": "\\$\\([a-zA-Z0-9_]+\\)",
+        "name": "variable.parameter",
+        "comment": "Variable reference in string template"
+      },{
+        "match": "\\$\\(`[a-zA-Z0-9_:]+\\)",
+        "name": "entity.name.function",
+        "comment": "Predicate literal in string template"
+      },{
+        "match": "\\\\.",
+        "name": "constant.other",
+        "comment": "Escaping in string template"
+      },{
+        "match": "\\$",
+        "name": "invalid",
+        "comment": "A $ is not allowed in strings"
+        }],
+    "name": "string",
+    "comment": "Strings"
+  },{
+    "match": "\\$[a-zA-Z0-9_]+",
+    "name": "variable.parameter",
+    "comment": "Variable reference"
+  },{
+    "match": "`[a-zA-Z0-9_:]+",
+    "name": "entity.name.function",
+    "comment": "Predicate literal"
+  },{
+    "match": "\\b(true|false)\\b",
+    "name": "constant.language",
+    "comment": "Boolean values."
+  },{
+    "match": "<~",
+    "name": "keyword.other",
+    "comment": "Output binding"
+  },{
+    "match": "\\b\\d+",
+    "name": "constant.numeric",
+    "comment": "An integer constant."
+  },{
+    "match": ",",
+    "name": "keyword.other",
+    "comment": "Separator"
+  },{
+    "match": "\\?|\\*",
+    "name": "keyword.other",
+    "comment": "Decorators"
+  },{
+    "match": "\\[|\\]",
+    "name": "keyword.other",
+    "comment": "Instance variable container"
+  },{
+    "match": "(:)\\s*([a-zA-Z0-9_]+)",
+    "captures": {
+      "1": {"name": "keyword.other"},
+      "2": {"name": "storage.type"}
+    },
+    "comment": "Parameter type declaration"
+  },{
+    "match": "\\b(lb.[\\w.]*)|BaseTask",
+    "name": "support.function",
+    "comment": "All task processes under the lb namespace."
+  },{
+    "match": "(\\.)([a-zA-Z0-9_]+)(:)(!?)([a-zA-Z0-9_]+)\\s*(->)",
+    "captures": {
+      "1": {"name": "keyword.other"},
+      "2": {"name": "entity.name.function"},
+      "3": {"name": "keyword.other"},
+      "4": {"name": "keyword.other"},
+      "5": {"name": "storage.type"},
+      "6": {"name": "keyword.other"}
+    },
+    "comment": "State machine decorated transition"
+  },{
+    "match": "(\\.)(!?)([a-zA-Z0-9_]+)\\s*(->)",
+    "captures": {
+      "1": {"name": "keyword.other"},
+      "2": {"name": "keyword.other"},
+      "3": {"name": "storage.type"},
+      "4": {"name": "keyword.other"}
+    },
+    "comment": "State machine non-decorated transition"
+   }],
+  "uuid": "84d513d5-c3d8-41b0-b69e-b77d7593bcd1"
+}

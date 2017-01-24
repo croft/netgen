@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>lang:block:predicateLifetime[] = "${1:TransactionLifetime}".$0</string>
+	<key>name</key>
+	<string>lang:block:predicateLifetime</string>
+	<key>scope</key>
+	<string>source.logicblox</string>
+	<key>tabTrigger</key>
+	<string>lifetime</string>
+	<key>uuid</key>
+	<string>20C927FC-2F60-4E7D-A9AB-5C262AB93EBE</string>
+</dict>
+</plist>

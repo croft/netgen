@@ -1,0 +1,33 @@
+{
+    "name": "logicblox",
+    "displayName": "LogicBlox",
+    "description": "Language support for LogicBlox languages.",
+    "version": "0.1.0",
+    "publisher": "Infor",
+    "engines": {
+        "vscode": "^1.5.0"
+    },
+    "categories": [
+        "Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "logiql",
+            "extensions": [".logic"],
+            "configuration": "./language-configuration.json"
+        }, {
+            "id": "lb-workflow",
+            "extensions": [".wf"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "logiql",
+            "scopeName": "source.logic",
+            "path": "./syntaxes/LogicBlox.tmLanguage"
+        }, {
+            "language": "lb-workflow",
+            "scopeName": "source.wf",
+            "path": "./syntaxes/LBWorkflow.tmLanguage"
+        }]
+    }
+}

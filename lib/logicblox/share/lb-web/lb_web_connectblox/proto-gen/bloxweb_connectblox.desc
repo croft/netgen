@@ -1,0 +1,35 @@
+
+ž
+lb/web/fake.protolb.web.connectblox"
+dummy
+	something (	"
+ExecRequest"
+ExecResponse"
+ExecInactiveRequest"
+ExecInactiveResponse"
+AddBlockRequest"
+AddBlockResponse"
+RemoveBlockRequest"
+RemoveBlockResponse"
+ListPredicatesRequest"
+ListPredicatesResponse"
+PredicateInfoRequest"
+PredicateInfoResponse"
+ListWorkspacesRequest"
+ListWorkspacesResponse"
+CreateWorkspaceRequest"
+CreateWorkspaceResponse"
+DeleteWorkspaceRequest"
+DeleteWorkspaceResponse"
+ImportWorkspaceRequest"
+ImportWorkspaceResponse"
+ExportWorkspaceRequest"
+ExportWorkspaceResponse"
+CreateBranchRequest"
+CreateBranchResponse"
+CloseBranchRequest"
+CloseBranchResponse"
+GetBranchNamesRequest"
+GetBranchNamesResponse"
+ReplaceDefaultBranchRequest"
+ReplaceDefaultBranchResponse

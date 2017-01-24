@@ -1,0 +1,10 @@
+{
+  "handler": "login-handler",
+  "prefix": "/login",
+  "http_method": "POST",
+  "request_protocol": "login",
+  "request_message": "Request",
+  "response_protocol": "login",
+  "response_message": "Response",
+  "ignore_authentication_requirement": false
+}

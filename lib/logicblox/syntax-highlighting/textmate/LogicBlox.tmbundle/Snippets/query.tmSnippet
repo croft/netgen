@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>query --blockName ${1:name} &lt;doc&gt;
+   $0
+&lt;/doc&gt;</string>
+	<key>name</key>
+	<string>query</string>
+	<key>scope</key>
+	<string>source.logicblox</string>
+	<key>tabTrigger</key>
+	<string>query</string>
+	<key>uuid</key>
+	<string>A1B83333-377B-4509-942B-1778CD0B13D1</string>
+</dict>
+</plist>

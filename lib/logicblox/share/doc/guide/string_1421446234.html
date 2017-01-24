@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The lb-workflow Guide</title>
+
+    <link href="lb-favicon.png"    rel="shortcut icon" type="image/x-icon" />
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="lb-workflow.css"   rel="stylesheet">    
+  </head>
+  <body>
+    <div class="container header-container">
+      <div class="row header">
+        <div class="col-lg-2">
+          <a href="http://logicblox.com"><img src="lblogo.png" alt="LogicBlox, Inc."></a>
+        </div>
+        <div class="col-lg-10">
+          <a href="index.html"><h1 class="text-center">The lb-workflow Guide</h1></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container contents-container">
+      <div class="row">
+        <div class="col-lg-2 sidebar">
+          <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
+            <ul class="nav">
+              <li class="sidebar-group-header">Tasks
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="#1469666212" title="lb.string.DecodeURL">lb.string.DecodeURL</a></li>
+                    <li class="other"><a href="#476729548" title="lb.string.EncodeURL">lb.string.EncodeURL</a></li>
+                    <li class="other"><a href="#1663446897" title="lb.string.Join">lb.string.Join</a></li>
+                    <li class="other"><a href="#18901931" title="lb.string.Split">lb.string.Split</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Standard Library
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="control_1096407654.html" title="control.wf">control.wf</a></li>
+                    <li class="other"><a href="jobs_2064022591.html" title="jobs.wf">jobs.wf</a></li>
+                    <li class="other"><a href="log_1948900833.html" title="log.wf">log.wf</a></li>
+                    <li class="other"><a href="stdlib_623000472.html" title="stdlib.wf">stdlib.wf</a></li>
+                    <li class="current"><a href="string_1421446234.html" title="string.wf">string.wf</a></li>
+                    <li class="other"><a href="tasks_1083303394.html" title="tasks.wf">tasks.wf</a></li>
+                    <li class="other"><a href="tdx_1729519909.html" title="tdx.wf">tdx.wf</a></li>
+                    <li class="other"><a href="testing-tasks_1856821761.html" title="testing-tasks.wf">testing-tasks.wf</a></li>
+                    <li class="other"><a href="workbooks_290480778.html" title="workbooks.wf">workbooks.wf</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Additional Resources
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="index.html" title="Index">Index</a></li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="col-lg-10 contents">
+          <div class="lb-workflow-block">
+<h3>Tasks to manipulate strings.</h3>          </div>
+          <div class="lb-workflow-block" id="1663446897">
+<p>Create a string by joining a set of parts using a separator.</p><p>The separator will be applied between the parts. Note that parts is a set, so there is no inherent order. However, this task guarantees that the join order is based on alphanumerically sorting of the input as strings.</p>
+<hr/><p>@param <code>parts</code> the set of parts to join.</p><p>@param <code>separator</code> the string to insert between each part.</p><p>@return <code>out</code> the resulting joined string.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.string.Join</span>(parts<span class="keyword">*</span><span class="separator">,</span> separator = <span class="string">", "</span><span class="separator">,</span> driver_meta<span class="keyword">?</span>): (out) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.string.Join"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="18901931">
+<p>Splits a string in various parts using a regular expression as a guide.</p><p>The regular expression defines the delimiter to split the input string. For example, <code>&quot;foo:bar&quot;</code> can be split with <code>&quot;:&quot;</code> to yield <code>{&quot;foo&quot;, &quot;bar&quot;}</code>. Note that the result is a set, so there&rsquo;s no order.</p><p>For more information on how splitting works, see <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#split-java.lang.String-">Java&rsquo;s String.split documentation</a>.</p>
+<hr/><p>@param <code>string</code> the string to be split.</p><p>@param <code>regex</code> a regular expression to split the string.</p><p>@return <code>out</code> the resulting set of strings.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.string.Split</span>(string<span class="separator">,</span> regex<span class="separator">,</span> driver_meta<span class="keyword">?</span>): (out<span class="keyword">*</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.string.Split"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="476729548">
+<p>Encode a string as a URL.</p><p>This task will encode the string using the &ldquo;Percent encoding&rdquo; escaping so that the whole URL can be escaped at once (as opposed to <code>application/x-www-form-urlencoded</code> encoding that can only be applied to the URL parameters).</p><p>For more information on the escaping rules, see <a href="http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/net/UrlEscapers.html#urlFragmentEscaper()">Guava urlFragmentEscaper documentation</a>.</p>
+<hr/><p>@param <code>input</code> the string to be encoded.</p><p>@return <code>encoded</code> the resulting encoded string.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.string.EncodeURL</span>(input<span class="separator">,</span> driver_meta<span class="keyword">?</span>): (encoded) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.string.EncodeURL"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1469666212">
+<p>Decode a URL into a string.</p><p>This task will decode the string using the &ldquo;Percent encoding&rdquo; escaping so that the whole URL can be escaped at once. This task uses java.net.URLDecoder to decode the input. See EncodeURL for the escaping rules that are reversed by this task.</p>
+<hr/><p>@param <code>input</code> the string to be decoded.</p><p>@return <code>decoded</code> the resulting decoded string.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.string.DecodeURL</span>(input<span class="separator">,</span> driver_meta<span class="keyword">?</span>): (decoded) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.string.DecodeURL"</span>
+  )
+</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="jquery.min.js"></script>
+    <script src="jquery.hoverIntent.minified.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('[data-toggle="popover"]').popover();   
+    });
+    $(".modal-hook").hoverIntent({
+      over: function () {
+        var target = $(this).attr("data-target");
+        $(target).modal("show");
+      },
+      interval: 700
+    });
+    </script>
+  </body>
+</html>

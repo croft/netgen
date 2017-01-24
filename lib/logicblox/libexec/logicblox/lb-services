@@ -1,0 +1,57 @@
+#!/usr/bin/env bash 
+# chkconfig: 2345 20 80
+# description: Init script for LB services
+
+if [[ -z "$LOGICBLOX_HOME" ]]; then
+   echo "error: LOGICBLOX_HOME is not set"
+   exit 1
+fi
+
+if [[ $# -gt 1 ]]; then
+   echo "error: only a single argument can be specified"
+   exit 1
+fi
+
+reset_option=$1
+
+if [[ $reset_option == "help" || $reset_option == "-h" || $reset_option == "--help" ]]; then
+   echo -e "usage: lb-services [-h,--help] [command]
+
+examples:
+   lb-services            Print currently running services by registered PID
+   lb-services print      Print currently running services by registered PID
+   lb-services processes  Print currently running services by heuristic
+   lb-services restart    Attempts to shut down and restart all services normally
+   lb-services start      Assumes no services are running and starts all of them
+   lb-services stop       Stops all services normally, but does not start any of them
+   lb-services status     Check status of services that are running"
+   exit 0
+fi
+
+source $LOGICBLOX_HOME/libexec/logicblox/library.sh
+
+if [[ $reset_option == "print" || $reset_option == "" ]]; then
+   print_services
+elif [[ $reset_option == "processes" ]]; then
+   print_services heuristic
+elif [[ $reset_option == "stop" ]]; then
+   print_services
+   shutdown_all_nrt
+   ensure_services_shutdown
+elif [[ $reset_option == "start" ]]; then
+   ensure_services_shutdown
+   logrotate_all
+   start_all_nrt
+   print_services
+elif [[ $reset_option == "restart" ]]; then
+   print_services
+   shutdown_all_nrt
+   ensure_services_shutdown
+   logrotate_all
+   start_all_nrt
+   print_services
+elif [[ $reset_option == "status" ]]; then
+   check_status
+else
+   echo "error: invalid option: $reset_option"
+fi

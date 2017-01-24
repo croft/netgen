@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The lb-workflow Guide</title>
+
+    <link href="lb-favicon.png"    rel="shortcut icon" type="image/x-icon" />
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="lb-workflow.css"   rel="stylesheet">    
+  </head>
+  <body>
+    <div class="container header-container">
+      <div class="row header">
+        <div class="col-lg-2">
+          <a href="http://logicblox.com"><img src="lblogo.png" alt="LogicBlox, Inc."></a>
+        </div>
+        <div class="col-lg-10">
+          <a href="index.html"><h1 class="text-center">The lb-workflow Guide</h1></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container contents-container">
+      <div class="row">
+        <div class="col-lg-2 sidebar">
+          <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
+            <ul class="nav">
+              <li class="sidebar-group-header">Tasks
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="#296300033" title="AsyncTask">AsyncTask</a></li>
+                    <li class="other"><a href="#1881367264" title="SyncTask">SyncTask</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Standard Library
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="control_1096407654.html" title="control.wf">control.wf</a></li>
+                    <li class="other"><a href="jobs_2064022591.html" title="jobs.wf">jobs.wf</a></li>
+                    <li class="other"><a href="log_1948900833.html" title="log.wf">log.wf</a></li>
+                    <li class="current"><a href="stdlib_623000472.html" title="stdlib.wf">stdlib.wf</a></li>
+                    <li class="other"><a href="string_1421446234.html" title="string.wf">string.wf</a></li>
+                    <li class="other"><a href="tasks_1083303394.html" title="tasks.wf">tasks.wf</a></li>
+                    <li class="other"><a href="tdx_1729519909.html" title="tdx.wf">tdx.wf</a></li>
+                    <li class="other"><a href="testing-tasks_1856821761.html" title="testing-tasks.wf">testing-tasks.wf</a></li>
+                    <li class="other"><a href="workbooks_290480778.html" title="workbooks.wf">workbooks.wf</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Additional Resources
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="index.html" title="Index">Index</a></li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="col-lg-10 contents">
+          <div class="lb-workflow-block">
+<p>Import concrete task implementations.</p><pre><code class="lb-workflow"><span class="keyword">import</span> <span class="string">"<a href="tasks_1083303394.html">tasks.wf</a>"</span>
+</code></pre>
+          </div>
+          <div class="lb-workflow-block">
+<p>Import tasks that are specifically designed to support testing.</p><pre><code class="lb-workflow"><span class="keyword">import</span> <span class="string">"<a href="testing-tasks_1856821761.html">testing-tasks.wf</a>"</span>
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1881367264">
+<p>Abstract specification corresponding to the SyncTask task class in Scala. Tasks that extend SimpleTask should make their implementation extend the SimpleTask class.</p><p>A SimpleTask has a simpler state machine than BaseTask. It should be used only for tasks that can be repeated without issue (e.g. pure functions like StringReplace, and simple tasks that are OK to be executed multiple times like Log). It cannot be cancelled, so it should only be used for tasks that do not involve holding resources and that are quick to execute.</p><p>Note that start and end nodes are in capital letters.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">SyncTask</span>(task_implementation_class<span class="separator">,</span> driver_meta<span class="keyword">?</span>)
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="296300033">
+<p>Abstract specification corresponding to the BaseTask class in Scala. Tasks that extend BaseTask should make their implementation extend the BaseTask class.</p><p>This is a more heavy weight task than SimpleTask. It requires more transactions to execute, because its state machine is more complex. On the other hand, it offers more guarantees, like ensuring that a task is not repeated even if the driver crashes, and providing cancellation means.</p><p>Note that BaseTask here does not extend the SimpleTask task. That&rsquo;s because it makes it clearer to have the whole specification of the state machine in a single task definition.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">AsyncTask</span>(task_implementation_class<span class="separator">,</span> driver_meta<span class="keyword">?</span>)
+</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="jquery.min.js"></script>
+    <script src="jquery.hoverIntent.minified.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('[data-toggle="popover"]').popover();   
+    });
+    $(".modal-hook").hoverIntent({
+      over: function () {
+        var target = $(this).attr("data-target");
+        $(target).modal("show");
+      },
+      interval: 700
+    });
+    </script>
+  </body>
+</html>

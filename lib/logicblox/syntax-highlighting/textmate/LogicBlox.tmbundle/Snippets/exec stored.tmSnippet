@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>exec --storedBlock ${1:name}
+$0</string>
+	<key>name</key>
+	<string>exec stored</string>
+	<key>scope</key>
+	<string>source.logicblox</string>
+	<key>tabTrigger</key>
+	<string>execStored</string>
+	<key>uuid</key>
+	<string>D3F0D79D-C79B-4F5E-A275-B8333960574A</string>
+</dict>
+</plist>

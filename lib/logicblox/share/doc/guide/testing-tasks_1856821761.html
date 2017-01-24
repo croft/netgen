@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The lb-workflow Guide</title>
+
+    <link href="lb-favicon.png"    rel="shortcut icon" type="image/x-icon" />
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="lb-workflow.css"   rel="stylesheet">    
+  </head>
+  <body>
+    <div class="container header-container">
+      <div class="row header">
+        <div class="col-lg-2">
+          <a href="http://logicblox.com"><img src="lblogo.png" alt="LogicBlox, Inc."></a>
+        </div>
+        <div class="col-lg-10">
+          <a href="index.html"><h1 class="text-center">The lb-workflow Guide</h1></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container contents-container">
+      <div class="row">
+        <div class="col-lg-2 sidebar">
+          <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
+            <ul class="nav">
+              <li class="sidebar-group-header">Tasks
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="#1206257374" title="lb.Assert">lb.Assert</a></li>
+                    <li class="other"><a href="#377853788" title="lb.AssertSet">lb.AssertSet</a></li>
+                    <li class="other"><a href="#83529546" title="lb.Fail">lb.Fail</a></li>
+                    <li class="other"><a href="#1821363576" title="lb.HelloWorld">lb.HelloWorld</a></li>
+                    <li class="other"><a href="#1517091669" title="lb.LogAll">lb.LogAll</a></li>
+                    <li class="other"><a href="#1116628017" title="lb.SetSetVar">lb.SetSetVar</a></li>
+                    <li class="other"><a href="#1708667645" title="lb.SetVar">lb.SetVar</a></li>
+                    <li class="other"><a href="#1717880895" title="lb.Sleep">lb.Sleep</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Standard Library
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="control_1096407654.html" title="control.wf">control.wf</a></li>
+                    <li class="other"><a href="jobs_2064022591.html" title="jobs.wf">jobs.wf</a></li>
+                    <li class="other"><a href="log_1948900833.html" title="log.wf">log.wf</a></li>
+                    <li class="other"><a href="stdlib_623000472.html" title="stdlib.wf">stdlib.wf</a></li>
+                    <li class="other"><a href="string_1421446234.html" title="string.wf">string.wf</a></li>
+                    <li class="other"><a href="tasks_1083303394.html" title="tasks.wf">tasks.wf</a></li>
+                    <li class="other"><a href="tdx_1729519909.html" title="tdx.wf">tdx.wf</a></li>
+                    <li class="current"><a href="testing-tasks_1856821761.html" title="testing-tasks.wf">testing-tasks.wf</a></li>
+                    <li class="other"><a href="workbooks_290480778.html" title="workbooks.wf">workbooks.wf</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Additional Resources
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="index.html" title="Index">Index</a></li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="col-lg-10 contents">
+          <div class="lb-workflow-block">
+<h3>Tasks mostly useful for testing.</h3><p>Note that most (if not all) tasks here extend <code>BaseTask</code>, because they are used in many  tests that check the more complex state machine. So avoid using them in production  workflows as they require more transactions than often needed for such types of tasks.</p>          </div>
+          <div class="lb-workflow-block" id="1708667645">
+<p>Set the value of the local variable. This is only useful for testing.</p>
+<hr/><p>@param <code>value</code> string value to set the variable</p><p>@return <code>var</code> variable to be set</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.SetVar</span>(value<span class="separator">,</span> driver_meta<span class="keyword">?</span>): (var) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.SetVar"</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1116628017">
+<p>Set the value of the local set variable. This is only useful for testing.</p>
+<hr/><p>@param <code>value</code> string value to set the variable</p><p>@return <code>var</code> variable to be set</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.SetSetVar</span>(value<span class="keyword">*</span><span class="separator">,</span> driver_meta<span class="keyword">?</span>): (var<span class="keyword">*</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.SetSetVar"</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1206257374">
+<p>Assert that the expected value equals the actual. The task will succeed if so, and will fail otherwise. This is useful for tests, where <code>actual</code> is often bound to a variable, and <code>expected</code> is a hardcoded value.</p>
+<hr/><p>@return <code>actual</code> the actual value, often bound to a variable</p><p>@param <code>expected</code> the expected value</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.Assert</span>(actual<span class="separator">,</span> expected<span class="separator">,</span> driver_meta<span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.testing.Assert"</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="377853788">
+<p>Assert that the expected value equals the actual. The task will succeed if so, and will fail otherwise. This is useful for tests, where <code>actual</code> is often bound to a variable, and <code>expected</code> is a hardcoded value.</p>
+<hr/><p>@return <code>actual</code> the actual value, often bound to a variable</p><p>@param <code>expected</code> the expected value</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.AssertSet</span>(actual<span class="keyword">*</span><span class="separator">,</span> expected<span class="keyword">*</span><span class="separator">,</span> driver_meta<span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.testing.AssertSet"</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1821363576">
+<p>Log a message after some sleep.</p><p>This task includes the functionality of Log, LogAll and Sleep, but as a BaseTask so that it can be used in various tests that require a more complex state machine.</p>
+<hr/><p>@param <code>sleep</code> number of seconds to wait before logging the message</p><p>@param <code>msg</code> message to log</p><p>@param <code>msgs</code> more messages to log</p><p>@return <code>time_var</code> an optional output variable that, if passed, will receive the  current time in millis</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.HelloWorld</span>(
+    sleep = <span class="number">0</span><span class="separator">,</span>
+    msg = <span class="string">"Hello World"</span><span class="separator">,</span>
+    msgs<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    level = <span class="string">"info"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (time_var<span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.HelloWorld"</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1517091669">
+<p>Write multiple messages to the logger.</p>
+<hr/><p>@param <code>msg</code> (required)  the messages to be written to the logger</p><p>@param <code>level</code> (defaults to &ldquo;info&rdquo;)  log level for the message. one of error, warning, debug, or info</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.LogAll</span>(msg<span class="keyword">*</span><span class="separator">,</span> level = <span class="string">"info"</span><span class="separator">,</span> driver_meta<span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.LogAll"</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="83529546">
+<p>Fail task will fail until the retryCount is exceeded, after which it will succeed. With a retryCount of 0, this task will immediately succeed. With a retryCount of -1, this task will never succeed.</p>
+<hr/><p>@param <code>msg</code> message of failure</p><p>@param <code>exception</code> if true, do not return a successful future, but throw an exception</p><p>@param <code>sync_exception</code> if true, throw an exception, not a failed future</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.Fail</span>(
+    msg = <span class="string">"</span><span class="string">"</span><span class="separator">,</span>
+    id = <span class="string">"</span><span class="string">"</span><span class="separator">,</span>
+    retry_count = <span class="number">-1</span><span class="separator">,</span>
+    exception = <span class="boolean">false</span><span class="separator">,</span>
+    sync_exception = <span class="boolean">false</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.Fail"</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1717880895">
+<p>Write a message to the logger then sleep for some time.</p>
+<hr/><p>@param <code>msg</code> (required)  the message to be written to the logger</p><p>@param <code>time</code>  the number of seconds to sleep before finishing the execution.</p><p>@param <code>level</code> (defaults to &ldquo;info&rdquo;)  log level for the message. one of error, warning, debug, or info</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.Sleep</span>(
+    msg<span class="separator">,</span>
+    time = <span class="number">1</span><span class="separator">,</span>
+    level = <span class="string">"info"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.Sleep"</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="jquery.min.js"></script>
+    <script src="jquery.hoverIntent.minified.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('[data-toggle="popover"]').popover();   
+    });
+    $(".modal-hook").hoverIntent({
+      over: function () {
+        var target = $(this).attr("data-target");
+        $(target).modal("show");
+      },
+      interval: 700
+    });
+    </script>
+  </body>
+</html>

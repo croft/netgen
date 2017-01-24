@@ -1,0 +1,292 @@
+package blox.common.protocol;
+
+option java_package = "com.logicblox.common.protocol";
+option java_outer_classname = "CommonProto";
+option optimize_for = SPEED;
+
+message CompilationProblems {
+  repeated Problem error = 1;
+  repeated Problem warning = 2;
+}
+
+/**
+ * Description of a problem (warning or error)
+ */
+message Problem {
+  optional string code = 1;
+  required string msg = 2;
+  required Position position = 4;
+  required Severity severity_code = 5;
+  optional string quote = 7;
+}
+
+enum Severity {
+  SEV_ERROR = 0;
+  SEV_WARNING = 1;
+  SEV_NONE = 2;
+}
+
+message Position {
+  required int64 start_line = 1;
+  required int64 start_column = 2;
+  optional int64 end_line = 3;
+  optional int64 end_column = 4;
+  optional int64 start_offset = 5;
+  optional int64 end_offset = 6;
+  required string block_name = 7;
+  optional string file_name = 8;
+}
+
+message PredicateInfo {
+  required string name = 1;
+  required string qualified_name = 2;
+  required int64 arity = 3;
+  required int64 key_arity = 4;
+  required int64 value_arity = 5;
+
+  repeated string key_argument = 6;
+  repeated string value_argument = 7;
+
+  required bool is_entity = 8 [default = false];
+  required bool is_ref_mode = 9 [default = false];
+  required bool is_one_to_one = 10 [default = false];
+  required bool is_ordered = 11 [default = false];
+  required bool has_default_value = 12 [default = false];
+
+  required bool is_subtype = 14 [default = false];
+  optional string supertype = 15;
+  optional string toptype = 42;
+
+  required bool has_ref_mode = 16 [default = false];
+  optional string ref_mode_name = 17;
+
+  required bool is_meta_predicate = 18 [default = false];
+  required bool is_pulse_predicate = 19 [default = false];
+
+   // predicates provided as built-ins that compute infinite relations, such as int32:add
+  required bool is_calculated = 20 [default = false];
+
+  required DerivationType derivation_type = 22;
+  
+  optional bool is_built_in = 28 [default = false];
+
+  required Lifetime lifetime = 30;
+  required bool is_auto_numbered = 31;
+
+  optional Constant actual_default_value = 32;
+  optional string file_path = 33;
+  optional string file_mode = 45;
+  optional string delimiter = 34;
+  optional bool has_column_names = 35;
+  optional string delim_column_names = 36;
+
+  optional bool is_sealed = 37 [default = false];
+  optional string local_name = 38;
+  // 2012.07.18 GAW
+  // Keep track of where a local predicate is 
+  // defined to detect whether it is being
+  // incorrectly used outside of its defining
+  // block.  Currently we will be conservative
+  // for compatibility purposes and if this
+  // field is missing not report, but in an
+  // upcoming release it will become manditory.
+  optional string definition_block = 44;
+
+
+  optional string display_name = 39;
+  
+  // 2011.06.09 GAW
+  // The synthetic flag is used to indicate 
+  // special compiler generated predicates, 
+  // such as projection predicates created
+  // to support certain forms of negation.
+  optional bool is_synthetic = 41;
+  optional bool is_constructor = 43;
+}
+
+message PredicatePopcount {
+  required string qualified_name = 1;
+  
+  // when set to -1 popcount is not returned. 
+  // (used for only listing predicates)
+  optional int64 popcount = 2 [default = -1];
+}
+
+/**
+ * Union for constants
+ */
+message Constant {
+  enum Kind {
+    BOOL = 0;
+    INT = 1;
+    FLOAT = 2;
+    STRING = 3;
+    DATETIME = 4;
+    UINT = 5;
+    DECIMAL = 6;
+    INT128 = 7;
+  }
+
+  required Kind kind = 1;
+  optional BoolConstant bool_constant =2;
+  optional IntConstant int_constant = 3;
+  optional FloatConstant float_constant = 4;
+  optional StringConstant string_constant = 5;
+  optional DateTimeConstant date_time_constant = 6;
+  optional UnsignedIntConstant uint_constant = 7;
+  optional DecimalConstant decimal_constant = 8;
+  optional Int128Constant int128_constant = 9;
+}
+
+message BoolConstant {
+  required bool value = 1;
+  optional blox.common.protocol.Position position = 2;
+}
+
+message IntConstant {
+  required int64 value = 1;
+  required Type type = 2;
+  optional blox.common.protocol.Position position = 3;
+}
+
+message UnsignedIntConstant {
+  required int64 value = 1;
+  required Type type = 2;
+  optional blox.common.protocol.Position position = 3;
+}
+
+message FloatConstant {
+  required string value = 1;
+  required Type type = 2;
+  optional blox.common.protocol.Position position = 3;
+}
+
+message DecimalConstant {
+  required string value = 1;
+  required Type type = 2;
+  optional blox.common.protocol.Position position = 3;
+}
+
+message Int128Constant {
+  required string value = 1;
+  required Type type = 2;
+  optional blox.common.protocol.Position position = 3;
+}
+
+message StringConstant {
+  // string literals are unescaped
+  required string value = 1;
+  optional blox.common.protocol.Position position = 2;
+}
+
+message DateTimeConstant {
+  // unix time in seconds
+  optional int64 value = 1;
+  optional blox.common.protocol.Position position = 2;
+}
+
+/**
+ * Union for types
+ */
+message Type {
+  enum Kind {
+    PRIMITIVE = 0;
+    UNARY = 1;
+  }
+
+  required Kind kind = 1;
+  optional PrimitiveType primitive = 2;
+  optional UnaryPredicateType unary = 3;
+}
+
+message PrimitiveType {
+  enum Kind {
+    BOOL = 0;
+    DECIMAL = 1;
+    SHAPE = 2;
+    IMAGE = 3;
+    BLOB = 4;
+    DATETIME = 5;
+    INT = 6;
+    UINT = 7;
+    FLOAT = 8;
+    STRING = 9;
+    INT128 = 10;
+  }
+
+  required Kind kind = 1;
+  optional int64 capacity = 2; // only used for DECIMAL currently
+}
+
+message UnaryPredicateType {
+  required string name = 1;
+}
+
+enum Lifetime {
+  TRANSACTION = 1;
+  DATABASE  = 2;
+  SESSION = 3;
+}
+
+enum DerivationType {
+  // this is the default of a predicate that does not have either
+  // an EDB or IDB rule deriving into it.  basically it means
+  // "derivation type unknown"
+  NOT_DERIVED = 0;
+
+  // predicate is definitely EDB
+  EXTENSIONAL = 1;
+
+  // also known as derived-only. non-materialized predicate
+  DERIVED = 2;
+
+  // IDB
+  DERIVED_AND_STORED = 3;
+
+  // Not used.  Originally intended to indicate predicates that would contain
+  // constraint violation message: that is, the non-emptyness of the predicate
+  // would indicate a constraint violation
+  INTEGRITY_CONSTRAINT = 4;
+}
+
+// Deprecated
+/*
+enum LockingPolicy {
+  BY_PREDICATE = 0;
+  BY_ELEMENT = 1;
+  UNLOCKED = 2;
+}
+*/
+
+// Deprecated
+/*
+enum StorageModel {
+  SPARSE = 0;
+  DENSE = 1;
+  DELTA_SPARSE = 2;
+  CHUNKED = 3;
+  DELIMITED_FILE = 4;
+  BINARY_FILE = 5;
+  RAW_FILE = 6;
+  SCALABLE_SPARSE = 7;
+  TCP_STREAM = 8;
+}
+*/
+
+// Deprecated
+/*
+enum Partitioning {
+  PARTITIONED = 0;
+  REPLICATED = 1;
+  MASTER_ONLY = 2;
+  FRAGMENT = 3;
+}
+*/
+
+enum LogicSort {
+  ACTIVE = 1;
+  INACTIVE = 2;
+  EXECUTE = 3;
+  INACTIVE_AFTER_FIXPOINT = 4;
+  EXECUTE_AFTER_FIXPOINT = 5;
+}

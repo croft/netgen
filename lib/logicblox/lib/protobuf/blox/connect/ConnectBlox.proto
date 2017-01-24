@@ -1,0 +1,653 @@
+import "blox/connect/BloxCommand.proto";
+import "blox/connect/Exception.proto";
+
+package blox.connect;
+option java_package = "com.logicblox.connect";
+
+option optimize_for = SPEED;
+
+/**
+ * Top-level request/response union
+ */
+message Request {
+  /* an identifier from the client can be used to identify a
+     request for logging purposes (to document the rough purposes
+     of a transaction). It does not have to be unique in any way for
+     the database connectivity */
+  optional string client_id = 1;
+
+  /* log level for this request. The log level is according to the
+     usual syntax e.g. debugDetail@factbus:debugDetail@benchmark).
+     The log level setting does not persist across requests */
+  optional string log_level = 2;
+  optional bool return_log = 3 [default = false];
+
+  /* priority for this request. Currently, requests of low priority
+     are not handled before there are no more requests of normal
+     priority to handle. */
+  optional Priority priority = 4;
+
+  /* TODO include something like an authentication token */
+
+  /* Execute a transaction */
+  optional Transaction transaction = 5;
+
+  /* Create workspace is currently not allowed as a general command
+     because that might make it difficult to do connection pooling and
+     keeping track of open workspaces per process. */
+  optional CreateWorkSpace create = 6;
+
+  /* See create workspace. There is an additional complication here
+     that copying workspaces might have requirements on blocking
+     incoming transactions and flushing outstanding changes to
+     disk  */
+  optional CopyWorkSpace copy = 7;
+
+  optional DeleteWorkSpace delete = 8;
+
+  optional ImportWorkSpace importws = 9;
+
+  optional ExportWorkSpace exportws = 10;
+
+  optional GetWorkSpacePath get_ws_path = 11;  
+
+  /*
+     It contains the client working directory
+  */
+  optional string current_working_directory = 12;
+
+  optional GetWorkSpaceVersion get_ws_version = 13;  
+
+  /* GUID to identify this request for future operations such as aborting it */
+  optional string guid = 14;
+
+  optional CancelRequests cancel_requests = 15;
+
+  /*
+   * If request contains add_replicator, then there must not be any other
+   * optional fields filled in.
+   * Also, a add_replicator must be sent as the first request on a fresh
+   * TCP connection to the Connectivity Server.
+   */
+  optional AddReplicator add_replicator = 16;
+
+  /*
+   * Some requests that require deleting whole workspaces (such as delete or
+   * create --overwrite) are disabled by default. If the client is owned by
+   * the same user as the server and both processes are running on the same
+   * machine, then we allow these operations if the client authenticates
+   * himself to the server.
+   * Authentication is based on a shared secret and timestamp.
+   * The shared secret is stored in a file. The filename is
+   * $LB_DEPLOYMENT_HOME/.lb-server.$PORT.secret if lb-server is listening
+   * for requests on the TCP port $PORT. If lb-server was started to listen on
+   * the unix-domain-socket then no authentication is necessary.
+   *
+   * The authentication_token is obtained via the following computation:
+   *  $SECRET='xxxxxxxx'   # the data stored in the secret file
+   *  $TIME=`date +%s`     # without the trailing newline. Eg., $TIME=1381359334
+   *  $WS=WorkspaceName    # for which this token should be valid
+   *  authentication_token = sha512sum(::$TIME::$WS::$SECRET::)
+   *  Example: For a secret 'js$dxs12', workspace ws, and time 1381359334, the
+   *  authentication_token would be:
+   *    HASH=$(echo -n '::1381359334::ws::js$dxs12::' | sha512sum)
+   *    TOKEN=$TIME::$HASH
+   *    TOKEN=1381359334::885b588486f1661ad8457a...9fb57db6b220ca1e5941bf56f8cad5f9e4443b705
+   */
+  optional string authenticator = 17;
+
+  /* Create a branch of the workspace */
+  optional CreateNamedBranch create_named_branch = 18;
+
+  /* Close a branch of the workspace */
+  optional CloseNamedBranch close_named_branch = 19;
+  
+  /* Retrieve a list of available workspace versions */
+  optional GetBranchNames get_branch_names = 20;
+
+  /* Revert the database to a previous version */
+  optional RevertDatabase revert_database = 21;
+
+  optional GetWorkspaceInfo get_workspace_info = 22;
+
+  optional StartMirror start_mirror = 23;
+
+  optional StopMirror stop_mirror = 24;
+
+  optional PromoteMirror promote_mirror = 25;
+
+  optional CopyRemoteWorkSpace copy_remote_workspace = 26;
+
+  optional ExecuteBatchScript execute_batch_script = 27;
+}
+
+message Response {
+  optional string client_id = 1;
+  optional ExceptionContainer exception = 2;
+  optional TransactionResponse transaction = 3;
+  optional CreateWorkSpaceResponse create = 4;
+  optional CopyWorkSpaceResponse copy = 5;
+  optional DeleteWorkSpaceResponse delete = 6;
+  optional ImportWorkSpaceResponse importws = 7;
+  optional ExportWorkSpaceResponse exportws = 8;
+  optional GetWorkSpacePathResponse get_ws_path = 9;  
+  optional bytes compressed_log = 10;
+  optional GetWorkSpaceVersionResponse get_ws_version = 11; 
+  optional CancelRequestsResponse cancel_requests = 12;
+  optional AddReplicatorResponse add_replicator = 13; 
+  optional CreateNamedBranchResponse create_named_branch = 14;
+  optional CloseNamedBranchResponse close_named_branch = 15;
+  optional GetBranchNamesResponse get_branch_names = 16;
+  optional RevertDatabaseResponse revert_database = 17;
+  optional GetWorkspaceInfoResponse get_workspace_info = 18;
+  optional StartMirrorResponse start_mirror = 19;
+  optional StopMirrorResponse stop_mirror = 20;
+  optional PromoteMirrorResponse promote_mirror = 21;
+  optional CopyRemoteWorkSpaceResponse copy_remote_workspace = 22;
+  optional ExecuteBatchScriptResponse execute_batch_script = 23;
+}
+
+/**
+ * Request to execute a transaction
+ */
+message Transaction {
+  /**
+   * A string of the form "name" or "name@branch", specifying the name of
+   * the workspace (or workspace name and branch name) within which to
+   * execute the transaction.
+   */
+  required string workspace = 1;
+
+  repeated Command command = 2;
+  repeated Command command_after_fixpoint = 3;
+  optional int32 timeout = 4 [default = -1];  // In milliseconds
+  optional bool exclusive = 5 [default = false];
+  optional bool readonly = 6 [default = false];
+
+  /**
+   * commit_mode specifies when the response for the transaction is sent back
+   * to the client. Currently valid values:
+   * - softcommit  .. transaction has finished and been committed to memory
+   * - diskcommit  .. transaction has been fully committed to local disk
+   */
+  optional string commit_mode = 7;
+}
+
+message TransactionResponse {
+  repeated CommandResponse command = 1;
+  repeated CommandResponse command_after_fixpoint = 2;
+}
+
+/**
+ * Request to create a new named branch of the workspace.  Fails if
+ * a branch of that name already exists.
+ */
+message CreateNamedBranch {
+   required string workspace = 1;
+   required string branch = 2;
+   optional string from_branch = 3;
+   optional bool overwrite = 4;
+}
+
+message CreateNamedBranchResponse {
+}
+
+/**
+ * Request to close a branch of the workspace.  All data associated with that
+ * branch is irretrievably lost.  Fails if a branch of that name does not
+ * exist.
+ */
+message CloseNamedBranch {
+   required string workspace = 1;
+   required string branch = 2;
+}
+
+message CloseNamedBranchResponse {
+}
+
+
+/**
+ * Request to retrieve a list of available workspace versions.  This will 
+ * include both named branches, and (if include_auto_versions is true) 
+ * automatic backups which have names like "2015.10.30.13.11.58.992634".
+ */
+message GetBranchNames {
+   required string workspace = 1;
+   required bool include_auto_versions = 2;
+}
+
+/**
+ * Response for GetBranchNames request, containing the list of available
+ * workspace versions.
+ */
+message GetBranchNamesResponse {
+   repeated string names = 1;
+}
+
+/**
+ * Request to revert the database to a previous version.  The specified branch
+ * will become the new default branch.  The old default branch will remain
+ * accessible for some period of time as a backup version.
+ */
+message RevertDatabase {
+   required string workspace = 1;
+   required string older_branch = 2;
+}
+
+message RevertDatabaseResponse {
+}
+
+
+/**
+ * Request to create a workspace. A workspace cannot be accessed by
+ * other transactions until the transaction that creates it has been
+ * completed.
+ */
+message CreateWorkSpace {
+   optional string name = 1;
+   repeated Command command = 2;
+   repeated Command command_after_fixpoint = 3;
+
+   optional bool measure_engine = 4 [ default = false];
+   optional bool snapshot_isolation = 5 [ default = false];
+   
+   // these are old-runtime C++ libraries, not lb-libraries
+   optional string libraries = 6;
+   
+   optional bool overwrite = 7;
+   optional bool unique = 8;
+}
+
+message CreateWorkSpaceResponse {
+  /* if no name was specified in the request, then the response
+     indicates the unique name that has been used */
+  required string name = 1;
+  repeated CommandResponse command = 2;
+  repeated CommandResponse command_after_fixpoint = 3;
+}
+
+/**
+ * Request to copy a workspace
+ */
+message CopyWorkSpace {
+  required string path = 1;
+  optional string new_path = 2;
+}
+
+message CopyWorkSpaceResponse {
+  /* if no name was specified in the request, then the response
+     indicates the unique name that has been used */
+  optional string path = 1;
+}
+
+/**
+ * Request to delete a workspace
+ */
+message DeleteWorkSpace {
+  required string name = 1;
+  optional bool ignore_nonexistent = 2;
+}
+
+message DeleteWorkSpaceResponse {
+}
+
+/**
+ * Request to import (copy) an unmanaged workspace into ConnectBlox.
+ */
+message ImportWorkSpace
+{
+  required string src_filepath = 1;
+  optional string name = 2;
+  optional bool overwrite = 3;
+  optional bool unique = 4;
+
+  repeated Command command = 5;
+  repeated Command command_after_fixpoint = 6;
+}
+
+message ImportWorkSpaceResponse
+{
+  required string name = 1;
+  required string filepath = 2;
+  repeated CommandResponse command = 3;
+  repeated CommandResponse command_after_fixpoint = 4;
+}
+
+/**
+ * Request to export (copy) an managed workspace from ConnectBlox.
+ */
+message ExportWorkSpace
+{
+  required string name = 1;
+  required string dest_filepath = 2;
+
+  // If the directory already exists, overwrite
+  optional bool overwrite = 5;
+}
+
+message ExportWorkSpaceResponse
+{
+}
+
+/**
+ * Request to get an absolute workspace path to a managed workspace.
+ */
+message GetWorkSpacePath
+{
+   required string name = 1;
+   optional bool inverse = 2 [ default = false ];
+}
+
+message GetWorkSpacePathResponse
+{
+  required string filepath = 1;
+}
+
+/**
+ * Request to get the runtime version of managed workspace.
+ */
+message GetWorkSpaceVersion
+{
+   required string name = 1;
+}
+
+message GetWorkSpaceVersionResponse
+{
+  // Major version string. In principle there is no convention, but
+  // the suggestion is to keep this version people use in their
+  // discussions (e.g. "3.9" and "4.0")
+  required string version = 2;
+  // Minor version, for example "3" for release "3.9.3"
+  optional string minor_version = 3;
+  // Detailed identifier for a specific build.
+  required string build_number = 1;
+}
+
+/**
+ * Request to cancel/abort an already submitted request. Takes a list
+ * of request ids that should already have been submitted. It is not
+ * considered an error to submit values that the server is unaware of,
+ * because they could have completed by the time this message is received.
+ * The response breaks down how the requests were handled.
+ */
+message CancelRequests
+{
+   repeated string req_guid = 1;
+}
+
+message CancelRequestsResponse
+{
+   /* requests that the server didn't know about */
+   repeated string unknown_guids = 4;
+}
+
+// Request priority?
+
+enum Priority
+{
+  NORMAL = 1;
+  LOW = 2;
+}
+
+
+/**
+ * Top-level admin request/response union
+ */
+
+message AdminRequest {
+   optional string client_id = 1;
+   optional ShutdownServer shutdown_server = 2;
+   optional AbortTransaction abort_transaction = 4;
+   optional bool list_workspaces = 6;
+   optional StatusRequest status = 7;
+   optional string command = 8;
+   optional string loglevel = 9;
+}
+
+message AdminResponse {
+  optional string client_id = 1;
+  optional ExceptionContainer exception = 2;
+  optional ShutdownServerResponse shutdown_server = 3;
+  optional AbortTransactionResponse abort_transaction = 5;
+  optional ListWorkSpacesResponse list_workspaces = 7;
+  optional StatusResponse status = 8;
+  optional string message = 9;
+}
+
+message ShutdownServer {
+   optional bool waitForProcesses = 1;
+}
+
+message ShutdownServerResponse {
+   optional string message = 1;
+}
+
+message AbortTransaction {
+   optional string workspace = 1;
+   required string tid = 2;
+}
+
+message AbortTransactionResponse {
+   optional string message = 1;
+}
+
+/**
+ * Request to list the available workspaces
+ */
+message ListWorkSpaces
+{
+}
+
+message ListWorkSpacesResponse
+{
+  repeated string name = 1;
+}
+
+message StatusRequest {
+  // list of workspaces for which information is requested.
+  // if requested workspace does not exist, it is ignored
+  repeated string workspaces = 1;
+  
+  // whether to include the Request of active requests
+  optional bool show_active_requests = 2 [default = false ];
+
+  // whether to include the Request of queued requests
+  optional bool show_queued_requests = 3 [default = false ];
+  
+  // whether to add internal debugging information in output
+  optional bool add_debug_info = 99 [default = false];
+}
+
+message StatusResponse {
+  repeated WorkspaceStatus workspaces = 1;
+  repeated string debug_info = 99;
+}
+
+message WorkspaceStatus {
+   required string name = 1 [default = ""];  
+        // NB: adding default to required field to not allow malformed messages
+   
+   // number of total requests for this wokspace
+   // -1 if workspace is not open
+   optional int32 num_requests = 2;
+   
+   // Request is usual lb-server Request
+   repeated RequestStatus requests = 3;
+   repeated string debug_info = 99;
+}
+
+message RequestStatus {
+   optional Request request = 1;
+   optional RequestStatusEnum state = 2;
+   optional int64 request_id = 3;
+   
+   repeated string debug_info = 99;
+}
+
+enum RequestStatusEnum {
+    // in some queue waiting to be executed
+    QUEUED = 1;
+    
+    // actively executing
+    ACTIVE = 2;
+
+
+    //// Currently not implemented      
+    // Finished executing, but waiting for disk-commit
+    // WAITING_FOR_DISK_COMMIT = 3;
+    // Being sent out, or waiting in queue to be sent out
+    // FINISHING = 4;
+}
+
+/*
+ * AddReplicator is a request sent from a replicating machine to the
+ * master machine, asking that it be added as a replicator for a
+ * workspace.  If the request is successful, the TCP connection is
+ * handed over to the replication protocol. This is used both for
+ * online replication ("lb start-mirror") and hot backups ("lb
+ * copy-remote").
+ */
+message AddReplicator {
+   required string workspace_name = 1;
+
+   required uint64 prev_version = 2;
+
+   // Whether to send one version and then shut down the connection.
+   optional bool replicate_once = 3 [default = false];
+
+   /*
+    * Timestamp corresponding to prev_version. Must match the
+    * timestamp of that version on the master, otherwise the master
+    * will refuse to start replication.
+    */
+   required uint64 prev_version_timestamp = 4;
+
+   /* 
+    * By default, the complete database state will be replicated (i.e. 
+    * including WorkspaceVersionManager).  If tip_only is set to true, only the
+    * most recent tip workspace will be replicated (tagged versions will be
+    * excluded.)
+    * Note: currently not implemented.
+    */
+   // optional bool tip_only;     /* In a future version, if needed */
+}
+
+message AddReplicatorResponse {
+   required string uuid = 1;
+   required string schema_version = 2;
+}
+
+/**
+ * Get information about a workspace.
+ */
+message GetWorkspaceInfo {
+   required string name = 1;
+}
+
+message GetWorkspaceInfoResponse {
+   optional string path = 1; // obsoletes GetWorkSpacePath
+   optional uint64 commit_version = 2;
+   repeated WorkSpaceOption option = 3;
+   required bool is_mirror = 4;
+   optional bool is_mirroring = 5;
+   optional uint64 mirroring_since = 6; // seconds in Unix epoch
+   optional uint64 pages_received = 7;
+   optional uint64 versions_received = 8;
+   optional uint64 used_disk_space = 9; // in bytes
+   optional uint64 active_mirror_count = 10; // how many mirrors are currently connected and replicating this workspace
+   required string uuid = 11;
+   optional string schema_version = 12;
+   repeated string active_mirrors = 13;
+
+   /*
+    * To show progress on the incoming version for mirrored workspaces.
+    */
+   optional uint64 pages_in_incoming_version = 14;
+   optional uint64 pages_received_in_incoming_version = 15;
+
+   enum State {
+     CLOSED = 0;
+     OPENED = 1;
+     INIT = 2;
+   }
+   required State state = 16;
+
+   optional uint64 commit_timestamp = 17;
+}
+
+message WorkSpaceOption {
+   required string name = 1;
+   required string value = 2;
+}
+
+/**
+ * Start or resume mirroring a workspace on another machine.
+ */
+message StartMirror {
+   required string name = 1;
+   required string remote_host = 2;
+   required uint32 remote_port = 3;
+   required string remote_workspace = 4;
+}
+
+message StartMirrorResponse {
+}
+
+/**
+ * Stop mirroring a workspace on another machine.
+ */
+message StopMirror {
+   required string name = 1;
+}
+
+message StopMirrorResponse {
+}
+
+/**
+ * Promote a mirror workspace to a master.
+ */
+message PromoteMirror {
+   required string name = 1;
+}
+
+message PromoteMirrorResponse {
+}
+
+/**
+ * Copy a remote workspace.
+ */
+message CopyRemoteWorkSpace {
+   required string name = 1;
+   required string remote_host = 2;
+   required uint32 remote_port = 3;
+   required string remote_workspace = 4;
+}
+
+message CopyRemoteWorkSpaceResponse {
+}
+
+/**
+ * Execute a series of dlbatch commands, with the output
+ * returned as a single string.  The commands are executed
+ * directly in lb-server rather than via a separate dlbatch
+ * process.  The 'transactional' flag determines whether the
+ * commands will be executed as a transaction; e.g. for a script
+ * containing addBlock or exec commands, transactional should
+ * be set to true.  Batch commands manipulating transactions
+ * (e.g. 'transaction', 'commit', 'abort') are disallowed.
+ * Transactions are executed as soft-commit writes.  The
+ * command is only available to authenticated clients (see
+ * Request.authenticator).
+ */
+message ExecuteBatchScript {
+   required string script = 1;
+   required string workspace = 2;
+   required bool transactional = 3;
+   optional bool return_data = 4;
+}
+
+message ExecuteBatchScriptResponse {
+   required string output = 1;
+   repeated Relation returned_data = 2;
+}
+

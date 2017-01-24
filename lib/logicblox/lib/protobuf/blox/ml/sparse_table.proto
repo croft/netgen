@@ -1,0 +1,35 @@
+package fl.com;
+
+message KeyDoubleValue {
+  required int64 key=1;
+  required double value=2;
+}
+
+message SparseDoublePoint {
+  optional int32  meta_byte=1;
+  optional double meta_double=2;
+  optional int32  meta_int32=3;
+  repeated KeyDoubleValue elem=4;
+}
+
+message SparseDoubleTable {
+  required string name=1;
+  repeated SparseDoublePoint point=2;
+}
+
+message KeyIntValue {
+  required int64 key=1;
+  required int64 value=2;
+}
+
+message SparseIntPoint {
+  optional int32  meta_byte=1;
+  optional double meta_double=2;
+  optional int32  meta_int32=3;
+  repeated KeyIntValue elem=4;
+}
+
+message SparseIntTable {
+  required string name=1;
+  repeated SparseIntPoint point=2;
+}

@@ -1,0 +1,2844 @@
+/** Measure service protocol */
+
+import "blox/options.proto";
+import "measure/measure_common.proto";
+package lb.web.measure;
+
+option java_package = "com.logicblox.bloxweb.measure";
+
+
+// Common /////////////////////////////////////////////////////////////
+
+/**
+ * Problem indicate issues, possibly fatal, that arose
+ * while processing a request.
+ */
+message Problem
+{
+   /**
+    * Code used to classify the nature of the problem
+    */
+   required string code = 1;
+
+   enum Severity {
+      WARNING = 1;
+      ERROR = 2;
+   }
+
+   required Severity severity = 2;
+
+   /**
+    * Text describing the details of the problem
+    */
+   required string text = 3;
+
+   /**
+    * Optional location in the input where the problem
+    * originates.
+    */
+   optional lb.web.measure.common.Region region = 4;
+
+   /**
+    * If the problem is an internal error, this is the
+    * state of the stack at the error.  The first frame
+    * will be the top of the stack.
+    */
+
+   message StackFrame
+   {
+      optional string file_name = 1;
+      required string class_name = 2;
+      required string method_name = 3;
+      optional int64 line = 4;
+   }
+
+   repeated StackFrame stack = 5;
+}
+
+/**
+ * Types understood by the measure service
+ */
+message Type
+{
+  enum Kind
+  {
+    /**
+     * UTF-8 strings
+     */
+    STRING = 1;
+
+    /**
+     * 64-bit twos compliment integers
+     */
+    INT = 2;
+
+    /**
+     * 64-bit floating point numbers
+     */
+    FLOAT = 4;
+
+    /**
+     * 64-bit fixed-point decimals
+     */
+    DECIMAL = 6;
+
+    /**
+     * Your usual boolean.
+     */
+    BOOLEAN = 7;
+
+    /**
+     * Some other named type.
+     */
+    NAMED = 8;
+  }
+
+  /**
+   * What kind of type is this?
+   */
+  required Kind kind = 1;
+
+  /**
+   * Required if kind is NAMED, should be empty otherwise.
+   */
+  optional string named = 2;
+}
+
+// Model //////////////////////////////////////////////////////////////
+
+/**
+ *
+ * The MeasureModel message encapsulates all the static information
+ * about a given measure service configuration.
+ *
+ */
+message MeasureModel
+{
+  /**
+   * You can optionally name the model.  This is only provided for
+   * clients for presentation purposes.  It is never used by the
+   * measure service itself.
+   */
+  optional string name = 1 [default = "Measure Service"];
+
+  /**
+   * The set of defined dimensions.
+   *
+   * Currently, there must be at least one.  The name of each
+   * dimension must be unique in the MeasureModel.
+   */
+  repeated Dimension dimension = 2 [(blox.options.set) = true];
+
+  /**
+   * The set of defined metrics.
+   *
+   * Currently, there must be at least one.  The name of each
+   * metric must be unique in the MeasureModel.
+   */
+  repeated Metric metric = 3 [(blox.options.set) = true];
+
+  /**
+   * The set of slides.
+   *
+   * The name of each slide must be unique in the MeasureModel.
+   *
+   * Old style multi-dimensional maps are deprecated.  Use the new 
+   * slide message instead. Deprecated: 4.3.12; removal: 4.4.1.
+   */
+  repeated MultiDimensionalLevelMap multi_dim_level_map = 4 [(blox.options.set) = true, deprecated=true];
+  repeated Slide slide = 17 [(blox.options.set) = true];
+
+  /**
+   * The set of user-defined operators.
+   *
+   * The name of each operator and domain combination must be unique in
+   * the MeasureModel.
+   */
+  repeated OpDef operator = 5 [(blox.options.set) = true];
+
+  /**
+   * The set of defined measure expression substitutions.
+   *
+   * Currently, this is entirely optional and only used for optimization
+   * purposes.  There must only be one substitution for a given measure
+   * expression.
+   */
+  repeated ExprSubst subst = 14 [(blox.options.set) = true];
+
+  /**
+   * An optional set of preferred key-orderings for measure-generated
+   * predicates at given intersections.  The order of the qualified
+   * levels within an intersection is meaningful.  The left-to-right
+   * order of the qualified levels in the intersection will be the
+   * left-to-right order that each level will be used as a key.
+   */
+  repeated Intersection key_order = 9 [(blox.options.set) = true];
+  
+  /**
+   * Optional set of variable orderings that the runtime should use in 
+   * eligible generated rules.
+   *
+   * WARNING: Some variable ordering choices can cause the runtime to fail
+   * to execute valid measure service requests.  Only use this feature if
+   * you are sure that it is the only solution to your problem.
+   */
+  repeated VarOrder runtime_var_order = 16 [(blox.options.set) = true];
+
+  /**
+   * An optional set of named aggregations.  This is entirely for
+   * convenience, and behaves no differently than using the given
+   * methods directly.
+   */
+  repeated AggDef aggregation = 10 [(blox.options.set) = true];
+
+  /**
+   * An optional set of named spreads.  This is entirely for
+   * convenience, and behaves no differently than using the given
+   * spreads directly.
+   */
+  repeated SpreadDef spread = 11 [(blox.options.set) = true];
+
+  /**
+   * Persistent metric locks.
+   */
+  repeated MetricLock metric_lock = 12 [(blox.options.set) = true];
+
+  /**
+   * Persistent dimension locks.
+   */
+  repeated DimensionLock dimension_lock = 15 [(blox.options.set) = true];
+
+  /**
+   * Named type definition.
+   */
+  repeated TypeDefinition type = 13 [(blox.options.set) = true];
+
+  /**
+   * Should the measure service try to "complete" the model, generating
+   * the necessarily LogiQL for missing types and predicates?  Because 
+   * completion does additional validation that did not happen previously,
+   * the default is to not perform completion.  
+   *
+   * In a LogicBlox 4.4.xx release, the default will become true.
+   */
+  optional bool complete_model = 18 [default = false];
+}
+
+/**
+ * Variable ordering specification.
+ */
+message VarOrder
+{
+  /* Match on a rule body involving this set of levels. */
+  repeated QualifiedLevel pattern = 1;
+
+  /* Use a variable ordering pragma on these levels, with the supplied order */
+  repeated QualifiedLevel order = 2;
+}
+
+/**
+ * User-defined operator.
+ * A user-defined operator is defined by designating a LogiQL functional predicate
+ * to serve as the implementation.  An operator may be overloaded, by using several
+ * OpDef messages to bind the same operator name to several predicates,
+ * which should differ in their arity or types of their arguments.
+ * A user-defined operator can be used in measure expressions similarly to the
+ * operators hard-coded into the protocol.
+ */
+message OpDef
+{
+  /**
+   * The name given to the operator.
+   */
+  required string name = 1;
+
+  /**
+   * The LogiQL predicate used to implement the operator.  It must
+   * be a functional predicate of the form [d1, ..., dn]=r
+   */
+  required string impl = 2;
+
+  /**
+   * The types for d1, ..., dn.
+   */
+  repeated Type domain = 3;
+
+  /**
+   * The type of r.
+   */
+  required Type range = 4;
+}
+
+/**
+ * A user defined aggregation
+ */
+message AggDef
+{
+  /**
+   * The name given to the aggregation.
+   */
+  required string name = 1;
+
+  /**
+   * The aggregation method
+   */
+  required AggExpr.Method method = 2;
+}
+
+/**
+ * A user defined spread
+ */
+message SpreadDef
+{
+  /**
+   * The name given to the aggregation.
+   */
+  required string name = 1;
+
+  /**
+   * The spread definition
+   */
+  required UpdateExpr.Transform.SpreadKind spread = 2;
+
+}
+
+/**
+ * A metric is an abstraction over a source of data conforming to 
+ * a particular signature.  Metrics can be implemented by
+ *
+ *   - predicates;
+ *   - dialogues (parameterized pairs of request and response predicates);
+ *   - expressions.
+ *
+ * In the future there may be other options for implementing metrics.
+ *
+ */
+message Metric
+{
+  /**
+   * The name of the metric.  Optional for anonymous metrics.
+   */
+  optional string name = 1;
+
+  /** The signature of this metric. 
+   *  For recalc metrics, the signature's interesection is the base intersection. 
+   *  The order of the intersection levels is meaningful:
+   *  it determines the key order for the metric when there
+   *  is no suitable key_order declaration in MeasureModel.
+   *
+   *  For now, the signature is optional for a metric defined by an expression
+   *  (it should be present in dialogue- and predicate-defined metrics). 
+  */
+  optional Signature signature = 13; 
+
+  /**
+   * Exactly one of these must be populated.
+   */
+  optional Predicate predicate = 4;
+  optional Dialogue dialogue = 5;
+  optional ExprMetric expr = 10;
+
+  /**
+   * Optional text for display purposes. If not defined, the
+   * name field is used instead.
+   */
+  optional string caption = 6;
+
+  /**
+   * At most one of the following two fields may be populated.
+   *
+   * An optional default aggregation method can be used when
+   * aggregating this metric to a given intersection.
+   *
+   * Alternatively, a measure language formula can be specified
+   * to use as the "recalc" of this metric for an intersection
+   * above the base intersection.
+   */
+  optional AggExpr.Method agg_method = 7;
+  optional Recalc recalc = 9;
+
+  /**
+   * Optional default spreading method to be used when
+   * updating this metric.
+   */
+  optional UpdateExpr.Transform.SpreadKind update_method = 8;
+
+  /**
+   * InverseGroups specify view-update operations for metrics.
+   *
+   * There may be more than one InverseGroup for a given metric. In
+   * the case that there is more than one, the first usable InverseGroup
+   * will be used.  If an InverseGroup would cause a conflict with other
+   * updates in the request, the next InverseGroup in the list will be
+   * chosen.  If there are no remaining InverseGroups for a metric, the
+   * update will be aborted.
+   */
+  repeated InverseGroup inverse = 11;
+
+  /**
+   * Attempt to automatically generate inverse for this metric.
+   * Generated inverses will be lower priority than any
+   * explicitly given inverses.
+   */
+  optional bool generate_inverses = 12;
+  
+}
+
+/** A signature is a type of a measure expression. 
+    It describes the shape of positions on which the measure is defined
+    and the type of its values.
+    [At the moment, there is only one kind of signature, BaseSignature,
+    for what can be called "measure values" (not to be confused with 
+    "value of a measure" or "measure's values"). We expect to introduce
+    at least one more kind, for typing measure functions, i.e. expressions
+    that produce a measure from other measures or other inputs.]
+*/
+message Signature {
+  enum Kind {
+    BASE   = 1;
+  }
+  required Kind kind = 1;
+  optional BaseSignature  base_signature  = 2;
+}
+
+message BaseSignature {
+  /**  The intersection at which a measure is defined.  */
+  required Intersection intersection = 1;
+
+  /** The type of a measure's values.
+      Absence of the field indicates a position-only measure. */
+  optional ValueType type = 2;
+}
+
+/* The type of a measure's values. 
+*/
+message ValueType {
+  enum Kind {
+    /** Indicates a single-valued measure.  */
+    SINGLETON = 1;
+    /** Indicates a multi-valued (set-valued) measure. */
+    SET = 2;
+  }
+  required Kind kind = 1;
+
+  /** The scalar base type of this value type.  */ 
+  required Type type = 2;  
+}
+
+/**
+ * An abstraction for specifying a LogiQL predicate.
+ *
+ */
+message Predicate
+{
+  /**
+   * The name of the predicate
+   */
+  required string name = 1;
+
+  /**
+   * Optional stage and delta specification.
+   * We currently use a string.  Given that we would
+   * like to handle historical queries in the future,
+   * and we may be revising delta logic some, it
+   * seems premature to commit to a specific enum or
+   * message.
+   */
+  optional string stage = 3;
+
+  optional string delta = 4;
+
+  /**
+   * Sometimes at the application level we know that
+   * a particular predicate will see frequent updates
+   * and will result in expensive maintenance if queries
+   * involving it are installed.  In such cases, we can
+   * set the predicate to be volatile and queries whose
+   * result depend on the predicate will not be installed.
+   *
+   * Note this is different than saying the predicate
+   * is pulse. Pulse predicates are already detected. */
+  optional bool volatile = 5 [default = false];
+
+  /**
+   * An optional predicate that can be written to if the named
+   * predicate is an IDB. The types of the update predicate's 
+   * arguments should match the named predicate.
+   *
+   * It is recommended that the update predicate be pulse, but it
+   * is not required.  Howver, note that if this predicate is pulse
+   * it will not be possible to issue remove requests, only updates.
+   */
+  optional string update_pred = 6;
+
+  /**
+   * A column providing the expected default value for the 
+   * predicate.  Would be cleaner if we had a singleton 
+   * constant message.
+   */ 
+  optional Column default_value = 7;
+
+  /**
+   * Should this predicate be relational?  
+   * If the field is absent, it doesn't matter.
+   * If the field is present and true, this predicate must be relational.
+   * If the field is present and false, this predicate must be functional.
+   */ 
+  optional bool relational = 8;
+}
+
+/**
+ * Dialogues are an abstraction computing measure data on demand.
+ *
+ * Dialogues are useful for when it is not possible or desirable to
+ * materialize the data for a metric.  Also dialogues are necessary
+ * to parameterize a metric based upon a user specified parameter.
+ */
+message Dialogue
+{
+   /**
+    * Name and signature of the parameters to this dialogue.  The
+    * measure service will expect that for a parameter named <param>
+    * there will be a corresponding pulse predicate named
+    * measure_rq:relation_<param>.  The tuples for <param> will be
+    * written into this predicate, and the dialogue can read them from
+    * that predicate.
+    *
+    * It is not necessary for the dialogue to use all the declared
+    * parameters, but the measure service is not guaranteed to generate
+    * correct LogiQL and the appropriate query transaction if all the
+    * parameters used by the dialogue are not declared here.
+    */
+   repeated ParamExpr param = 4 [(blox.options.set) = true];
+
+   /**
+    * The LogiQL predicate that will contain the result of
+    * the dialogue.
+    */
+   required string response_pred = 2;
+
+   /**
+    * The name of the inactive block that contains the logic for
+    * computing the dialogue.
+    */
+   required string block = 3;
+}
+
+/**
+ * An abstraction for specifying a measure language recalc.
+ *
+ * From CubiQL's perspective, a recalc is vaguely like an
+ * aggregation method.
+ *
+ */
+message Recalc
+{
+  /* The name of measure language rule to look in to find the formula. */
+  required string rule_name = 1;
+}
+
+/**
+ * ExprMetrics allow expressions to be given a name.
+ */
+message ExprMetric
+{
+  /**
+   *  The expression for the data of the metric.
+   *  Exactly one of these two alternative fields should be used,
+   *  but the string alternative is deprecated.
+   *  Instead, use the 'str' field in the MeasureExpr alternative. 
+   */  
+  optional string measure_str = 1 [deprecated=true];  //deprecated: 4.3.3; removal: 4.4.1
+  optional MeasureExpr measure_expr = 2;
+}
+
+/**
+ * A slide defines a method for explicitly mapping from some set of
+ * levels to another level, without using the edges found within the
+ * source dimensions.  The source and target levels do not need to be
+ * related in any way, and it is also possible to define a slide that
+ * maps from a level to itself, to allow for movement within single
+ * level.
+ *
+ * The mapping predicate backing the slide should have the form
+ *
+ *   mapPred[...source_levels...]=target_level
+ *
+ * or
+ *
+ *   mapPred(...source_levels..., target_level)
+ *
+ */
+message Slide
+{
+  /* The name of the slide that will be used when aggregating. */
+  required string name = 1;
+
+  /* The predicate implementing the slide. */
+  required Predicate map = 2;
+
+  /* The source levels */
+  repeated QualifiedLevel source_level = 3;
+
+  /* When aggregating via a slide, the result intersection will contain
+   * { ... target_label: target_dimension.target_level ...}
+   */ 
+  optional string target_label = 4;
+  required string target_dimension = 5;
+  required string target_level = 6;
+}
+
+/**
+ *
+ * A multi-dimensional level map is a predicate that maps tuples
+ * of some source intersection to entities of some target
+ * level using a level map predicate with signature:
+ *
+ *   levelMapPred[source_dimensionality]=target_level
+ *
+ * or
+ *
+ *   levelMapPred(source_dimensionality, target_level)
+ *
+ * Deprecated in 4.3.12; removal in 4.4.1
+ */
+message MultiDimensionalLevelMap
+{
+  required string name = 1;
+  required string level_map_pred = 2;
+  required Intersection source_inter = 3;
+
+  // When rolling up across a multi-dim map, the result is at intersection
+  // {target_label: target_level}
+  optional string target_label = 4;
+  required string target_level = 5;
+}
+
+/**
+ * A dimension is an axis that can be used to classify points of
+ * data, such as time or space.  Currently only discrete finite
+ * dimensions are supported.
+ *
+ * A dimension is represented via a set of levels to structure
+ * data measured along the dimension, with edges between the
+ * levels to represent relationships between them.  For example,
+ * a time dimension could have a day level and a week level,
+ * and an edge from day to week to indicate which days belong to
+ * which weeks.
+ *
+ * Levels themselves contain elements called members.
+ *
+ * There are two ways of defining the edges in a dimension. One
+ * it is to directly define the edge.  The other is to define
+ * named path through levels called a hierarchy.  Hierarchies are
+ * useful when it is desirable that some operations, such as
+ * aggregation, follow a specific path through the dimension.
+ *
+ * The level structure of a dimension must form a meet-semilattice,
+ * and therefore there must exist a level that is the bottom of
+ * that semi-lattice.
+ *
+ */
+message Dimension
+{
+  /**
+   * The dimension's name.
+   */
+  required string name = 1;
+
+  /**
+   * The set of levels in the dimension.  The name of
+   * each level must be unique within this Dimension.
+   */
+  repeated Level level = 2 [(blox.options.set) = true];
+
+  /**
+   * The set of direct edges between levels.
+   */
+  repeated Edge edge = 3 [(blox.options.set) = true];
+
+  /**
+   * The set of hierarchies in the dimension.  The name of
+   * each hierarchy must be unique within this Dimension.
+   */
+  repeated Hierarchy hierarchy = 4 [(blox.options.set) = true];
+
+  /**
+   * An optional default path or hierarchy through this dimension.
+   */
+  optional string default_hierarchy = 5;
+
+  /**
+   * Optionally, a level may be specified as the distinguished
+   * top of the dimension.  Some OLAP applications designate a
+   * level ('*') that represents all members of a dimension.
+   * However, measure service is designed to not require that
+   * such a level exists.  However, in the case that it does,
+   * it needs to know the level so that it can properly compute
+   * aggregations.
+   */
+  optional string top_level = 6;
+
+  /**
+   * If false, aggregations along this dimension will not be
+   * automatically unwound during optimization.
+   */
+  optional bool unwinds = 7 [default = true];
+
+  /**
+   * Optional text for display purposes. If not defined the name should
+   * be used.
+   */
+  optional string caption = 8;
+
+  /**
+   * Definition of a level within a dimension.
+   */
+  message Level {
+    /**
+     * The name of the level.
+     */
+    required string name = 1;
+
+    required Type type = 5;
+
+    /**
+     * An optional set of attributes for this level.
+     * The name of each attribute must be unique within this level.
+     */
+    repeated Attribute attribute = 3 [(blox.options.set) = true];
+
+    /**
+     * Optional text for display purposes. If not defined, the
+     * name field is used instead.
+     */
+    optional string caption = 4;
+  }
+
+  /**
+   * Representation of an unnamed edge within
+   * a dimension.
+   */
+  message Edge
+  {
+    /**
+     * The name of the source level.
+     */
+    required string source_level = 1;
+
+    /**
+     * The name of the target level.
+     */
+    required string target_level = 2;
+
+    /**
+     * The LogiQL predicate mapping members of the
+     * source level to members the target level.
+     */
+    required Predicate pred = 4;
+  }
+
+  /**
+   * Representation of a hierarchy.
+   */
+  message Hierarchy
+  {
+    /**
+     * The name of the hierarchy
+     */
+    required string name = 1;
+    /**
+     * The path the hierarchy takes through the
+     * dimension, bottom-up.  There must be at least one
+     * level in the path.
+     */
+    repeated Path path = 2;
+
+    /**
+     * Nodes that are part of the hierarchy's path.
+     */
+    message Path
+    {
+      /**
+       * The level at this point in the path
+       */
+      required string level = 1;
+
+      /**
+       * The LogiQL predicate used to map from
+       * members of this level to the next
+       * level in the path.
+       *
+       * Unless this is the last level in path,
+       * this field must be populated. If this
+       * is the last level in the path, this
+       * field must *not* be populated.
+       */
+      optional Predicate pred = 3;
+    }
+  }
+}
+
+/**
+ * An attribute is a property of a level that may
+ * be used in queries and reporting.
+ */
+message Attribute
+{
+  /**
+   * The name of the attribute.  Optional for anonymous
+   * attributes.
+   */
+  optional string name = 1;
+
+  /**
+   * The LogiQL predicate implementing the attribute.
+   */
+  required Predicate predicate = 4;
+
+  /**
+   * The type of values in this property.
+   */
+  required Type type = 3;
+}
+
+/**
+ * QualifiedLevels are used to specify levels.  However, because
+ * it is possible for two dimensions to have levels with the same
+ * name, it is generally necessary to also give the level's
+ * dimension to correctly specify it.  In the future we may
+ * drop the requirement that the dimension field always be
+ * supplied if it can be unambigiously inferred.
+ *
+ * A hierarchy may optionally be specified.  Some operations
+ * will use this as a hint to guide selecting a path through a
+ * dimension.
+ *
+ * A label may also be specified.  Labels are used to disambiguate
+ * multiple occurence of the same level in an intersection.
+ *
+ */
+message QualifiedLevel
+{
+  optional string label = 1;
+  required string dimension = 2;
+  optional string hierarchy = 3;
+  required string level = 4;
+}
+
+/**
+ * An intersection is a sequence of qualified levels.
+ *
+ * Intersections are ordered by lifting the ordering
+ * of levels on levels within their respective dimensions.
+ * The ordering on intersections forms a lattice with the
+ * nullary intersection being the top element.
+ */
+message Intersection
+{
+  // Only one of the following three fields should be populated
+
+  // Concrete levels making up the intersection.  Must be empty if
+  // any other field is populated.
+  repeated QualifiedLevel qualified_level = 1;
+
+  // Optional variable field to indicate that this is
+  // an intersection variable.
+  optional string variable = 2;
+
+  // Intersection of an expression.
+  optional MeasureExpr expr = 3;
+  
+  // Intersection computed from the combination of multiple intersections.
+  optional CompositeIntersection composite = 4;
+
+  // Intersection computed by restricting to a specified set of dimensions
+  optional RestrictionIntersection restriction = 5;
+}
+
+/**
+ * Compute an intersection by combining a set of intersections by the
+ * given operation.
+ */
+message CompositeIntersection
+{
+   /**
+    * Supported composition operations
+    */
+   enum Kind
+   {
+      /**
+       * Compute the intersection lattice meet on the given 
+       * intersections.
+       *
+       * The meet is the intersection in the lattice that is 
+       * larger or equal to all other intersections less than 
+       * or equal to all the intersections to be combined.
+       *
+       */
+      MEET = 1;
+
+      /**
+       * Compute the intersection lattice join on the given 
+       * intersection.
+       *
+       * The join is the intersection in the lattice that is 
+       * smaller or equal to all other intersections greater than 
+       * or equal to all the intersections to be combined.
+       */
+      JOIN = 2;
+   }
+
+   // The kind of the composite
+   required Kind kind = 1;
+
+   /**
+    * The set intersections to combine.  If the kind is MEET, then
+    * the set must be non-empty.  
+    */ 
+   repeated Intersection inter = 2 [(blox.options.set) = true];
+}
+
+/**
+ * Compute an intersection by restricting it to dimensions
+ * matching the given labels.
+ *
+ * Technically this could be computed by using a CompositeIntersection
+ * JOIN operation, but requires the user to know the bottom levels of
+ * each dimension ahead of time.
+ */
+message RestrictionIntersection 
+{
+   
+   /* The set of dimensions to keep. */
+   repeated string label = 1 [(blox.options.set) = true];
+
+   /* The intersection to restrict. */
+   required Intersection inter = 2;
+}
+
+/**
+ * Expressions substitutions allow for replacing logic
+ * that the measure service would generate for a given
+ * expression with the specified LogiQL predicate or 
+ * expression.
+ *
+ * Expression substitutions are generally used to hand
+ * optimize measure expression queries, if the logic
+ * generated by the measure service does not perform
+ * well.
+ */
+message ExprSubst
+{
+   /**
+    * The Phase determines at what point the substitution
+    * will be applied, either pre or post optimization.
+    *
+    * PRE is useful when you want to replace an expression
+    * before the optimizer might rewrite the expression
+    * into something more difficult to predictably replace.
+    */
+   enum Phase
+   {
+      PRE = 1;
+      POST = 2;
+   }
+
+  /**
+   * The replacement result of this substitution. 
+   * Exactly one of the following two alternative fields must be used,
+   * but the Predicate alternative is deprecated.  Instead,
+   * use an anonymous MetricExpr. 
+   */
+  optional Predicate pred = 1 [deprecated=true];  //deprecated: 4.3.3; removal: 4.4.1
+  optional MeasureExpr replacement_expr = 5;
+
+  required Phase phase = 2;
+
+  /** The expression to be replaced. 
+   *  Exactly one of these two alternative fields should be used,
+   *  but the string alternative is deprecated.
+   *  Instead, use the 'str' field in the MeasureExpr alternative. 
+   */
+  optional MeasureExpr expr = 3;
+  optional string expr_str = 4 [deprecated=true];  //deprecated: 4.3.3; removal: 4.4.1
+}
+
+
+// Measure querying ///////////////////////////////////////////////////
+
+/**
+ * Requests are sent to the measure-service service to either pre-install
+ * measure expression queries or to make the actual queries themselves.
+ */
+message Request
+{
+  /**
+   * Admin requests cannot be made together with other sorts of
+   * requests.  If this field is populated, fields for the other request
+   * kinds must not be.
+   */
+  optional AdminRequest admin_request = 4;
+
+  /**
+   * Specify bindings for relation parameters in this request.
+   */
+  repeated RelationBinding relation = 8;
+
+  /**
+   * As long as admin_request is not populated, any of these fields may be
+   * populated as needed. update and install requests take place before
+   * query_requests.
+   */
+  repeated QueryRequest query_request = 2;
+  optional ModelRequest model_request = 6;
+  optional InstallRequest install_request = 3;
+  repeated UpdateRequest update_request = 5;
+  optional EditabilityRequest editability_request = 12;
+
+  //// Global request configuration ///////////////////////////////// 
+
+  /**
+   * Request metric locks.
+   */
+  repeated MetricLock metric_lock = 9;
+
+  /**
+   * Request dimension locks.
+   */
+  repeated DimensionLock dimension_lock = 10;
+
+  /**
+   * Request inverses.
+   */
+  repeated InverseGroup inverse = 11;
+
+  /**
+   * Where to inject a fault (optional) during request handling.
+   */
+  optional string fault_point = 13;
+
+  /**
+   * Whether to collect profile information.
+   */
+  optional bool profile = 14;
+}
+
+message ModelRequest
+{
+}
+
+/**
+ * Administrative requests.  Administrative requests
+ * are currently only allowed if measure:admin:allowed[]
+ * in the measure workspace is set to "enabled".
+ */
+message AdminRequest
+{
+   /**
+    * Currently supported admin requests.
+    */
+   enum Kind
+   {
+      /* Restart this service instance */
+      RESTART = 1;
+      /* Obtain the workspace name for this instance. */
+      WORKSPACE = 2;
+      /* Set the configuration. */
+      CONFIGURE = 3;
+      /* Removes all logic installed by the measure service, 
+       * and restarts the instance. 
+       */
+      CLEAR_CACHED_LOGIC = 4;
+   }
+
+  /**
+   * Specifies the kind of the admin request.
+   */
+  required Kind kind = 1;
+
+  /**
+   * Configuration options to update.
+   */
+  optional string log_level = 2;
+  optional string compile_format = 3;
+  optional string code_format = 4;
+  optional bool emit_comments = 5;
+  optional bool short_names = 6;
+  optional bool query_after_fixpoint = 7;
+  optional bool fatal_warnings = 8;
+  optional bool default_value_agg = 9;
+}
+
+/**
+ * Install requests are used to pre-install measure expression
+ * queries that we know we will be making ahead of time.  Doing
+ * so we can make sure all the necessary logic is compiled and
+ * ready before the actual query is performed.
+ */
+message InstallRequest
+{
+
+  /**
+   *  Measure expressions to be installed.
+   *  Exactly one of these two alternative fields should be used,
+   *  but the string alternative is deprecated.
+   *  Instead, use the 'str' field in the MeasureExpr alternative. 
+   */
+  repeated MeasureExpr measure_expr  = 1 [(blox.options.set) = true];
+  repeated string measure_str = 3 [(blox.options.set) = true, deprecated=true];  //deprecated: 4.3.3; removal: 4.4.1
+
+  /**
+   * Measure language rules to be installed.
+   */
+  optional string rules = 4;
+
+  /**
+   * Apply a limited set of rewrites.
+   * FIX? generalize to sequence of rewrites
+   */
+  optional bool limited_rewrites = 5;
+}
+
+/**
+ * Query requests return data formatted into columns.
+ *
+ */
+message QueryRequest
+{
+  /**
+   * The name of the "report" to construct.  The name
+   * has no effect on the query and, if supplied, is only
+   * used to provide an optional name in the returned report.
+   */
+  optional string report_name = 1;
+
+  /**
+   * If set, no more than this many rows will be returned.
+   *
+   * Currently only works with 3.x.
+   */
+  optional int64 row_limit = 6;
+
+  /**
+   * Should the response contain a column for row indices?
+   *
+   * Row index columns are only important if there is more
+   * than one measure expression in the request and they are
+   * known to be defined at different positions, resulting in
+   * a sparse result.  For example, you could query both
+   * Sales and Returns in the same report.  However, not
+   * all positions with Sales may have Returns.  Therefore,
+   * there will be "holes" and the only way to align the
+   * returned columns is by using the row index.
+   */
+  optional bool return_row_numbers = 3 [default = true];
+
+  /**
+   * Optionally request information about the "keys" of this
+   * report. In this case, the "keys" are the members of levels
+   * of the intersection.  Key requests make it possible to make
+   * attribute queries against these members that are not
+   * straightforwardly expressed as measure expression queries.
+   *
+   * It is allowed to make multiple request for the same
+   * "key" level, and to request "keys" for levels above those
+   * found in the intersection.
+   */
+  repeated KeyRequest key = 4;
+
+  /**
+   * The measure expressions to query.  There must be
+   * at least one.  All measure expressions must be at
+   * the same intersection. 
+   * Exactly one of these two alternative fields should be used,
+   * but the string alternative is deprecated.
+   * Instead, use the 'str' field in the MeasureExpr alternative. 
+   */
+  repeated MeasureExpr measure = 5;
+  repeated string measure_str = 7 [deprecated=true];  //deprecated: 4.3.3; removal: 4.4.1
+
+  /**
+   * Apply a limited set of rewrites.
+   */
+  optional bool limited_rewrites = 8;
+
+  /**
+   * Should a default value be explicitly returned rather than materializing
+   * the default valued rows?
+   *
+   * This default on this option will be switched to "true" in the 4.4.1 
+   * release, and the option will be removed in the 4.4.3 release.
+   */
+  optional bool default_values = 9 [default = false]; 
+
+  /**
+   * Should the new binary decimal column format be used? 
+   *
+   * The primary motivation for enabling this flag is that (a) it will enable
+   * significantly faster turnaround on decimal data in the measure service 
+   * and (b) it is expected that less data will need to be sent to the client
+   * (but this still needs to be verified empirically).
+   *
+   * Assuming no performance regressions are found with its use, the default
+   * will be switched to "true" in the 4.4.1 release, and the field will 
+   * be removed altogether in 4.4.3.
+   */
+  optional bool binary_decimal_columns = 10 [default = false];
+}
+
+/**
+ * KeyRequests allow the client to request attributes from
+ * the keyspace of the queried measures
+ */
+message KeyRequest
+{
+  /**
+   * Specifies the level in the report's intersection to include
+   */
+  required QualifiedLevel qualified_level = 1;
+  /**
+   * The name of the attribute to use as a key.
+   */
+  required string attribute = 2;
+}
+
+/**
+ * A RelationBinding gives a name to a CubiQL expression
+ * in the scope of a Request.  The bound expression can 
+ * then be referred to from the request's queries, via a ParamExpr.
+ *
+ * RelationBindings are somewhat like explicit substitutions to
+ * close the measure expressions in a query.
+ *
+ * The intersections specified with the param and relation fields
+ * may have their levels in different order; they are matched by label. 
+ */
+message RelationBinding
+{
+   /**
+    * The name of the parameter and its signature.
+    */
+   required ParamExpr param = 1;
+
+   /**
+    * A relation to bind to the parameter expression.
+    */
+   required MeasureExpr expr = 3;
+}
+
+/**
+ * A Response message is sent by measure-service service in response
+ * to a Request message.
+ *
+ * For install requests, the message will
+ * be empty unless there was an error during measure expression
+ * installation, in which case the problem field will be populated.
+ *
+ * For query requests, the Response will contain a populated
+ * report field. 
+ *
+ * For model query requests, the Response will contain a populated
+ * model field.
+ *
+ * Otherwise, if there was an error, the problem field will be
+ * populated.
+ *
+ */
+message Response
+{
+  /**
+   * Exactly one of these may be populated.
+   */
+  repeated Report report = 1;
+  optional AdminResponse admin = 5;
+  optional MeasureModel model = 3;
+  optional EditabilityResponse editability = 6;
+
+  optional LiteralExpr profile = 7;
+  repeated Problem problem = 4;
+}
+
+/**
+ * AdminReponse messages hold data relevant to a
+ * successful AdminRequest
+ */
+message AdminResponse
+{
+  /* Set in response to a WORKSPACE AdminRequest. */
+  optional string workspace = 1;
+}
+
+/**
+ * A report carries the results of a query request. 
+ *
+ * It contains one or more Columns, depending on the query made.
+ * Query responses are column-oriented because that leads to more
+ * space-efficient messages than if we used a row-oriented encoding.
+ */
+message Report
+{
+   /* If the corresponding QueryRequest had a report_name field,
+    * this name will match.
+    */
+   optional string name = 2;
+
+   repeated Column report_column = 1;
+}
+
+/**
+ * Columns contain data returned as from measure expression queries.
+ */
+message Column
+{
+
+  /**
+   * Exactly one of these must be populated.
+   */
+  optional BoolColumn bool_column = 1;
+  optional IntColumn int_column = 2;
+  optional FloatColumn float_column = 3;
+  optional StringColumn string_column = 4;
+  optional DecimalColumn decimal_column = 5;
+}
+
+/**
+ * Message for representing boolean valued columns
+ *
+ * Note that for sparse responses, the index into the
+ * value field does not necessarily correspond to the
+ * row number.
+ */
+message BoolColumn { 
+   /* If this field is set, it will contain the default value any rows
+    * not returned in this column.
+    *
+    * Currently, this field is only used for reporting and ignored if
+    * this column is used as part of a literal expression.
+    */
+   optional bool defaultValue = 2;
+
+   repeated bool value = 1 [packed = true]; 
+}
+
+/**
+ * Message for representing integer valued columns
+ *
+ * Note that for sparse responses, the index into the
+ * value field does not necessarily correspond to the
+ * row number.
+ */
+message IntColumn { 
+   /* If this field is set, it will contain the default value any rows
+    * not returned in this column.
+    *
+    * Currently, this field is only used for reporting and ignored if
+    * this column is used as part of a literal expression.
+    */
+   optional int64 defaultValue = 2;
+
+   repeated int64 value = 1 [packed = true];
+}
+
+/**
+ * Message for representing float valued columns
+ *
+ * Note that for sparse responses, the index into the
+ * value field does not necessarily correspond to the
+ * row number.
+ */
+message FloatColumn { 
+   /* If this field is set, it will contain the default value any rows
+    * not returned in this column.
+    *
+    * Currently, this field is only used for reporting and ignored if
+    * this column is used as part of a literal expression.
+    */
+   optional double defaultValue = 2;
+   
+   repeated double value = 1 [packed = true]; 
+}
+
+/**
+ * Message for representing string valued columns
+ *
+ * Note that for sparse responses, the index into the
+ * value field does not necessarily correspond to the
+ * row number.
+ */
+message StringColumn { 
+   /* If this field is set, it will contain the default value any rows
+    * not returned in this column.
+    *
+    * Currently, this field is only used for reporting and ignored if
+    * this column is used as part of a literal expression.
+    */
+   optional string defaultValue = 2;
+
+   repeated string value = 1; 
+}
+
+/**
+ * Message for representing decimal valued columns
+ *
+ * Note that for sparse responses, the index into the
+ * value field does not necessarily correspond to the
+ * row number.
+ */
+message DecimalColumn {
+
+  /* If the "binary_decimal_columns" field is false or unset the decimal
+   * values will be returned in these two fields. 
+   *
+   * Using the string version of the column fields is deprecated as of 4.4.0
+   * and will be removed in 4.4.3.
+   */ 
+
+  /* If this field is set, it will contain the default value any rows
+   * not returned in this column.
+   *
+   * Currently, this field is only used for reporting and ignored if
+   * this column is used as part of a literal expression.
+   */
+  optional string defaultValue = 2;
+  repeated string value = 1; 
+
+  /* If the "binary_decimal_columns" field is true, values will be
+   * returned in the following fields.
+   *
+   * A decimal value can be reconstituted by 
+   *
+   * (-1 * negative) * ((integral * 10^18) + fraction) * 10^-18)
+   *
+   */
+
+  /* If these three fields are set, it will contain the default value any rows
+   * not returned in this column.
+   *
+   * Currently, these fields are only used for reporting and ignored if
+   * this column is used as part of a literal expression.
+   */
+  optional bool   negativeDefault = 3;
+  optional uint64 integralDefault = 4;
+  optional uint64 fractionDefault = 5;
+
+  repeated bool   negative = 6       [packed = true];
+  repeated uint64 integral_digit = 7 [packed = true];
+  repeated uint64 fraction_digit = 8 [packed = true];
+
+}
+
+
+// Measure expressions ////////////////////////////////////////////////
+
+/**
+ * Annotations are an experimental means of providing additional 
+ * meta-data for a measure expression.  
+ * Currently supported annotations:
+ *
+ *  - 'functional' - values is required and must be a BoolColumn containing exactly one value.
+ *
+ *  - 'defaultValue' - values is required and must be a Column containing exactly one value.
+ *
+ *  - 'inlined' - values is required and must be a BoolColumn containing exactly one value.
+ *     Advises whether the predicate implementing the expression should be an inlined (derived-only) IDB.
+ *     false [default]: if possible, implement the expression as a materialized (maintained) IDB; 
+ *     true: if possible, treat the predicate as a derived-only IDB,
+ *           that is, inline the predicate's body at all its reference sites.
+ *     In general, CubiQL expressions are implemented as inlined (derived-only) IDBs,
+ *     but an expression that defines a metric is materialized, as a rule.
+ *     This annotation allows to change this metric-specific arrangement back to inlining.
+ *     When the defining expression of a metric enjoys the default value derived from the
+ *     default values of predicate-defined metrics participating in the expression,
+ *     materializing the metric makes it more efficient, by making use of the default value.
+ */
+message Annotation {
+  required string name = 1;
+  optional Column values = 2;
+}
+
+
+/**
+ * MeasureExprs are the fundamental building block of measure
+ * service queries.  All queries are constructed from them.
+ */
+message MeasureExpr
+{
+   /**
+    * Enumerate the kind of measure expressions that exist.
+    */
+   enum Kind
+   {
+      METRIC = 1;
+      AGGREGATION = 2;
+      FILTER = 3;
+      COMPOSITE = 4;
+      ATTRIBUTE = 5;
+      OP = 7;
+      WIDEN = 8;
+      DICE = 9;
+      DROP = 10;
+      DIFFERENCE = 11;
+      DEMOTE = 13;
+      PREV = 14;
+      OVERRIDE = 16;
+      DELTA = 17;
+      PARAM = 18;
+      SPLIT = 19;
+      RELABEL = 20;
+      VARIABLE = 21;
+      ABSTRACTION = 22;
+      APPLICATION = 23;
+      LITERAL = 24; 
+      CAST = 25;
+      PROMOTE = 26;
+   }
+
+   /**
+    * Specify what sort of measure expression this message
+    * represents.
+    *
+    * Required if the str field is not set.
+    */
+   optional Kind kind = 1;
+
+   /**
+    * Optionally, the expression can be defined by a string.
+    */
+   optional string str = 32;
+
+   /**
+    * Disjoint sum of all the possible measure expression
+    * payloads.
+    *
+    * Exactly one of these fields must be populated.
+    */
+   optional MetricExpr metric = 2;
+   optional AggExpr aggregation = 3;
+   optional FilterExpr filter = 4;
+   optional CompositeExpr composite = 5;
+   optional AttributeExpr attribute = 6;
+   optional OpExpr op = 8;
+   optional WidenExpr widen = 9;
+   optional DiceExpr dice = 10;
+   optional DropExpr drop = 11;
+   optional DifferenceExpr difference = 12;
+   optional DemoteExpr demote = 14;
+   optional PromoteExpr promote = 33;
+   optional PrevExpr prev = 15;
+   optional OverrideExpr override = 17;
+   optional DeltaExpr delta = 18;
+   optional ParamExpr param = 19;
+   optional SplitExpr split = 20;
+   optional RelabelExpr relabel = 21;
+   optional VarExpr variable = 22;
+   optional AbsExpr abstraction = 23;
+   optional AppExpr application = 24;
+   optional LiteralExpr literal = 25;
+   optional CastExpr cast = 26;
+
+   /**
+    * Optional location added when parsed from another format
+    */
+   optional lb.web.measure.common.Region region = 30;
+
+   /**
+    * Any annotations associated with this expression.
+    *
+    * EXPERIMENTAL!!!
+    */
+   repeated Annotation annotation = 31;
+}
+
+/**
+ * Variable expressions are bound by abstraction expressions
+ */
+message VarExpr
+{
+   required string name = 1;
+}
+
+/**
+ * An abstraction expression allows abstracting over intersections
+ * and expressions in a measure expression
+ */
+message AbsExpr
+{
+   message InterArgument
+   {
+      required string name = 1;
+      // Optional default intersection argument
+      optional Intersection inter = 2;
+   }
+
+   message ExprArgument
+   {
+      required string name = 1;
+      // Optional default expression argument
+      optional MeasureExpr expr = 2;
+   }
+
+   // Intersection arguments.  These arguments
+   // are in scope in expr_args as well as
+   // the body.
+   repeated InterArgument inter_arg = 1;
+
+   // Expression arguments.  These arguments are
+   // in scope of the body.
+   repeated ExprArgument expr_arg = 2;
+
+   // The abstraction body.
+   required MeasureExpr body = 3;
+}
+
+/**
+ * An application expression allows instantiating an abstraction
+ * expression.
+ */
+message AppExpr
+{
+   /* If the argument name is omitted, the argument is
+    * assumed to correspond to the argument at that position
+    * in the AbsExpr.  The unnamed arguments must form
+    * a prefix of the overall arguments.  That is you cannot
+    * have any named arguments appearing before unnamed arguments.
+    */
+
+   message InterArgument
+   {
+      optional string name = 1;
+      required Intersection inter = 2;
+   }
+
+   message ExprArgument
+   {
+      optional string name = 1;
+      required MeasureExpr expr = 2;
+   }
+
+   // Abstraction to be instantiated
+   required MeasureExpr abstraction = 1;
+
+   // Intersection arguments
+   repeated InterArgument inter_arg = 2;
+   // Expression arguments
+   repeated ExprArgument expr_arg = 3;
+}
+
+/* A literal expression specifies a literal measure, that is, a measure given by
+   enumerating a set of positions along with any associated values.  
+   The explicit intersection supplied within the literal's signature allows the measure
+   service to deal with column-ordering issues, instead of requiring clients to do so.
+   The order of levels in the intersection determines the literal's key order. 
+*/
+message LiteralExpr
+{
+  /* The kind determines whether this is a special case of the position-only metric
+     that contains a single empty tuple. (This case is not representable using columns.)
+  */
+  enum Kind {
+    GENERAL = 1;
+    TOP_SINGLETON = 2;  //at this kind, the column fields should be absent
+  }
+  optional Kind kind = 1 [default = GENERAL];
+
+  required BaseSignature signature = 2; 
+
+  /* Columns are assumed to be in the order induced by intersection, type of the signature.
+     To represent the relation with no data (the empty relation) it is permissible
+     to either supply the full set of empty columns corresponding to the signature, 
+     or to omit the column fields completely.
+  */
+  repeated Column column = 3;
+}
+
+
+/**
+ * Widen expression can be used to push a measure expression from
+ * a more general intersection to a more specific one.  For example,
+ * it could be used to take an expression at the intersection
+ * (Location.region, Time.week) to (Location.store, Time.day).  Or
+ * from (Time.year) to (Time.month, Product.sku), etc. The result
+ * will be at the intersection that is the greatest lower bound of
+ * the supplied expression and the supplied intersection.
+ */
+message WidenExpr
+{
+  required MeasureExpr expr = 1;
+  required Intersection inter = 2;
+}
+
+/**
+ * Drop expressions drop the values from a measure query to
+ * produce a position-only query.  This is useful if you would like
+ * to compute over keys without having to worry about values.
+ */
+message DropExpr
+{
+  required MeasureExpr expr = 1;
+}
+
+/**
+ * Override expressions return values for the positions in the list of
+ * expressions prioritizing those values coming from expressions
+ * earlier in the list.  It is similar to Alloy's relational
+ * override operator, but n-ary.
+ *
+ * Overrides cannot be position-only, however this is not a significant
+ * limitation, as they would be effectively equivalent to the union
+ * composite in that case.
+ *
+ */
+message OverrideExpr
+{
+  /** At least one expr must be supplied. */
+  repeated MeasureExpr expr = 1;
+}
+
+/**
+ * Prev expressions are temporal operator, that return the
+ * result of the expression as it was in the previous transaction.
+ *
+ * Currently only works on expressions that will be materialized.
+ */
+message PrevExpr
+{
+  required MeasureExpr expr = 1;
+}
+
+/**
+ * Delta expressions let you query the assertions to any expression
+ * or the retractions to a materialized expression.
+ *
+ * Asking for the assertions to a non-materialized expression is
+ * effectively a no-op, as all values will be new.  As such is also
+ * not possible to ask for the retractions of a non-materialized
+ * expression.
+ */
+message DeltaExpr
+{
+
+   /**
+    * Kind of the delta to query
+    */
+   enum Kind
+   {
+      ASSERTION = 1;
+      RETRACTION = 2;
+   }
+
+   required Kind kind = 1;
+   required MeasureExpr expr = 2;
+}
+
+/**
+ * Demote expressions take a position-only measure expression and
+ * convert it to one with a value by making one of the dimensions
+ * of its intersection its value.  As such, it may produce a
+ * set-valued measure expression
+ *
+ * Promote and demote are almost inverses.  Promotion of a
+ * singleton valued expression followed by a demotion will yield a
+ * set valued expresison.
+ */
+message DemoteExpr
+{
+  required MeasureExpr expr = 1;
+
+  // Exactly one of label or dimension is required.
+  optional string dimension = 2;  //May deprecate in the future
+  optional string label = 3;
+}
+
+/**
+ * Promote expressions take a measure expression with a value
+ * (either a singleton or a set) and converts the values of the
+ * expression to be a dimension of the expression's intersection
+ * with the given label.  The type of the expression's value must
+ * correspond unambigiously to one of the levels defined in the
+ * model.
+ *
+ * Demote and promote are almost inverses.  Promotion of a
+ * singleton valued expression followed by a demotion will yield a
+ * set valued expresison.
+ */
+message PromoteExpr
+{
+  required MeasureExpr expr = 1;
+  /* If a label is not specified, the dimension name of level corresponding
+   * to the type of the expression will be used as the label. */
+  optional string label = 2;
+}
+
+/**
+ * Difference expressions remove those positions and values in
+ * the left expression that are contained in the right expression.
+ * If the right expression is position-only, then positions in the
+ * left expression are removed regardless of value.
+ */
+message DifferenceExpr
+{
+  required MeasureExpr left = 1;
+  required MeasureExpr right = 2;
+}
+
+/**
+ * Dice expression returns the subset of positions in supplied
+ * measure expression that map to positions in the supplied dicer
+ * expressions.
+ */
+message DiceExpr
+{
+  /**
+   * The measure expression to subset.
+   */
+  required MeasureExpr expr = 1;
+
+  /**
+   * The set of dicer expressions to specify which positions to
+   * keep from expr.
+   *
+   * There must be at least one.
+   */
+  repeated MeasureExpr dicer = 2 [(blox.options.set) = true];
+
+  /**
+   * If undefined or false, select those positions in expr that
+   * are in all dicer expressions. If true, a position is kept
+   * if it can be found in any one of the dicer expressions.
+   */
+  optional bool is_disjunction = 3;
+}
+
+/**
+ * Op messages are used to specify operations on values.
+ * We provide a fixed set of predefined operations,
+ * as well as the means to refer to a named operation
+ * specified as part of the model.
+ */
+message Op
+{
+   enum Kind
+   {
+     /**
+      * Unary negation
+      */
+     NEGATE = 1;
+
+     /**
+      * Unary square root
+      */
+     SQRT = 2;
+
+     /**
+      * Unary natural logarithm
+      */
+     LOG = 4;
+
+     /**
+      * Unary operator converting strings to uppercase
+      */
+     TO_UPPER = 5;
+
+     /**
+      * Unary operator converting strings to lowercase
+      */
+     TO_LOWER = 6;
+     
+     /**
+      * Unary operator for obtaining string length. 
+      */
+     LENGTH = 39;
+
+     /**
+      * Binary operator for adding two numbers
+      */
+     ADD = 7;
+     
+     /**
+      * Binary operator for computing the maximum two numbers
+      */
+     MAX = 37;
+
+     /**
+      * Binary operator for subtracting two numbers
+      */
+     SUBTRACT = 8;
+
+     /**
+      * Binary operator for multiplying two numbers
+      */
+     MULTIPLY = 9;
+
+     /**
+      * Binary operator for dividing two numbers
+      */
+     DIVIDE = 10;
+     
+     /*
+      * Unary operator for computing floor of numbers.
+      */
+     FLOOR = 35;
+
+     /**
+      * Unary operator for computing ceiling of numbers
+      */
+     CEIL = 36;
+
+     /**
+      * Binary exponent function
+      */
+     POW = 24;
+
+     /**
+      * Binary operator for the modulus for INTEGERs
+      */
+     MOD = 32;
+
+     /**
+      * Unary operator for computing absolute values
+      */
+     ABS = 33;
+
+     /**
+      * An operator defined as part of the model
+      */
+     NAMED = 31;
+   }
+   required Kind kind = 1;
+
+   /**
+    * If kind is NAMED, this must be populated with
+    * the name of the operator to use.
+    */
+   optional string name = 2;
+}
+
+/**
+ * Operator expressions transform the value of the
+ * given measure expression.  The number of measure
+ * expression arguments that must be supplied depends
+ * on the choice of operator.
+ *
+ * The intersection of resulting expression is defined
+ * to be at the greatest lower bound of all the arguments.
+ */
+message OpExpr
+{
+   /**
+    * The operator to use.
+    */
+   required Op op = 1;
+
+   /**
+    * The measure expression to transform.
+    */
+   repeated MeasureExpr expr = 2;
+}
+
+/***
+ * Convert values of a measure from one type to another.
+ * Currently allowed conversions:
+ * string  ~> int
+ * string  ~> float
+ * string  ~> decimal
+ * string  ~> boolean
+ * decimal ~> float
+ * decimal ~> string
+ * float   ~> decimal
+ * float   ~> int
+ * float   ~> string
+ * int     ~> decimal
+ * int     ~> float
+ * int     ~> string
+ * boolean ~> string
+ * type    ~> named   where named is implemented by type
+ * named   ~> type    where named is implemented by type
+ *
+ */
+message CastExpr
+{
+  /**
+   * The expression to convert.
+   */
+  required MeasureExpr expr = 1;
+
+  /**
+   * The type to convert to.
+   */
+  required Type type = 2;
+}
+
+
+/***
+ * Composite expressions are used to combine together many
+ * measure expressions by unioning or intersecting them
+ * together.  All the measure expressions must be at the
+ * same intersection.
+ */
+message CompositeExpr
+{
+   /**
+    * Supported composition operations
+    */
+   enum Kind
+   {
+      /**
+       * Only keep those positions and values found in all
+       * measure expressions
+       */
+      INTERSECTION = 1;
+
+      /***
+       * Collect all positions and values found in all
+       * measure expressions.
+       * Produces a set-valued measure, to accommodate
+       * the possibility of different values for the
+       * same position being present in the measures. 
+       */
+      UNION = 2;
+   }
+
+   required Kind kind = 1;
+
+   /**
+    * The measure expressions to combine.
+    */
+   repeated MeasureExpr expr = 2 [(blox.options.set) = true];
+}
+
+/**
+ * An attribute expression lifts an attribute to a unary metric whose
+ * intersection consists of the specified level.  So, if the
+ * "id" attribute is selected from the level Product.sku, the
+ * attribute expression will have the intersection of {Product.sku}.
+ */
+message AttributeExpr
+{
+   /**
+    * The level to select the attribute from.
+    */
+   required QualifiedLevel qualified_level = 1;
+
+   /**
+    * Optional named attribute to query.  In
+    * the future this field will most likely be
+    * renamed to "name"
+    */
+   optional string attribute = 2;
+}
+
+/**
+ * A named and typed reference to a measure that is bound
+ * to this name elsewhere (in the query request or in a dialogue).
+ * Currently, a ParamExpr must be either be position-only or singleton;
+ * set-valued parameter expressions are not supported.
+ * The order of levels in the parameter's intersection 
+ * determines the parameter's key order. 
+ */
+message ParamExpr
+{
+   required string name = 1;
+
+   required BaseSignature signature = 4; 
+}
+
+/**
+ * Obtain the contents of a metric.
+ */
+message MetricExpr
+{
+   /**
+    * Optional named metric to query.
+    */
+   optional string name = 1;
+
+   /**
+    * "anonymous" metric to query.
+    */
+   optional Metric metric = 2;
+}
+
+/**
+ * Filter expressions are used to filter the values of
+ * the given measure expression.
+ */
+message FilterExpr
+{
+   /**
+    * Measure expression to be filtered.
+    */
+   required MeasureExpr expr = 1;
+
+   /**
+    * The set of predicates used to filter the values of expr.
+    *
+    * There must be at least one.
+    */
+   repeated Comparison comparison = 2 [(blox.options.set) = true];
+
+   /**
+    * If undefined or false, the values in expr must satisfy all
+    * predicates; if set to true, the values will be kept if
+    * they satisfy just one comparison.
+    */
+   optional bool is_disjunction = 3;
+}
+
+/**
+ * Comparison is a unary predicate over values.
+ */
+message Comparison
+{
+   enum Kind
+   {
+      /**
+       * The value must be equal to the given term.
+       */
+      EQUALS = 1;
+
+      /**
+       * The value must not be equal to the given term.
+       */
+      NOT_EQUALS = 2;
+
+      /**
+       * The value must be less than the given term.
+       */
+      LESS_THAN = 3;
+      /**
+       * The value must be less than or equal to the given term.
+       */
+      LESS_OR_EQUALS = 4;
+
+      /**
+       * The value must be greater than the given term.
+       */
+      GREATER_THAN = 5;
+
+      /**
+       * The value must be greater than or equal to the given term.
+       */
+      GREATER_OR_EQUALS = 6;
+
+      /**
+       * The value matches the POSIX extended regular expression.
+       * Only applies to expressions with string values.
+       */
+      MATCH = 8;
+   }
+
+   required Kind op = 1;
+
+   /**
+    * A measure to compare values against, must be set.
+    */
+   required MeasureExpr expr = 2;
+}
+
+/**
+ * Aggregation expressions are used to combine together values at
+ * positions in the supplied measure expression mapping them into
+ * positions higher in the intersection lattice.  The groupings
+ * specified as part of the aggregation expression are used to
+ * specify the path that should be taken in the intersection
+ * lattice.
+ */
+message AggExpr
+{
+   /**
+    * The methods available for combining values.
+    */
+   message Method
+   {
+     enum Primitive
+     {
+       /**
+        * Collect does not transform the values in any way, it
+        * just groups them all together as a set.  Therefore,
+        * while there may be more than one value per position
+        * in the resulting measure expression, there will only
+        * be one of each.
+        */
+       COLLECT = 2;
+
+       /**
+        * Take the unique, unambiguous value that occurs at all positions,
+        * if any.
+        *
+        * This is a synthetic aggregation.
+        */
+       AMBIG = 3;
+
+       /***
+        * Combine the values together by totalling them together.
+        * Only works for numeric values.
+        */
+       TOTAL = 4;
+
+       /***
+        * Combine the values together by selecting the minimum.
+        */
+       MIN = 6;
+
+       /***
+        * Combine the values together by selecting the maximum.
+        */
+       MAX = 7;
+
+       /**
+        * Combine the values together by replacing them with the
+        * their count.
+        */
+       COUNT = 8;
+
+       /**
+        * Return the mode of the values.
+        *
+        * This is a synthetic aggregation.
+        */
+       MODE = 17;
+
+       /**
+        * Combine the values together by replacing them with
+        * the count of the distinct values.
+        *
+        * This is a synthetic aggregation.
+        */
+       COUNT_DISTINCT = 18;
+
+       /**
+        * Combines values together into a new dimension in the
+        * intersection, making the values their frequency.
+        */
+       HISTOGRAM = 19;
+
+       /**
+        * Sorts of the values by introducing a use of the primitive
+        * Int dimension.
+        */
+       SORT = 20;
+
+       /**
+        * Combine the values together by computing the average.
+        * Only works for numeric values.
+        *
+        * This is a synthetic aggregation.
+        */
+       AVERAGE = 21;
+
+       /**
+        * Sorts the keys, consistent with the aggregation level.
+        */
+       KEY_SORT = 22;
+     }
+
+     /**
+      * A composite component specifies that a given primitive
+      * aggregation method be used when aggregating along the given
+      * dimension.
+      */
+     message CompositeComponent
+     {
+       optional string label = 3;
+       required string dimension = 1;
+       optional string hierarchy = 4;
+       required Primitive primitive = 2;
+     }
+
+     /**
+      * Exactly one of the four following fields must be populated.
+      */
+
+     /**
+      * A primitive aggregation method.
+      */
+     optional Primitive primitive = 1;
+
+     /**
+      * A named aggregation method.
+      */
+     optional string named = 2;
+
+     /**
+      * Components of a composite aggregation.
+      *
+      * All composite aggregations are synthetic.
+      */
+     repeated CompositeComponent composite = 3;
+
+     /**
+      * A header sort aggregation, indicated by the key that should be sorted
+      * floating after the value.  The key must be an entity with a refmode.
+      * Note: A header sort is different form the primitive SORT method.
+      */
+     optional QualifiedLevel header_sort_level = 4;
+   }
+
+
+   /**
+    * Grouping operations
+    */
+   message Grouping
+   {
+      enum Kind
+      {
+        option allow_alias = true;
+        /**
+         * Combine all members of the given dimension, eliminating that
+         * dimension from the resulting intersection.
+         */
+        ALL = 2;
+        /**
+         * Roll up values to the level in the specified dimension.
+         */
+        MAP = 3;
+
+        /**
+         * Multi-dimensional grouping/slides
+         */
+        MULTI_MAP = 4;  //deprecated: 4.3.12;  removal: 4.4.1
+        SLIDE = 4;
+      }
+
+      required Kind kind = 1;
+
+      /** The four fields 'label', 'dimension', 'hierarchy' and 'level'
+       *  are only meaningful with ALL or MAP.
+       *  The pair of 'label', 'dimension' constitute a reference to an axis in the
+       *  expression being aggregated, therefore: 
+       *  - label and dimension are optional, but at least one must be used;
+       *  - when label is used, it has to refer to a label in the expression;
+       *  - when label and dimension are both used,
+       *      dimension must be the dimension at the label in the expression; 
+       *  - when only dimension is used, there must be an unlabeled dimension
+       *      in the expression; its name is, effectively, the label. 
+       * For the other two fields,
+       *  - with ALL, level and hierarchy  are prohibited; 
+       *  - with MAP, level is required and hierarchy is optional.
+       * When present, the hierarchy field specifies the aggregation rollup path
+       * through intermediate levels to be used, in case there are multiple possibilities.
+       */ 
+      optional string label = 2;
+      optional string dimension = 3;
+      optional string hierarchy = 4;
+      optional string level = 5;
+
+      /**
+       * Must be populated if kind is MULTI_MAP.
+       */
+      optional string multi_dim_map = 6;
+   }
+
+   /**
+    * Aggregation method to use.
+    */
+   required Method method = 1;
+
+   /**
+    * The measure expression to aggregate.
+    */
+   required MeasureExpr expr = 2;
+
+   /** The aggregating target may be specified either via grouping operations,
+     or by giving the intersection of the target. 
+     Absence of either of the following fields is understood as empty grouping. 
+   */
+
+   /**
+    * The set of grouping operations.  There can
+    * be at most one grouping per dimension in the
+    * intersection of expr.
+    */
+   repeated Grouping grouping = 3 [(blox.options.set) = true];
+
+   /**
+    * The intersection of the aggregating target. 
+    * Note that this will never make use of multidimensional maps.
+    */
+   optional Intersection inter = 4;
+}
+
+/**
+ * A label map entry is use to specify a source and target
+ * label for the split and relabeling expressions.
+ */
+message LabelMap
+{
+  required string source = 1;
+  required string target = 2;
+}
+
+/**
+ *  Splits allow for duplicating a label in the intersection
+ *  of an expression.  For example, for some expression 'e'
+ *  at intersection
+ *
+ *    (Produt:sku, Location:store, Chronological:week)
+ *
+ *  a split on Chronological to Seasonal would yield a new
+ *  expression at the intersection
+ *
+ *    (Produt:sku, Location:store, Chronological:week, Seasonal:week)
+ *
+ *  Note this is different than widening with Seasonal:week as that
+ *  would take the product of all the positions in the expression
+ *  with all the weeks that exist.  Whereas splitting will yield the
+ *  same weeks in Seasonal as in Chronlogical, thus the cardinality
+ *  will be unchanged.  Splitting does not affect the values, if any,
+ *  of the expression, either.
+ */
+message SplitExpr
+{
+  /**
+   * Mappings to specify the splitting.
+   * The mapping does not need to be functional.
+   * It may be empty, in which case the SplitExpr is a no-op.
+   */
+  repeated LabelMap map = 1;
+  required MeasureExpr expr = 2;
+}
+
+/**
+ * Relabeling allows changing the name of labels in an intersection.
+ * For example, for some expression 'e' at intersection
+ *
+ *    (Produt:sku, Location:store, Chronological:week)
+ *
+ * if we specify that Location be relabeled to Geographic, the
+ * resulting expression will be at the intersection
+ *
+ *    (Produt:sku, Geographic:store, Chronological:week)
+ *
+ * This doesn't change the actual positions or value in the expression,
+ * just how they labeled.
+ *
+ */
+message RelabelExpr
+{
+  /**
+   * Mapping to specify the renaming.  The mapping must be functional.
+   * It may be empty, in which case the RelabelExpr is a no-op.   
+   */
+  repeated LabelMap map = 1;
+  required MeasureExpr expr = 2;
+}
+
+
+// Updates //////////////////////////////////////////////////////////
+
+/**
+ * Message for encapsulating the notion of a metric at a given intersection.  
+ */
+message MetricInter
+{
+  required string metric = 1;
+  required Intersection inter = 2;
+}
+
+/**
+ * Editability requests provide information about which visible metrics can be 
+ * still be edited given a set of current edits.  That is, if UpdateRequests
+ * were sent for each of the given metrics at the specified intersections, 
+ * we want to determine which other visible metrics we could also send an 
+ * UpdateRequest and have them all succeed.
+ */
+message EditabilityRequest
+{
+  /**
+   * The set of metric @ intersection that have been edited.
+   */
+  repeated MetricInter edited = 1 [(blox.options.set) = true];
+
+  /**
+   * The set of metric @ intersection that are visible.  Should
+   * be disjoint from edited.
+   */
+  repeated MetricInter visible = 2 [(blox.options.set) = true];
+}
+
+message EditabilityResponse
+{
+  /**
+   * Are the current edits even consistent, such that an edit is possible?
+   * That is, if UpdateRequests were sent for the set of metrics and 
+   * intersections specified, in the "edited" field of the request, could it
+   * succeed?
+   */ 
+  required bool consistent = 1;
+
+  /**
+   * The set of metric @ intersections that can still be edited.  That is,
+   * if we created an UpdateRequests for all of the metrics an intersections
+   * specified in the "edited" field of the request, these are the visible 
+   * metrics and intersection that could also be used in an UpdateRequest and 
+   * have the result succeed.  
+   *
+   * Note, that this set is a disjunction not a conjunction.  So updates are 
+   * only guaranteed to succeed if one element in this set is chosen to be 
+   * added to the set of edits.  At that point, another EditabilityRequest 
+   * would need to be sent to determine whether any the remaining visible 
+   * metrics could also be edited.
+   * 
+   * Will be empty if consistent is false;
+   */
+  repeated MetricInter editable = 2 [(blox.options.set) = true];
+}
+
+/*
+ * A request to update a metric with data from a given source.
+ */
+message UpdateRequest
+{
+  required UpdateExpr expr = 1;
+
+  /* Tuples that will be used as an input to the update.
+   *
+   * Use a ParamExpr coupled with a RelationBinding in the enclosing Request 
+   * to send ephemeral literal data.  A LiteralExpr could be used as well, 
+   * but in this case the data would be installed as logic.  Unless these 
+   * data are used more than once, this would likely be undesirable.
+   *
+   * In the future, we may move 'input' into UpdateExpr directly.
+   */
+  required MeasureExpr input = 3;
+}
+
+/**
+ * A MetricLock is defined for the given metric by
+ * a position-only CubiQL expression which evaluates to
+ * those positions of the metric whose values should not
+ * change. Sometimes depending on the edits involved, a
+ * MetricLock may be promoted to an identity edit, in
+ * order to preserve the values at the given positions.
+ *
+ * However, it is sometimes desirable that a MetricLocks
+ * not be converted to an edit, perhaps for performance
+ * reasons.  If so, the MetricLock can be marked as
+ * not convertible.  However, such locks will always
+ * be projected to the base intersection of the metric.
+ * This is required because we would otherwise not be 
+ * able to correctly handle edits underneath them.
+ */
+message MetricLock
+{
+  required string metric = 1;
+
+  /**
+   * Positions that should be locked in the metric. 
+   * Exactly one of these two alternative fields should be used,
+   * but the string alternative is deprecated.
+   * Instead, use the 'str' field in the MeasureExpr alternative. 
+   */
+  optional MeasureExpr expr = 2;
+  optional string expr_str = 3 [deprecated=true];  //deprecated: 4.3.3; removal: 4.4.1
+
+  /* Can this lock be converted to an edit? */
+  optional bool convertible = 4 [default = true];
+}
+
+/**
+ * A DimensionLock is defined for a labeled dimension by
+ * a position-only CubiQL expression which evaluates to
+ * those positions of the dimension that should not change.
+ *
+ * Because of the global nature of a DimensionLock, they
+ * currently never affect the choice of inverse and are always
+ * projected to the base intersection of a dimension.
+ *
+ * The expression must have a unary intersection containing
+ * a level drawn from the given dimension with the given label.
+ */
+message DimensionLock
+{
+  /**
+   * If the label is omitted, it is assumed to be the same as
+   * the dimension name.
+   */
+  optional string label = 1;
+  required string dimension = 2;
+
+  /**
+   * Positions that should be locked in the dimension. 
+   * Exactly one of these two alternative fields should be used,
+   * but the string alternative is deprecated.
+   * Instead, use the 'str' field in the MeasureExpr alternative. 
+   */
+  optional MeasureExpr expr = 3;
+  optional string expr_str = 4 [deprecated=true];  //deprecated: 4.3.3; removal: 4.4.1
+}
+
+/**
+ * An inverse specifies a metric and an expression
+ * used to update it.
+ */
+message Inverse
+{
+  /**
+   * Target metric
+   */
+  required string metric = 1;
+
+  /**
+   * New data for the metric. 
+   * Exactly one of these two alternative fields should be used,
+   * but the string alternative is deprecated.
+   * Instead, use the 'str' field in the MeasureExpr alternative. 
+   */
+  optional MeasureExpr expr = 2;
+  optional string expr_str = 3 [deprecated=true];  //deprecated: 4.3.3; removal: 4.4.1
+}
+
+/**
+ * A inverse group specifies a list of inverses that can
+ * be used to update the database when the named metric
+ * is updated.
+ */
+message InverseGroup
+{
+  /**
+   * The name of metric being updated.
+   *
+   * If this InverseGroup is part of a request, rather than a metric
+   * definition, this field is required.
+   */
+  optional string metric = 1;
+
+  /**
+   * Inverses to use.
+   *
+   * There should be only a single inverse for each
+   * target metric.
+   */
+  repeated Inverse inverse = 2 [(blox.options.set) = true];
+
+}
+
+/**
+ * Update expressions are used to modify named metrics in the
+ * measure model.  It is possible to remove elements in metrics
+ * by specifying positions at higher intersections and have those
+ * positions map down to those in the metric.  It is also possible
+ * to specify a series of transformations on the input tuples
+ * mapping them down to the target metric.
+ */
+message UpdateExpr
+{
+  /**
+   * Enumerate the kind of updates that are supported.
+   */
+  enum Kind
+  {
+    SPREAD = 1;
+    REMOVE = 2;
+  }
+
+  message Transform
+  {
+    /* TODO: Should just rename to Kind, but protocol buffers do
+     * not provide any kind of support for message aliasing. */
+    message SpreadKind
+    {
+      /**
+       * Primitive spreading methods
+       */
+      enum Primitive {
+        /* On integer-valued metrics, EVEN and RATIO add/subtract a compensatory
+         * value of one on enough positions to ensure the new total matches the
+         * requested total. */
+        EVEN = 1;
+        RATIO = 2;
+        DELTA = 3;
+        REPLICATE = 4;
+        /* Experimental. Convert to float numbers for the spread arithmetic. */
+        EVEN_FLOAT = 5;
+        RATIO_FLOAT = 6;
+      }
+
+     /**
+      * A composite component specifies that a given primitive
+      * spreading method be used when spreading along the given
+      * dimension.
+      */
+      message CompositeComponent
+      {
+        optional string label = 3;
+        required string dimension = 1;
+        required Primitive primitive = 2;
+      }
+
+      message Query
+      {
+        /* The expression is to compute the result of the query update.  This
+         * is the most fundamental of transform methods, as all others desugar
+         * into it.
+         *
+         * The expression may use several variables (VarExprs) that are
+         * defined within the scope of the expression.
+         *
+         *  - New: This variable contains the data used as an input
+         *    to the transform.  At the spread intersection.
+         *
+         *  - Old: This variable contains the old values (if there are any)
+         *    of the metric being spread, aggregated to the spread
+         *    intersection.
+         *
+         *  - Target: This variable contains th old values (if there are any)
+         *    of the metric being spread, aggregated to the target
+         *    intersection.
+         *
+         *  - FixedBelow:  This variable contains the positions at the
+         *    base intersection of the metric being spread that should be
+         *    "fixed" and unchanged by the spread.
+         *
+         *  - OldFixed: This variable contains the old aggregated values
+         *    (if there are any) of the positions in FixedBelow at the
+         *    spread intersection.
+         *
+         *  - NewFixed: This variable contains the new aggregated values of
+         *    the positions in FixedBelow at the spread intersection.
+         *    This correctly accounts for the absence of values in
+         *    FixedBelow originating from removals.
+         *
+         * For the descriptions above "spread intersection" means the
+         * intersection of the input to the transaction, and the "target
+         * intersection" is the intermediate intersection of the transform,
+         * and "base intersection" means the base intersection of the metric
+         * being spread into.  Note that these three intersections must have
+         * the relative ordering
+         *
+         *    base <= target <= spread
+         *
+         * The overall expression should be at the target intersection of
+         * the transform.
+         *
+         * Exactly one of these two alternative fields should be used,
+         * but the string alternative is deprecated.
+         * Instead, use the 'str' field in the MeasureExpr alternative. 
+         * */
+        optional MeasureExpr expr = 1;
+        optional string expr_str = 2 [deprecated=true];  //deprecated: 4.3.3; removal: 4.4.1
+
+        // The expected type, if there is one.
+        optional Type type = 3;
+      }
+
+      message ByMetric
+      {
+        required string metric = 1;
+      }
+
+      /**
+       * Exactly one of the following fields must be populated.
+       */
+
+      optional Primitive primitive = 1;
+      
+      // Query specific data
+      optional Query query = 3;
+
+      // Name, if a named spread
+      optional string named = 4;
+
+      // Components of a composite spread
+      repeated CompositeComponent composite = 5;
+
+      optional ByMetric by_metric = 6;
+    }
+
+    // If no spread-kind is specified a default will be chosen, based upon
+    // last aggregated metric used in the update before spreading.
+    optional SpreadKind spread_kind = 1;
+
+    // spread from the current intersection down to this set of levels
+    // each dimension should occur at most once in the current intersection
+    // any restrictions on hierarchy?
+    // each level should only occur once.
+    // The distribution should be the identity when spread_kind is
+    // FRACTION_PARENT.
+    repeated QualifiedLevel distribution = 2 [(blox.options.set) = true];
+  }
+
+  message Target 
+  {
+    message LevelMap 
+    {
+      required string dimension = 1;
+      optional string hierarchy = 2;
+      required string source_level = 3;
+      required string target_level = 4;
+    }
+
+    // Exactly one of the following must be populated.
+    optional string metric = 1;
+    optional AttributeExpr attribute = 2;
+    optional QualifiedLevel level = 3;
+    optional LevelMap level_map = 4;
+  }
+
+  /**
+   * The kind of the update.
+   */
+  required Kind kind = 1;
+
+  /**
+   * The named metric to update.
+   * One of the two fields must be present, but metric is deprecated in favor of target.metric 
+   */
+  optional string metric = 2 [deprecated = true]; // deprecated: 4.3.4; removal: 4.4.1
+  optional Target target = 7;
+
+  /** The signature for the input data of the update.
+   *  The positions of the input at this signature's intersection will
+   *  either be spread to the metric directly, or via a chain of transformations.
+   *  For a REMOVE update, the signature can be position-only. 
+   *
+   * The signature is no longer required as it can be inferred from the 
+   * input expression.
+   */
+   optional BaseSignature signature = 6 [deprecated = true]; // deprecated: 4.3.7; removal 4.4.1
+
+  /**
+   * When kind is SPREAD, these transforms are applied to the
+   * input positions to convert them to positions in the metric.
+   * The target of the transforms
+   *
+   * May be omitted for REMOVE, but can be supplied for finer
+   * control over removal.
+   */
+  repeated Transform transform = 4;
+}
+
+// Partitioning /////////////////////////////////////////////////////
+
+message PartitionResponse
+{
+   // true if request should be broadcast
+   required bool broadcast = 1;
+   // if !broadcast, partitions to receive request.
+   repeated string partitionID = 2 [(blox.options.set) = true];
+}
+
+message TypeDefinition
+{
+  /**
+   * Named entity type.
+   */
+  required string type = 1;
+
+  /**
+   * The entity's primitive backing type.
+   */
+  required Type backing_type = 2;
+
+  /**
+   * Required if the corresponding LogiQL entity type does not have a 
+   * refmode, and there is not a unique constructor for the entity.
+   *
+   * It should be a binary predicate mapping entities to values of the 
+   * backing type.  However, if the predicate is a constructor, it should
+   * be the reverse a mapping from elements of the backing type to values
+   * of the entity.
+   */ 
+  optional string conversion_pred = 3;
+}

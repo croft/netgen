@@ -1,0 +1,431 @@
+/**
+ * This protocol is used by the requests and responses of the transaction service.
+ */
+package lb.web.txn;
+
+option java_package = "com.logicblox.web";
+
+
+//
+// MESSAGES TO REQUEST TRANSACTION INFORMATION
+//
+
+/**
+ * A list of part ids. This is sent on the body of a POST/PUT request to 
+ * commit a transaction, and allows the server to wait ffor all these parts.
+ */
+message PartIdList {
+
+  /**
+   * IDs of all parts that the transaction contains.
+   */
+  repeated string part_id = 1;
+}
+
+
+//
+// TRANSACTION INFORMATION MESSAGES (RESPONSES)
+//
+
+/**
+ * A list of transactions sent as a response by the transaction service.
+ */
+message TransactionList {
+
+  /**
+   * Transactions currently running.
+   */
+  repeated Transaction running  = 1;
+
+  /**
+   * Transactions that already finished.
+   */
+  repeated Transaction disposed = 2;
+}
+
+
+/**
+ * Information about a particular transaction.
+ */
+message Transaction {
+
+  /**
+   * A unique identifier.
+   */
+  required string id = 1;
+
+  /**
+   * The URI that represents the transaction.
+   */
+  required string location = 2;
+
+  /**
+   * The current status of the transaction.
+   */
+  required Status status    = 3;
+
+  /**
+   * The outcome of the transaction. Only set when status is DISPOSED.
+   */
+  optional Outcome outcome  = 4;
+
+  /**
+   * The workspace where the transaction will execute.
+   */
+  optional string workspace = 5;
+
+  /**
+   * If the transaction follows the asynchronous protocol.
+   */
+  required bool async    = 11;
+
+  /**
+   * If the transaction is readonly in the workspace.
+   */
+  required bool readonly = 12;
+
+  //
+  // The following timestamps have ISO-8601 format ("yyyy-MM-dd HH:mm:ss,SSSSSZZ").
+  // The fields here are in the order these events occur. 
+  //
+
+  /**
+   * Timestamp when the transaction received a start request (was created).
+   */
+  required string start_time   = 21;
+
+  /**
+   * Timestamp when the transaction received a commit request.
+   */
+  optional string commit_time  = 22;
+
+  /**
+   * Timestamp when the corresponding workspace transaction was submitted.
+   */
+  optional string workspace_transaction_start_time    = 23;
+
+  /**
+   * Timestamp when the corresponding workspace transaction finished.
+   */
+  optional string workspace_transaction_response_time = 24;
+
+  /**
+   * Timestamp when the transaction finished executing.
+   */
+  optional string dispose_time = 25;
+
+  /**
+   * Textual description of dispose_time - start_time.
+   */
+  optional string duration = 26;
+  
+  /**
+   * The list of parts in this transaction.
+   */
+  repeated Part part = 30;
+
+  /**
+   * The number of parts that are expected by this transaction.
+   *
+   * This is only available if the transaction is synchronous and after the commit request arrived.
+   */
+  optional int64 expectedParts = 31;
+
+  // TDX specific  
+  /**
+   * If the transaction is to export TDX files (false if it is to import).
+   */
+  optional bool export = 100;
+
+  /**
+   * The result of the execution of a transaction.
+   */
+  enum Outcome
+  {
+    /**
+     * Transaction finished properly
+     */
+    SUCCESS = 0;
+    
+    /**
+     * Transaction was manually aborted.
+     */
+    ABORTED = 1;
+    
+    /**
+     * Transaction did not complete in time.
+     */
+    EXPIRED = 2;
+    
+    /**
+     * Transaction failed with exception.
+     */
+    FAILURE = 3;
+    
+    /**
+     * Transaction was cancelled because client closed synchronous connection.
+     */
+    CANCELLED = 4;
+  };
+
+  /**
+   * The current status of the transaction.
+   */
+  enum Status
+  {
+    /**
+     * Transaction started, still waiting for parts.
+     */
+    STARTED = 0;
+    
+    /**
+     * Commit request received, but missing parts.
+     */
+    COMMIT_RECEIVED = 1;
+    
+    /**
+     * All parts and commit received, ready to execute.
+     */
+    READY = 2;
+    
+    /**
+     * Execution finished (outcome is set)
+     */
+    DISPOSED = 3;
+  }
+}
+
+
+/**
+ * A part in a multi-part transaction.
+ */
+message Part {
+
+  /**
+   * A unique identifier.
+   */
+  required string id = 1;
+
+  /**
+   * The uri of the request that created the part.
+   */
+  required string request_uri = 2;
+
+  /**
+   * The uri of the request, including parameters.
+   */
+  required string full_request_uri = 7;
+
+  /**
+   * The current status of the part.
+   */
+  required Status status = 3;
+
+  /**
+   * The HTTP status returned to the request that created the part if 
+   * the transaction is synchronous. If the transaction is asynchronous,
+   * this is the value is recorded by never returned.
+   */
+  optional int64 http_status = 4;
+
+  /**
+   * If the content of the request is not in the body, this carries the
+   * URI of where the content can be fetched (e.g. file, s3 or cs URIs).
+   */
+  optional string request_content_uri = 5;
+
+  /**
+   * If the content of the response is not in the body, this carries the
+   * URI of where the content can be fetched (e.g. file, s3 or cs URIs).
+   */
+  optional string response_content_uri = 6;
+
+  //
+  // TDX specific
+  //
+
+  /**
+   * True if this is an import request and errors were found.
+   */
+  optional bool import_errors = 100;
+  //optional string local_file       = 100;
+  //optional string local_error_file = 101;
+
+  /**
+   * The current status of a transaction part.
+   */
+  enum Status
+  {
+    /**
+     * Local download of import file is pending.
+     */
+    PENDING = 0;
+
+    /**
+     * Part is ready to be processed; awaiting transaction.
+     */
+    READY = 1;
+
+    /**
+     * Part processing is done (transaction outcome is set).
+     */
+    DONE  = 2;
+
+    /**
+     * This part was removed from the transaction prior to
+     * creating the workspace transaction (because it was not
+     * included in the commit part list).
+     */
+    REMOVED = 3;
+  }
+}
+
+
+
+
+
+//
+// INTERNAL API REQUEST CONFIGURATION
+//
+// This is an internal API which is not guaranteed to be stable.
+//
+
+/**
+ * Represents a request to the client API to execute a multi-part transaction.
+ */
+message TransactionRequest {
+
+  // the transaction service to call (e.g. /txn).
+  required string service = 1;
+
+  // the location of the transaction service and all its parts.
+  // this must be an http URL since only TCP is supported.
+  optional string transport = 2 [default = "http://localhost:8080"];
+
+  // whether to use the asynchronous protocol.
+  optional bool async = 10 [default = true];
+
+  // frequency to poll for transaction termination, in milliseconds. Only used if async is true. 
+  optional int64 poll = 11 [default = 5000];
+
+  // timeout in milliseconds for the transaction to terminate. When timeout expires, an abort request
+  // is issued.
+  optional int64 timeout = 12;
+
+  // whether to query the transaction status. Only used if async is false; async always queries.
+  optional bool query = 13 [default = false];
+
+  // list of parts in the transaction.
+  repeated PartRequest part = 30;
+
+  // TODO - authentication
+}
+
+/**
+ * A request to execute an individual service call. This may be executed on its own or
+ * encapsulated in a TransactionRequest.
+ */
+message PartRequest {
+
+  // the service to call (e.g. /my_service).
+  optional string service = 1 [default = "/"];
+
+  // location of the service (defaults to the transaction's transport).
+  // required if not part of a transaction.
+  optional string transport = 2;
+
+  // the HTTP method to use in the call.
+  optional HttpMethod method = 3 [default = POST];
+  enum HttpMethod {
+    GET    = 1;
+    POST   = 2;
+    PUT    = 3;
+    DELETE = 4;
+    HEAD   = 5;
+  }
+
+  // the content to send; can be the actual content, a file path or a uri (indicated by content_transfer).
+  // see content_transfer.
+  optional string content = 4;
+
+  // the type of the content to send in the request (e.g. text/csv, text/json, etc).
+  optional string content_type = 5;
+
+  // the transfer coding of the request content.
+  optional ContentTransfer content_transfer = 6 [default = INLINE];
+  enum ContentTransfer {
+    INLINE = 1; // the content field is the content itself
+    FILE   = 2; // the content field indicates a local file to be read
+    URI    = 3; // the content field indicates a URI to be resolved and downloaded by the server
+  }
+
+  // the encoding of the content.
+  optional ContentEncoding content_encoding = 7 [default = NONE];
+  enum ContentEncoding {
+    NONE = 1;  // the content is not encoded
+    GZIP = 2;  // the content is encoded in gzip
+  }
+
+  // the location to store the response; can be a file path or a uri.
+  optional string response_content = 8;
+
+  // the type requested for the response. Note that for TDX imports, response content type = text/csv
+  // indicates that return_errors = true.
+  optional string response_content_type = 9;
+
+  // the transfer coding requested for the response content.
+  optional ContentTransfer response_content_transfer = 10 [default = INLINE];
+
+  // the encoding requested for the response; defaults to content_encoding.
+  optional ContentEncoding response_content_encoding = 11;
+
+  // encryption key to decode the request or encode the response.
+  optional string key = 12;
+
+  // URL parameters to send in the request.
+  repeated Param param = 20;
+
+  // a timeout for the part. This is only used when the part is executed standalone,
+  // and is ignored if the part belongs to a transaction request.
+  optional int64 timeout = 30;
+
+  // TODO - authentication
+}
+
+/**
+ * URL parameter
+ */
+message Param {
+  required string key   = 1;
+  required string value = 2;
+}
+
+/**
+ * This is the response message returned by the client API for a TransactionRequest.
+ */
+message TransactionResponse {
+  // the transaction status (if TransactionRequest.async||query is true)
+  optional Transaction txn = 1;
+
+  // responses to parts, in the same order as the requests
+  repeated PartResponse response = 2;  
+}
+
+/**
+ * This is the response message returned by the client API when executing a single
+ * PartRequest or encapsulated in a TransactionResponse.
+ */
+message PartResponse {
+
+  // the content returned by the service. Note that this is only filled if the content is
+  // to be returned at the body of the HTTP response, i.e. response_content_transfer is
+  // INLINE. For FILE or URI, the PartResponse will be empty.
+  optional string response_content = 1;
+
+  optional int64 http_status = 2;
+
+  /**
+   * True if this is an import request and errors were found.
+   */
+  optional bool import_errors = 3;
+}

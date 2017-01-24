@@ -1,0 +1,185 @@
+import "blox/options.proto";
+import "measure/measure_common.proto";
+package lb.web.measure;
+
+option java_package = "com.logicblox.bloxweb.measure";
+
+message Program
+{ 
+   option (blox.options.lifetime) = "transaction"; 
+   repeated Rule rule = 1;
+}
+
+message Rule
+{
+   optional string name = 1;
+   repeated Formula formula = 2;
+
+   
+   optional lb.web.measure.common.Region region = 3;
+}
+
+message Formula
+{
+   optional string name = 1;
+   repeated Equation equation = 2;
+  
+   optional lb.web.measure.common.Region region = 3;
+}
+
+message Equation 
+{
+   required Expr left = 1;
+   required Expr right = 2;
+  
+   optional lb.web.measure.common.Region region = 3;
+}
+
+message Expr 
+{
+   enum Kind
+   {
+      FUNCTION = 1;
+      GROUP = 2;
+      GUARDED = 3;
+      P2P = 4;
+      TUPLE = 5;
+      VARIABLE = 6;
+      CONSTANT = 7;
+   }
+   required Kind kind = 1;
+   
+   optional FunctionExpr function = 3;
+   optional GroupExpr group = 4;
+   optional GuardedExpr guarded = 5;
+   optional P2PExpr p2p = 6;
+   optional TupleExpr tuple = 7;
+   optional VarExpr variable = 8;
+   optional ConstantExpr constant = 9;
+  
+   optional lb.web.measure.common.Region region = 10;
+}
+
+
+message FunctionExpr
+{
+   message Arguments {
+     repeated Expr arg = 1;
+   }
+
+   required string name = 1;
+   repeated Arguments args = 2;
+   optional string stage = 3;
+}
+
+message GuardedExpr
+{
+   required Expr expr = 1;
+   required Guard guard = 2;
+}
+
+
+message P2PExpr 
+{
+   required string name = 1;
+   required string arg = 2;
+}
+
+message GroupExpr
+{
+   required Expr expr = 1;
+}
+
+message TupleExpr
+{
+   repeated Expr expr = 1;
+}
+
+message VarExpr 
+{
+   required string variable = 1;
+}
+
+message ConstantExpr
+{
+   enum Kind
+   {
+      BOOLEAN = 1;
+      STRING = 2;
+      INT = 3;
+      FLOAT = 4;
+      DECIMAL = 5;
+   }
+
+   required Kind kind = 1;
+
+   optional bool   boolean_constant = 2;
+   optional string string_constant = 3;
+   optional int64  int_constant = 4;
+   optional double float_constant = 5;
+   optional int64 decimal_constant = 6; 
+}
+
+message Guard
+{
+   enum Kind
+   {
+      COMPARISON = 1;
+      CONJUNCTION = 2;
+      DISJUNCTION = 3;
+      EXISTS = 4;
+      NEGATION = 5;
+      RELATION = 6;
+   }
+
+   required Kind kind = 1;
+
+   optional CompGuard comparison = 2;
+   optional ConjGuard conjunction = 3;
+   optional DisjGuard disjunction = 4;
+   optional ExistsGuard exists = 5;
+   optional NegationGuard negation = 6;
+   // FIX!!! On one hand these aren't actually functions,
+   // but the they are structurally identical, so it 
+   // seems like we should try to have them share something
+   optional FunctionExpr relation = 7;
+   
+   optional lb.web.measure.common.Region region = 8;
+}
+
+message ConjGuard 
+{
+   repeated Guard guard = 1;
+}
+
+message DisjGuard 
+{
+   repeated Guard guard = 1;
+}
+
+message CompGuard 
+{
+   enum Op 
+   {
+      EQUALS            = 1;
+      NOT_EQUALS        = 2;
+      GREATER_THAN      = 3;
+      LESS_THAN         = 4;
+      GREATER_OR_EQUALS = 5;
+      LESS_OR_EQUALS    = 6; 
+   }
+
+   required Op op = 1;
+   required Expr left = 2;
+   required Expr right = 3;
+}
+
+message ExistsGuard 
+{
+  required Expr expr = 1;
+}
+
+message NegationGuard 
+{
+  required Guard guard = 1;
+}

@@ -1,0 +1,7 @@
+[Unit]
+Description=LogicBlox ConnectBlox Port
+PartOf=lb.target lb-server.service
+Before=lb.target
+
+[Socket]
+ListenStream=127.0.0.1:5518

@@ -1,0 +1,71 @@
+package lb.web.delim;
+
+option java_package = "com.logicblox.bloxweb.delim";
+
+message FileBinding
+{
+  required FileDefinition file = 2;
+
+  repeated PredicateBinding binding = 3;
+  optional string entity_creation = 4;
+
+  repeated DefaultValue default_value = 5;
+  optional bool ignore_idb_on_import = 6 [default = false];
+}
+
+message FileDefinition
+{
+  required string delimiter = 2;
+  required string column_headers = 3;
+  required string column_formats = 4;
+
+  optional string file_columns_required = 5;
+  optional string file_columns_optional = 6;
+  optional string file_columns_can_be_absent = 7;
+  optional string mode = 8;
+
+  // TODO - perhaps add some means to attach descriptions to columns.
+}
+
+message PredicateBinding
+{
+  required string predicate_name = 1;
+  required string predicate_binding_columns = 2;
+  repeated ColumnBinding column = 3;
+
+  optional bool export = 4 [default = true];
+  optional bool import = 5 [default = true];
+  optional bool no_retraction_on_post = 11 [default = false];
+
+  optional string entity_creation = 9;
+
+  repeated Filter filter = 10;
+}
+
+message ColumnBinding
+{
+  required int64 index = 1;
+
+  optional string entity_creation = 2;
+
+  optional string import_function = 4;
+  optional string import_function_inverse = 5;
+  optional string export_function = 6;
+  optional string export_function_inverse = 7;
+}
+
+message Filter
+{
+  required string predicate_name = 1;
+  required string headers = 2;
+
+  // not supported yet
+  optional bool negated = 5 [default = false];
+}
+
+message DefaultValue
+{
+  required string header = 1;
+  optional string import_default_value = 2;
+  optional string export_default_value = 3;
+}

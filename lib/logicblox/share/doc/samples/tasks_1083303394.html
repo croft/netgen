@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The lb-workflow Samples Directory</title>
+
+    <link href="lb-favicon.png"    rel="shortcut icon" type="image/x-icon" />
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="lb-workflow.css"   rel="stylesheet">    
+  </head>
+  <body>
+    <div class="container header-container">
+      <div class="row header">
+        <div class="col-lg-2">
+          <a href="http://logicblox.com"><img src="lblogo.png" alt="LogicBlox, Inc."></a>
+        </div>
+        <div class="col-lg-10">
+          <a href="index.html"><h1 class="text-center">The lb-workflow Samples Directory</h1></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container contents-container">
+      <div class="row">
+        <div class="col-lg-2 sidebar">
+          <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
+            <ul class="nav">
+              <li class="sidebar-group-header">Workflows
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="#414322582" title="lb.ActivateApp">lb.ActivateApp</a></li>
+                    <li class="other"><a href="#1156161141" title="lb.DeactivateApp">lb.DeactivateApp</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Tasks
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="#813688923" title="lb.BackupWorkspace">lb.BackupWorkspace</a></li>
+                    <li class="other"><a href="#444299818" title="lb.CommitWorkbooks">lb.CommitWorkbooks</a></li>
+                    <li class="other"><a href="#1810986197" title="lb.ConcatFiles">lb.ConcatFiles</a></li>
+                    <li class="other"><a href="#209968790" title="lb.CopyFiles">lb.CopyFiles</a></li>
+                    <li class="other"><a href="#2093840554" title="lb.CreateBranch">lb.CreateBranch</a></li>
+                    <li class="other"><a href="#1093886119" title="lb.CreateDir">lb.CreateDir</a></li>
+                    <li class="other"><a href="#1582726742" title="lb.CreateTmpDir">lb.CreateTmpDir</a></li>
+                    <li class="other"><a href="#86962181" title="lb.CreateWorkbooks">lb.CreateWorkbooks</a></li>
+                    <li class="other"><a href="#102678113" title="lb.CreateWorkspace">lb.CreateWorkspace</a></li>
+                    <li class="other"><a href="#1593183723" title="lb.CreateZipArchive">lb.CreateZipArchive</a></li>
+                    <li class="other"><a href="#887335291" title="lb.DateAdd">lb.DateAdd</a></li>
+                    <li class="other"><a href="#94704443" title="lb.DeleteBranch">lb.DeleteBranch</a></li>
+                    <li class="other"><a href="#844644713" title="lb.DeleteDirs">lb.DeleteDirs</a></li>
+                    <li class="other"><a href="#416023284" title="lb.DeleteFiles">lb.DeleteFiles</a></li>
+                    <li class="other"><a href="#1960648650" title="lb.DeleteWorkbooks">lb.DeleteWorkbooks</a></li>
+                    <li class="other"><a href="#1261328249" title="lb.EditPasswordFile">lb.EditPasswordFile</a></li>
+                    <li class="other"><a href="#2092655549" title="lb.ExecuteLogiQL">lb.ExecuteLogiQL</a></li>
+                    <li class="other"><a href="#42610943" title="lb.ExecuteMeasureWarmup">lb.ExecuteMeasureWarmup</a></li>
+                    <li class="other"><a href="#1855540567" title="lb.ExportPartitionedCsv">lb.ExportPartitionedCsv</a></li>
+                    <li class="other"><a href="#542792164" title="lb.ExportUsers">lb.ExportUsers</a></li>
+                    <li class="other"><a href="#791514336" title="lb.FilePoller">lb.FilePoller</a></li>
+                    <li class="other"><a href="#386615000" title="lb.GetBranchNames">lb.GetBranchNames</a></li>
+                    <li class="other"><a href="#1365101903" title="lb.GetEnv">lb.GetEnv</a></li>
+                    <li class="other"><a href="#1648949581" title="lb.GetProperty">lb.GetProperty</a></li>
+                    <li class="other"><a href="#257785277" title="lb.GetWorkbookCreationParams">lb.GetWorkbookCreationParams</a></li>
+                    <li class="other"><a href="#674158810" title="lb.GetWorkbookInfo">lb.GetWorkbookInfo</a></li>
+                    <li class="other"><a href="#965971621" title="lb.GzipFiles">lb.GzipFiles</a></li>
+                    <li class="other"><a href="#631343385" title="lb.ImportWorkbookMaster">lb.ImportWorkbookMaster</a></li>
+                    <li class="other"><a href="#474850959" title="lb.ImportWorkbookTemplate">lb.ImportWorkbookTemplate</a></li>
+                    <li class="other"><a href="#2035775467" title="lb.JsonService">lb.JsonService</a></li>
+                    <li class="other"><a href="#957270104" title="lb.KillConnectbloxProcess">lb.KillConnectbloxProcess</a></li>
+                    <li class="other"><a href="#1355248097" title="lb.ListFiles">lb.ListFiles</a></li>
+                    <li class="other"><a href="#439938571" title="lb.LoadPositionAccess">lb.LoadPositionAccess</a></li>
+                    <li class="other"><a href="#461873308" title="lb.LoadTemplateAccess">lb.LoadTemplateAccess</a></li>
+                    <li class="other"><a href="#311910870" title="lb.LoadUsers">lb.LoadUsers</a></li>
+                    <li class="other"><a href="#1111066964" title="lb.Log">lb.Log</a></li>
+                    <li class="other"><a href="#513765668" title="lb.MergePasswordFiles">lb.MergePasswordFiles</a></li>
+                    <li class="other"><a href="#647172466" title="lb.MoveFiles">lb.MoveFiles</a></li>
+                    <li class="other"><a href="#206464830" title="lb.ParseJsonObject">lb.ParseJsonObject</a></li>
+                    <li class="other"><a href="#1376753748" title="lb.PartitionCsv">lb.PartitionCsv</a></li>
+                    <li class="other"><a href="#524427256" title="lb.ReadCsv">lb.ReadCsv</a></li>
+                    <li class="other"><a href="#1300473654" title="lb.RefreshWorkbooks">lb.RefreshWorkbooks</a></li>
+                    <li class="other"><a href="#239689351" title="lb.ReplaceDefaultBranch">lb.ReplaceDefaultBranch</a></li>
+                    <li class="other"><a href="#2129407807" title="lb.RestoreWorkspace">lb.RestoreWorkspace</a></li>
+                    <li class="other"><a href="#1738493576" title="lb.SftpUpload">lb.SftpUpload</a></li>
+                    <li class="other"><a href="#1362466744" title="lb.StartServices">lb.StartServices</a></li>
+                    <li class="other"><a href="#1360321560" title="lb.StopServices">lb.StopServices</a></li>
+                    <li class="other"><a href="#1681287477" title="lb.StringReplace">lb.StringReplace</a></li>
+                    <li class="other"><a href="#1500233916" title="lb.TdxExport">lb.TdxExport</a></li>
+                    <li class="other"><a href="#1395876043" title="lb.TdxImport">lb.TdxImport</a></li>
+                    <li class="other"><a href="#1637101954" title="lb.Timestamp">lb.Timestamp</a></li>
+                    <li class="other"><a href="#83095245" title="lb.UUID">lb.UUID</a></li>
+                    <li class="other"><a href="#1364259224" title="lb.UnpackArchive">lb.UnpackArchive</a></li>
+                    <li class="other"><a href="#571908201" title="lb.ValidateFiles">lb.ValidateFiles</a></li>
+                    <li class="other"><a href="#447294205" title="lb.ValidateManifest">lb.ValidateManifest</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Standard Library
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="control_1096407654.html" title="control.wf">control.wf</a></li>
+                    <li class="other"><a href="jobs_2064022591.html" title="jobs.wf">jobs.wf</a></li>
+                    <li class="other"><a href="log_1948900833.html" title="log.wf">log.wf</a></li>
+                    <li class="other"><a href="stdlib_623000472.html" title="stdlib.wf">stdlib.wf</a></li>
+                    <li class="other"><a href="string_1421446234.html" title="string.wf">string.wf</a></li>
+                    <li class="current"><a href="tasks_1083303394.html" title="tasks.wf">tasks.wf</a></li>
+                    <li class="other"><a href="tdx_1729519909.html" title="tdx.wf">tdx.wf</a></li>
+                    <li class="other"><a href="testing-tasks_1856821761.html" title="testing-tasks.wf">testing-tasks.wf</a></li>
+                    <li class="other"><a href="workbooks_290480778.html" title="workbooks.wf">workbooks.wf</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Additional Resources
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="index.html" title="Index">Index</a></li>
+                    <li class="other"><a href="backup_1332419570.html" title="backup/wf/backup.wf">backup/wf/backup.wf</a></li>
+                    <li class="other"><a href="load_2058935082.html" title="backup/wf/load.wf">backup/wf/load.wf</a></li>
+                    <li class="other"><a href="restore_1204968188.html" title="backup/wf/restore.wf">backup/wf/restore.wf</a></li>
+                    <li class="other"><a href="exec_logiql_1742551485.html" title="connectblox/wf/exec_logiql.wf">connectblox/wf/exec_logiql.wf</a></li>
+                    <li class="other"><a href="main_633623232.html" title="param/wf/main.wf">param/wf/main.wf</a></li>
+                    <li class="other"><a href="partition_1866736532.html" title="partition/wf/partition.wf">partition/wf/partition.wf</a></li>
+                    <li class="other"><a href="bar_840371832.html" title="purge/bar.wf">purge/bar.wf</a></li>
+                    <li class="other"><a href="fail_1033209759.html" title="purge/fail.wf">purge/fail.wf</a></li>
+                    <li class="other"><a href="foo_713015307.html" title="purge/foo.wf">purge/foo.wf</a></li>
+                    <li class="other"><a href="url_1270117002.html" title="string/wf/url.wf">string/wf/url.wf</a></li>
+                    <li class="other"><a href="export_961675574.html" title="tdx/wf/export.wf">tdx/wf/export.wf</a></li>
+                    <li class="other"><a href="import_1592603335.html" title="tdx/wf/import.wf">tdx/wf/import.wf</a></li>
+                    <li class="other"><a href="create_873980314.html" title="workbookutil/wf/create.wf">workbookutil/wf/create.wf</a></li>
+                    <li class="other"><a href="create2_1323635598.html" title="workbookutil/wf/create2.wf">workbookutil/wf/create2.wf</a></li>
+                    <li class="other"><a href="create3_1323665389.html" title="workbookutil/wf/create3.wf">workbookutil/wf/create3.wf</a></li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="col-lg-10 contents">
+          <div class="lb-workflow-block">
+<h3>Specification of concrete task implementations for the standard library.</h3>          </div>
+          <div class="lb-workflow-block">
+<p>Tasks to call the workflow control service.</p><pre><code class="lb-workflow"><span class="keyword">import</span> <span class="string">"<a href="control_1096407654.html">lb/control.wf</a>"</span>
+</code></pre>
+          </div>
+          <div class="lb-workflow-block">
+<p>Tasks related to lb-jobs.</p><pre><code class="lb-workflow"><span class="keyword">import</span> <span class="string">"<a href="jobs_2064022591.html">lb/jobs.wf</a>"</span>
+</code></pre>
+          </div>
+          <div class="lb-workflow-block">
+<p>Tasks to use notifiers and logging.</p><pre><code class="lb-workflow"><span class="keyword">import</span> <span class="string">"<a href="log_1948900833.html">lb/log.wf</a>"</span>
+</code></pre>
+          </div>
+          <div class="lb-workflow-block">
+<p>Tasks to manipulate strings.</p><pre><code class="lb-workflow"><span class="keyword">import</span> <span class="string">"<a href="string_1421446234.html">lb/string.wf</a>"</span>
+</code></pre>
+          </div>
+          <div class="lb-workflow-block">
+<p>Tasks to call TDX services.</p><pre><code class="lb-workflow"><span class="keyword">import</span> <span class="string">"<a href="tdx_1729519909.html">lb/tdx.wf</a>"</span>
+</code></pre>
+          </div>
+          <div class="lb-workflow-block">
+<p>Tasks related to workbooks.</p><pre><code class="lb-workflow"><span class="keyword">import</span> <span class="string">"<a href="workbooks_290480778.html">lb/workbooks.wf</a>"</span>
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="791514336">
+<p>Check for the existence of files that match some set of patterns. This task will either look immediately for a file or can be given a start time. It can also either look once or look repeatedly for files with an optional timeout. If no files are found, the task will fail.</p>
+<hr/><p>@param patterns (required)  Set of file paths to look for. The paths can contain wildcard  characters (* and ?). For example &ldquo;/data/incoming/201?/M*.dat&rdquo;.</p><p>@param start_time (optional)  Optional time at which the polling will start, in HH:mm:ss format by  default. If not specified, the polling will start immediately.  Otherwise the task will wait until the specified time before polling.  If the start_time is before the time at which this task starts, it will  be scheduled to run at the specified time on the next day unless  advance_start_time is false.</p><p>@param start_format (optional)  The format of the timestamp specified in start_time. Defaults to  &ldquo;HH:mm:ss&rdquo; which specifies a particular time on the current day.</p><p>@param poll_interval (optional)  The number of seconds that all elapse between checks for files.  Defaults to ten seconds.</p><p>@param timeout (optional)  The number of seconds to wait for files to appear before the task will  fail. If the value is less than zero, the task will wait forever. If  the value is zero, the task will check one time for files. The  timeout timer starts when the polling starts. Default value is zero.</p><p>@param end_time (optional)  A timestamp that defines when to stop waiting for files to appear. The  format of this is specified by the end_format parameter. If no file  matching patterns appears by end_time, the task fail or continue as  defined by the on_timeout parameter. Only one of timeout or end_time  should be used. The behavior is undefined if both are used.</p><p>@param end_format (optional)  The format of the timestamp specified in end_time. Defaults to  &ldquo;HH:mm:ss&rdquo; which specifies a particular time on the current day.</p><p>@param matches (optional, output)  If used, this refers to a workflow variable that will receive the set of  matching files found if the task succeeds.</p><p>@param on_timeout (optional)  Action to take if a file was not found before the timeout. Value must be  one of FAIL, IGNORE, WARN to cause the task to fail, silently ignore the  missing file, or log a warning respectively. Default is FAIL.</p><p>@param advance_start_time (optional)  If set to true (default), value of start_time will be set to the same  time on the next day if the time has already passed for the current day.</p><p>@param match_all_patterns (optional)  If set to true, this task will look for at least one file that matches  each pattern in the patterns parameters. If set to false (the default)  the task will complete as soon as any file that matches any pattern is  detected.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.FilePoller</span>(
+    patterns<span class="keyword">*</span><span class="separator">,</span>
+    start_time<span class="keyword">?</span><span class="separator">,</span>
+    start_format = <span class="string">"HH:mm:ss"</span><span class="separator">,</span>
+    end_time<span class="keyword">?</span><span class="separator">,</span>
+    end_format = <span class="string">"HH:mm:ss"</span><span class="separator">,</span>
+    poll_interval<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"10s"</span><span class="separator">,</span>
+    timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"10s"</span><span class="separator">,</span>
+    on_timeout = <span class="string">"FAIL"</span><span class="separator">,</span>
+    advance_start_time = <span class="boolean">true</span><span class="separator">,</span>
+    match_all_patterns = <span class="boolean">false</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (matches<span class="keyword">*</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.FilePoller"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="447294205">
+<p>Manifest files are delimited text files with a header of &ldquo;File|Hash&rdquo;. Each line has a file name (located relative to directory containing manifest) and an md5 checksum. This task will load the manifest file, make sure that all files listed in the manifest exist, and check their md5 checksums. Optional parameters will allow this task to wait for missing files to appear to support cases where the manifest shows up while data files are still in route.</p><p>Output from this task includes:</p>
+<ul>
+  <li>the list of files in the manifest (absolute paths)</li>
+  <li>the date of the manifest (either extracted from the manifest file name or from the manifest file&rsquo;s modification time)</li>
+  <li>the timestamp of the manifest (either extracted from the manifest file name or from the manifest file&rsquo;s modification time)</li>
+  <li>a manifest group ID, extracted from the manifest file name</li>
+</ul>
+<hr/><p>@param manifest (required)  Absolute path to a manifest file</p><p>@param manifest_pattern (optional)  A string like &ldquo;Manifest_%ID%_%DATE%_%TIME%&rdquo; that tells us where to  find the dataset id, date, and time of the manifest from the manifest  file name.</p><p>@param required_files (optional)  A set of file name patterns, each of which much exist in the manifest or  the task will fail. The patterns can contain the wildcard characters *  or ?.</p><p>@param files (optional, output)  If defined, this is a reference to a workflow variable that will receive  the set of all files found in the manifest.</p><p>@param id (optional, output)  If defined, this is a reference to a workflow variable that will receive  the manifest group id extracted from the manifest name  (see manifest_pattern).</p><p>@param date (optional, output)  If defined, this is a reference to a workflow variable that will receive  the manifest date, extracted from the manifest name or from the manifest  file&rsquo;s modification time (see manifest_pattern).</p><p>@param time (optional, output)  If defined, this is a reference to a workflow variable that will receive  the manifest time, extracted from the manifest name or from the manifest  file&rsquo;s modification time (see manifest_pattern).</p><p>@param s3_config (optional)  Name of a section in the lb-web config file that has s3 connection info.  Used if the manifest is located in an S3 bucket.</p><p>@param validate_checksums (optional)  By default this task will validate the MD5 checksums for all data files  listed in the manifest. Setting this to false will skip the checksum  validation and just do basic manifest validation and make sure the  data files exist.</p><p>@param ignored_files (optional)  Set of patterns that indicate files in the manifest that will be ignored.  The patterns can contain wildcard characters * and ?.</p><p>@param file_arrival_timeout (optional)  Number of seconds that we should wait for data files listed in the  manifest to appear. If a file does not appear before the timeout,  the task will fail.</p><p>@param file_arrival_poll_interval (optional)  Number of seconds to wait between polling for data files to appear.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.ValidateManifest</span>(
+    manifest<span class="separator">,</span>
+    manifest_pattern<span class="keyword">?</span><span class="separator">,</span>
+    required_files<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    s3_config<span class="keyword">?</span><span class="separator">,</span>
+    validate_checksums = <span class="boolean">true</span><span class="separator">,</span>
+    ignored_files<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    file_arrival_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span><span class="keyword">?</span><span class="separator">,</span>
+    file_arrival_poll_interval<span class="keyword">:</span> <span class="message-type" >Duration</span><span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (
+    files<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    id<span class="keyword">?</span><span class="separator">,</span>
+    date<span class="keyword">?</span><span class="separator">,</span>
+    time<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.ValidateManifest"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1364259224">
+<p>Extract all the files in a set of archives (currently just zip supported). The locations of all extracted files will be output from this task if the files parameter is defined. Files will either be extracted to a specified location (using the dest parameter) or to a temporary directory (usually the system /tmp directory) if dest is not specified.</p>
+<hr/><p>@param archives (required)  Set of zip files to be unpacked. The archive paths can contain wildcard  characters (* and ?) to find files that match particular patterns.</p><p>@param dest (optional)  Either an existing directory to receive files from the archive or the  name of a single destination file. If not an existing directory, all  files from all archives will be written to the same file, overwriting  each other. If not specified, all unpacked files will be written to  a temporary directory (typically /tmp). The locations of all unpacked  files will be returned in the files parameter. If dest is not an  existing directory, missing parent directories will be automatically  created. Note that you can&rsquo;t assume that extracted files will be  located at the top level of the destination directory. Unique  subdirectories may be created to avoid collision in case this task is  running in parallel with other UnpackArchive tasks.</p><p>@param unique_names (optional)  If set to true and if dest is a directory, we will extract each archive  into a unique subdirectory of the dest directory to make sure extracted  files do not overwrite each other.</p><p>@param files (optional, output)  Reference to a workflow variable that will contain the set of all  extracted files when the task has finished.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.UnpackArchive</span>(
+    archives<span class="keyword">*</span><span class="separator">,</span>
+    dest<span class="keyword">?</span><span class="separator">,</span>
+    unique_names<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (files<span class="keyword">*</span><span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.UnpackArchive"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1593183723">
+<p>Create a zip archive that contains all the specified source files. The source and destination files can be on the local file system or in an S3/GCS folder. The source files can contain wildcard characters. All matched files will be included in the archive. If any source file is a local directory, it will be recursively added to the archive.</p><p>@param src_files (required, set):  Set of files to include in the zip archive.</p><p>@param dest (required)  Path to the destination zip archive file that will be created.</p><p>@param level (optional)  Optional integer indicating compression level (0-9).</p><p>@param s3_config (optional)  Name of a section in the lb-web config file that has s3 connection info</p><p>@param key (optional)  Encryption key used for S3 upload/download</p><p>@param if_missing (optional)  Action to take if any of the specified source files cannot be found. Value must  be one of FAIL, IGNORE, WARN to cause the task to fail, silently ignore  the missing file, or log a warning respectively. Default is WARN.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.CreateZipArchive</span>(
+    src_files<span class="keyword">*</span><span class="separator">,</span>
+    dest<span class="separator">,</span>
+    level<span class="keyword">?</span><span class="separator">,</span>
+    if_missing = <span class="string">"WARN"</span><span class="separator">,</span>
+    s3_config<span class="keyword">?</span><span class="separator">,</span>
+    key<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.CreateZipArchive"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="647172466">
+<p>Either rename a local file or move it into a specified directory. If the <code>dest</code> parameter is an existing directory, the source file will be moved into it. Otherwise the source file will be renamed to the specified <code>dest</code> name, with any missing parent directories automatically created.</p><p>If <code>dest</code> is a directory, then <code>src</code> can be a pattern that uses wildcard characters <code>*</code> and <code>?</code> to select a set of files to be moved.</p>
+<hr/><p>@param src (required)  Set of file names or patterns (possibly containing wildcards * or ?)  to be moved.</p><p>@param dest (required)  Either a path to an existing directory that will receive the source files  or the new path to a file if renaming a single file</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.MoveFiles</span>(src<span class="keyword">*</span><span class="separator">,</span> dest<span class="separator">,</span> driver_meta<span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.MoveFiles"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="965971621">
+<p>Gzip a single file or a set of files. If the dest parameter is an existing directory, then the files parameter can be a set of files or a set of patterns using wildcards (* and ?) that matches multiple files. Each file will be gzipped into the destination directory with the gzip file names being the same as the source file names with any extension replaced with &ldquo;.gz&rdquo;. If the dest parameter is not an existing directory, then all files will be written to the specified dest file, potentially overwriting each other. Any missing parent directories of the destination will be automatically created.</p>
+<hr/><p>@param files (required)  Set of files to be gzipped or patterns using * and ? wildcards that  matches multiple files to be gzipped</p><p>@param dest (required)  Either an existing directory or the name of the generated gzip file</p><p>@param unique_names (optional)  If set to true and if dest is a directory, we will create a unique  subdirectory of the dest directory in which to put each gzipped file to  ensure files do not overwrite each other if this task is running in  parallel.</p><p>@param zipped (optional, output)  Reference to a workflow variable that will contain the set of all  zipped files when the task has finished.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.GzipFiles</span>(
+    files<span class="keyword">*</span><span class="separator">,</span>
+    dest<span class="separator">,</span>
+    unique_names<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (zipped<span class="keyword">*</span><span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.GzipFiles"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="209968790">
+<p>Copy a set of files, either local file to local file, local file to S3, or S3 files to local. The src parameter can be path to a file or a wildcard If src starts with &ldquo;s3://&rdquo; then download files from an S3 bucket. Otherwise assume the source files are local files. Note that pattern matching only works in the last piece of a file path when downloading from S3 buckets.</p><p>If the dest parameter starts with &ldquo;s3://&rdquo;, upload files to S3. Otherwise assume the destination is local. If the destination is an existing local directory, all source files will be copied into the directory. If the destination is local but does not exist, assume that the source is a single file and the destination is the name of the local file the source will by copied to. Note that S3 to S3 copies are not supported. Also note that when uploading to S3, dest is always assumed to be a folder. We can&rsquo;t do the same checking we do with a local dest to see if it is an existing directory or not.</p>
+<hr/><p>@param files (required)  Set of source file paths or patterns that matches a set of source files.  Can start with &ldquo;s3://&rdquo; to indicate download of source files from S3.  Note that pattern matching only works in the last piece of a file path when downloading  from S3 buckets.</p><p>@param dest (required)  Path to destination directory or file. Can start with &ldquo;s3://&rdquo; for uploads  of local files to S3. If dest is S3, assume it is a folder on S3 and use  the source file names as the destination file names in the folder.</p><p>@param key (optional)  Encryption key used for S3 upload/download</p><p>@param s3_config (optional)  Name of a section in the lb-web config file that has s3 connection info</p><p>@param unique_names (optional)  If set to true and if dest is a local directory, we will create a unique  subdirectory of the dest directory in which to put each copied file to  ensure files do not overwrite each other if this task is running in  parallel.</p><p>@param recursive (optional)  Only supported right now to upload local files to s3. If true, recurse  through all directories found in the specified files and upload all files.</p><p>@param dest_is_dir (optional)  If true, assume the destination is a directory for copies to local  destinations. Create the directory if it doesn&rsquo;t exist. Default is  false.</p><p>@param if_missing (optional)  Action to take if any of the specified files cannot be found. Value must  be one of FAIL, IGNORE, WARN to cause the task to fail, silently ignore  the missing file, or log a warning respectively. Default is WARN.</p><p>@param copies (optional, output)  Reference to a workflow variable that will contain the set of all  copied file paths when the task has finished.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.CopyFiles</span>(
+    files<span class="keyword">*</span><span class="separator">,</span>
+    dest<span class="separator">,</span>
+    key<span class="keyword">?</span><span class="separator">,</span>
+    s3_config<span class="keyword">?</span><span class="separator">,</span>
+    unique_names<span class="keyword">?</span><span class="separator">,</span>
+    recursive = <span class="boolean">false</span><span class="separator">,</span>
+    dest_is_dir = <span class="boolean">false</span><span class="separator">,</span>
+    if_missing = <span class="string">"WARN"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (copies<span class="keyword">*</span><span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.CopyFiles"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1810986197">
+<p>Concatenate a set of input files to a single destination file.</p>
+<hr/><p>@param dest (required)  The path to a file that will receive the concatenated source files. This  can be either a local file or a file in an S3 folder. Any missing  parent directories of the destination file will be created.</p><p>@param src (required)  A set of input files that will be concatenated together. Since  lb-workflow uses unordered sets, there is no way to guarantee the order  in which the files will be concatenated unless you set the ordered  property to true. If ordered is true, the each file in src needs to be  in the form &ldquo;0=file_path&rdquo;, a sort index followed by equals followed by  the file path. In this case, we&rsquo;ll sort the files by index to determine  the concatenation order.</p><p>@param ordered (optional)  Indicates if the src files should be sorted. Defaults to false.</p><p>@param first_header_only (optional)  If true, the first line in each src file will be removed except for the  first file &ndash; useful when concatenating CSV files with a common header.</p><p>@param if_missing (optional)  Action to take if any of the specified src files cannot be found. Value  must be one of FAIL, IGNORE, WARN to cause the task to fail, silently  ignore the missing file, or log a warning respectively. Default is WARN.</p><p>@param key (optional)  Name of encryption key used when uploading files to S3</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.ConcatFiles</span>(
+    dest<span class="separator">,</span>
+    src<span class="keyword">*</span><span class="separator">,</span>
+    ordered = <span class="boolean">false</span><span class="separator">,</span>
+    first_header_only = <span class="boolean">false</span><span class="separator">,</span>
+    key<span class="keyword">?</span><span class="separator">,</span>
+    if_missing = <span class="string">"WARN"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.ConcatFiles"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1111066964">
+<p>Write a message to the logger.</p>
+<hr/><p>@param msg (required)  the message to be written to the logger</p><p>@param level (defaults to &ldquo;info&rdquo;)  log level for the message. one of error, warning, debug, or info</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.Log</span>(msg<span class="separator">,</span> level = <span class="string">"info"</span><span class="separator">,</span> driver_meta<span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.Log"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1365101903">
+<p>Read an environment variable and store its value in a workflow variable. If the environment variable does not exist, use the default value if it is specified or fail the task otherwise.</p>
+<hr/><p>@param name (required)  the name of the environment variable to read</p><p>@param var (required, output)  a reference to the workflow variable to receive the environment variable  value</p><p>@param default (optional)  value to be used if the environment variable does not exist</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.GetEnv</span>(name<span class="separator">,</span> default<span class="keyword">?</span><span class="separator">,</span> driver_meta<span class="keyword">?</span>): (var) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.GetEnv"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1648949581">
+<p>Read a property from a properties file and store its value in a workflow variable. If the property does not exist, use the default value if it is specified or fail the task otherwise.</p>
+<hr/><p>@param file (required)  path to a properties file</p><p>@param name (required)  the name of the environment variable to read</p><p>@param var (required, output)  a reference to the workflow variable to receive the environment variable  value</p><p>@param default (optional)  value to be used if the environment variable does not exist</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.GetProperty</span>(
+    file<span class="separator">,</span>
+    name<span class="separator">,</span>
+    default<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (var) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.GetProperty"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="102678113">
+<hr/><p>@param workspace (required)  The name of the workspace that will be created (i.e. /my/db)</p><p>@param archive (required)  Path to a tgz archive or a directory containing the template of the  workspace to be created. This archive must be located where the  workspace creation service can find it on the destination server. For  the custom batch handler in 3.10, this is done via service configuration  parameter. For LB4, this parameter must to a path to a workspace  directory that exists on the destination server.</p><p>@param service (optional)  If not specified, this task uses a custom bloxweb handler to implement  remote workspace creation. If specified, the task assumes it  is set to the URI of the standard LB4 import_workspace connectblox  service that is used to implement the workspace creation.</p><p>@param transport (optional)  If not specified, the workspace will be created on the local server.  This parameter can also start with &ldquo;sqs:&rdquo; to identify the SQS queue  associated with a server that will receive the request. Or it can be  an URL that identifies the server on which the workspace will be  created along with the port used to communicate with the remote service  and the name of the workspace (i.e. http://remote_server:8080)</p><p>@param overwrite (optional)  If &ldquo;true&rdquo;, then replace existing workspace without error. otherwise  the task will fail if a workspace with the specified name already exists</p><p>@param start_services (optional)  If &ldquo;true&rdquo;, then start any lb services registered in the workspace after  it has been created</p><p>@param timeout (optional)  The number of seconds to wait for the workspace to be created before  aborting the request and failing. The same timeout is used to  start_services if that is requested, so the total duration of the task  with <code>start_services</code> is 2x the <code>timeout</code>.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.CreateWorkspace</span>(
+    workspace<span class="separator">,</span>
+    archive<span class="separator">,</span>
+    service<span class="keyword">?</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    overwrite<span class="keyword">?</span><span class="separator">,</span>
+    start_services<span class="keyword">?</span><span class="separator">,</span>
+    timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.CreateWorkspace"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1637101954">
+<p>Generate a timestamp using the specified format and store it as a string in a workflow variable.</p>
+<hr/><p>@param format (required)  a string that specifies how to format the timestamp. This uses Java&rsquo;s  SimpleDateFormat. As an example, &ldquo;yyyy_MM_dd_HH_mm_ss&rdquo; would produce  a value like &ldquo;2014_06_26_08_32_20&rdquo;.</p><p>@param tstamp (required, output)  a reference to a workflow variable that will receive the formatted  timestamp</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.Timestamp</span>(format<span class="separator">,</span> driver_meta<span class="keyword">?</span>): (tstamp) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.Timestamp"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="83095245">
+<p>Generate a random UUID.</p>
+<hr/><p>@return <code>uuid</code> a reference to a workflow variable that will receive the random UUID.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.UUID</span>(driver_meta<span class="keyword">?</span>): (uuid) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.UUID"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="887335291">
+<p>Take a specified date in a specified format, add time period to it, and return a new date in the same format as the original. If incrementing the date results in an invalid date (March 30 + 5 days = March 35th, for example), the resulting date will be normalized (April 4th, for example).</p>
+<hr/><p>@param date (required)  The original date.</p><p>@param format (required)  The format of the date parameter (for example &ldquo;yyyy_MM_dd_HH_mm_ss&rdquo;).</p><p>@param increment (required)  The number of time periods (see resolution) to add to the date. This  value can be negative to move backwards in time.</p><p>@param resolution (required)  Indicates the resolution of the increment value. Currently supported  values include DAYS, MONTHS, YEARS, HOURS, MINUTES, and SECONDS.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.DateAdd</span>(
+    date<span class="separator">,</span>
+    format<span class="separator">,</span>
+    increment<span class="separator">,</span>
+    resolution<span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (result) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.DateAdd"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1582726742">
+<p>Generate a directory with a unique name. If the parent parameter is specified, the new directory will be created in the parent directory (the parent will be created if it is missing). If parent is not specified, the new directory will be created in the system tmp directory. If prefix is specified, it will be used as the prefix for the new directory. If timestamp is specified, the current time will be included after any specified prefix. If neither prefix or timestamp are used, the new directory will start with &ldquo;tmp&rdquo;. The full path to the new directory will be stored in the workflow variable indicated by the dir parameter.</p>
+<hr/><p>@param parent (optional)  path to a directory that will contain the new directory. system tmp  directory will be used if not specified (usually /tmp)</p><p>@param prefix (optional)  string that will prefix the name of the new directory</p><p>@param timestamp (optional)  format for a timestamp that will be included in the name of the new  directory (see Timestamp task for details)</p><p>@param dir (required, output)  reference to a workflow variable that will receive the full path to the  new directory</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.CreateTmpDir</span>(
+    parent<span class="keyword">?</span><span class="separator">,</span>
+    prefix<span class="keyword">?</span><span class="separator">,</span>
+    timestamp<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (dir) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.CreateTmpDir"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1093886119">
+<p>Create a directory if it does not already exist.</p>
+<hr/><p>@param dir (required)  Path to local directory to be created. All necessary parent directories  will also be created.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.CreateDir</span>(dir<span class="separator">,</span> driver_meta<span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.CreateDir"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="844644713">
+<p>Delete directories from the file system. If the recurse parameter is set to &ldquo;true&rdquo;, all subdirectories will be deleted first.</p>
+<hr/><p>@param dirs (required)  Set of paths or patterns (containing * or ?) to the directories to be  deleted. Pattern matching is not supported for S3 folders.</p><p>@param recurse (optional)  Flag that indicates if all subdirectories should be deleted (if true).  default value is false. If the directory is an s3 path, we assume  recurse is true since we cannot otherwise delete s3 folders.</p><p>@param if_missing (optional)  Action to take if no files found that match the patterns. Value must be  one of FAIL, IGNORE, WARN to cause the task to fail, silently ignore the  missing file, or log a warning respectively. Default is WARN.</p><p>@param s3_config (optional)  Name of a section in the lb-web config file that has s3 connection info</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.DeleteDirs</span>(
+    dirs<span class="keyword">*</span><span class="separator">,</span>
+    recurse = <span class="boolean">false</span><span class="separator">,</span>
+    if_missing = <span class="string">"WARN"</span><span class="separator">,</span>
+    s3_config<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.DeleteDirs"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="416023284">
+<hr/><p>@param files (required)  Set of paths to files or patterns (containing * or ?) that match files  to be deleted. If the path starts with &ldquo;s3:&rdquo;, we will delete a file  from an S3 bucket. Note that pattern matching does not work with S3  files.</p><p>@param if_missing (optional)  Action to take if no files found that match the patterns. Value must be  one of FAIL, IGNORE, WARN to cause the task to fail, silently ignore the  missing file, or log a warning respectively. Default is WARN.</p><p>@param s3_config (optional)  Name of a section in the lb-web config file that has s3 connection info</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.DeleteFiles</span>(
+    files<span class="keyword">*</span><span class="separator">,</span>
+    if_missing = <span class="string">"WARN"</span><span class="separator">,</span>
+    s3_config<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.DeleteFiles"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1355248097">
+<p>Look for a set of files that match a set of input patterns. The patterns can contain wildcard characters * and ?. If a pattern starts with &ldquo;s3:&rdquo; we will look for files in an S3 bucket. For S3 buckets, wildcards are only allowed in the last component of the path. Patterns for local files can contain wildcard characters anywhere.</p><p>Note that there appears to be a bug in this code that prevents us from finding files in the top level folder of an S3 bucket.</p>
+<hr/><p>@param patterns (required)  Set of patterns used to match files.</p><p>@param s3_config (optional)  Name of a section in the lb-web config file that has s3 connection info  used to query for files in S3. Defaults to &ldquo;default&rdquo;.</p><p>@param recursive (optional)  Only works with local files right now. If true, recurse through all  directories found in the specified patterns and return all normal files  found.</p><p>@param if_missing (optional)  Action to take if no files found that match the patterns. Value must be  one of FAIL, IGNORE, WARN to cause the task to fail, silently ignore the  missing file, or log a warning respectively. Default is WARN.</p><p>@param matches (output)  Set of files found that match all the patterns.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.ListFiles</span>(
+    patterns<span class="keyword">*</span><span class="separator">,</span>
+    s3_config<span class="keyword">?</span><span class="separator">,</span>
+    recursive = <span class="boolean">false</span><span class="separator">,</span>
+    if_missing = <span class="string">"WARN"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (matches<span class="keyword">*</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.ListFiles"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="571908201">
+<p>Validate that data in a CSV file passes a set of checks. This currently uses a protobuf schema copied from the C&amp;B application suite to define the file checks. See the FileSpec message in the src/main/proto/batch_engine.proto schema for details on the checks can be performed (file encoding, file required, correct header, number of rows, columns requiring values, unique keys, fields per row, field data types, field values).</p><p>In general each type of check can be configured to report a critical, error, warning, or informational log message. All messages will be logged to a file with the same name as the data file in a specified log directory. A summary of how many issues were detected will be logged to the task execution log.</p><p>Optional thresholds can define how many log messages of a particular category (i.e. errors) will cause the task to fail.</p><p>See files in the src/batch_engine/scripts/file_specs/ directory of the C&amp;B application for examples.</p>
+<hr/><p>@param files (required)  Set of paths to the data file to be checked. These paths can contain  wildcard characters (* or ?) used to match files.</p><p>@param specs_dir (required)  Path to directory containing text-formatted protobuf files based on the  FileSpec message in the batch_engine.proto schema. The task looks for  a file in this directory with the same base name as the data file but  with the extension replaced with &ldquo;.txt&rdquo;.</p><p>@param log_dir (required)  Path to directory that will receive a file containing the validation  log messages.</p><p>@param critical_threshold (optional)  Number of CRITICAL issues that will cause the task to fail. Default is  to allow an infinite number of this issues to be detected.</p><p>@param error_threshold (optional)  Number of ERROR issues that will cause the task to fail. Default is  to allow an infinite number of this issues to be detected.</p><p>@param warning_threshold (optional)  Number of WARN issues that will cause the task to fail. Default is  to allow an infinite number of this issues to be detected.</p><p>@param info_threshold (optional)  Number of INFO issues that will cause the task to fail. Default is  to allow an infinite number of this issues to be detected.</p><p>@param summary_tag (optional)  If specified, this string will be prepended to each validation summary  message written to the workflow log or to the summary_file.</p><p>@param summary_file (optional)  A path to a file that will contain all validation summary messages. If  the file exists, new messages will be appended to it.</p><p>@param summary_level (optional)  This can be any of CRITICAL, ERROR, WARN, INFO, ALL, or a comma-separated  list of any of those values. This can be used to control which summary  messages are printed. Default is to display all of them.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.ValidateFiles</span>(
+    files<span class="keyword">*</span><span class="separator">,</span>
+    specs_dir<span class="separator">,</span>
+    log_dir<span class="separator">,</span>
+    critical_threshold<span class="keyword">?</span><span class="separator">,</span>
+    error_threshold<span class="keyword">?</span><span class="separator">,</span>
+    warning_threshold<span class="keyword">?</span><span class="separator">,</span>
+    info_threshold<span class="keyword">?</span><span class="separator">,</span>
+    check_file_encoding = <span class="boolean">false</span><span class="separator">,</span>
+    summary_tag<span class="keyword">?</span><span class="separator">,</span>
+    summary_file<span class="keyword">?</span><span class="separator">,</span>
+    summary_level = <span class="string">"ALL"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.ValidateFiles"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="2035775467">
+<p>Call a JSON service.</p>
+<hr/><p>Additional constraints on the parameters.</p>
+<pre>
+  uri
+  ? transport
+  ? txn_timeout = 320
+  ? format = true
+  ? gzip = true
+  xor
+      json
+      json_file
+  ? xor
+      output
+      output_file
+</pre><p>@param <code>uri</code></p><p>@param <code>transport</code></p><p>@param <code>json</code> the JSON string to send as a request to the service. Either this or <code>json_file</code> is mandatory.</p><p>@param <code>json_file</code> a local file from where JSON is loaded and then sent as a request to the service. Either this or  <code>json</code> is mandatory.</p><p>@param <code>output_file</code> a local file where to store the returned response as JSON. It is possible to use this together  with <code>output</code>.</p><p>@param <code>method</code></p><p>@param <code>txn_timeout</code></p><p>@param <code>format</code></p><p>@param <code>gzip</code></p><p>@return <code>output</code> the returned response as JSON. This is set only if it is bound to a variable.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.JsonService</span>(
+    uri<span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    json<span class="keyword">?</span><span class="separator">,</span>
+    json_file<span class="keyword">?</span><span class="separator">,</span>
+    output_file<span class="keyword">?</span><span class="separator">,</span>
+    method = <span class="string">"POST"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    format = <span class="boolean">true</span><span class="separator">,</span>
+    gzip = <span class="boolean">true</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (output<span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.JsonService"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="42610943">
+<p>Issue a set of measure service warmup requests.</p>
+<hr/><p>@param service (required)  Identifies measure service used to process the warmup request</p><p>@param request_file (optional)  File containing a json measure warmup request per line. The file can  be on S3 or local. No header needed for the file. We assume each line  contains a warmup request to be executed.</p><p>@param if_missing (optional)  defaults to &ldquo;FAIL&rdquo; (task fails if request_file not found). other  allowed values are &ldquo;WARN&rdquo; and &ldquo;IGNORE&rdquo;</p><p>@param on_error (optional)  defaults to &ldquo;WARN&rdquo; (issue warning and continue if individual warmup  request fails). other allowed values are &ldquo;FAIL&rdquo; (log error and fail  task) and &ldquo;IGNORE&rdquo; (silently continue)</p><p>Note: one of request_file or requests is required, but not both</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.ExecuteMeasureWarmup</span>(
+    service<span class="separator">,</span>
+    request_file<span class="keyword">?</span><span class="separator">,</span>
+    requests<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    s3_config<span class="keyword">?</span><span class="separator">,</span>
+    key<span class="keyword">?</span><span class="separator">,</span>
+    if_missing = <span class="string">"FAIL"</span><span class="separator">,</span>
+    on_error = <span class="string">"WARN"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.ExecuteMeasureWarmup"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1261328249">
+<pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.EditPasswordFile</span>(
+    src<span class="separator">,</span>
+    dest<span class="separator">,</span>
+    users<span class="keyword">*</span><span class="separator">,</span>
+    new_password<span class="separator">,</span>
+    delim = <span class="string">"|"</span><span class="separator">,</span>
+    password_column = <span class="string">"PASSWORD"</span><span class="separator">,</span>
+    user_column = <span class="string">"USER"</span><span class="separator">,</span>
+    if_missing = <span class="string">"FAIL"</span><span class="separator">,</span>
+    empty_only = <span class="boolean">false</span><span class="separator">,</span>
+    key<span class="keyword">?</span><span class="separator">,</span>
+    s3_config<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.EditPasswordFile"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="513765668">
+<hr/><p>@param password_source (required)  Can be either SRC_1 or SRC_2. Indicates which password we should use if  a user appears in both source files and the passwords don&rsquo;t match.</p><p>@param user_master (required)  Can be either SRC_1, SRC_2, or BOTH. If SRC_1 or SRC_2, we will only  consider users defined in either the src1 or src2 file respectively,  ignoring extra users in the other file. If BOTH, we will merge users  from both files into the destination.</p><p>@param default_password (optional)  If specified, this password will be used in the destination file for  any users in the source files with an empty password.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.MergePasswordFiles</span>(
+    src1<span class="separator">,</span>
+    src2<span class="separator">,</span>
+    dest<span class="separator">,</span>
+    password_source<span class="separator">,</span>
+    user_master<span class="separator">,</span>
+    default_password<span class="keyword">?</span><span class="separator">,</span>
+    delim = <span class="string">"|"</span><span class="separator">,</span>
+    password_column = <span class="string">"PASSWORD"</span><span class="separator">,</span>
+    user_column = <span class="string">"USER"</span><span class="separator">,</span>
+    ignore_columns<span class="keyword">*</span><span class="separator">,</span>
+    if_missing = <span class="string">"FAIL"</span><span class="separator">,</span>
+    key<span class="keyword">?</span><span class="separator">,</span>
+    s3_config<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.MergePasswordFiles"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1855540567">
+<p>Split a set of data files into pieces based on a partition file.</p><p><em>NOTE</em>: There needs to be enough space on the data server to export full versions of all the data files and to generate the partitioned files (essentially 2 copies of the data). All this is done locally before the final partitioned result files are copied to S3. This work will be done in the working directory of the batch service running on the data server (defaults to /data/tmp/).</p>
+<hr/><p>@param workspace (required)  Path to the workspace from which data is exported (i.e. /my/db)</p><p>@param transport (optional)  If not specified, the workspace will be located on the local server.  This parameter can also start with &ldquo;sqs:&rdquo; to identify the SQS queue  associated with a server that will receive the request. Or it can be  an URL that identifies the server on which the workspace will be  located along with the port used to communicate with the remote service  and the name of the workspace (i.e. http://remote_server:8080)</p><p>@param data (required)  List of lb-web service identifiers used to export the data that will be  partitioned (i.e. /my/db/export/fe/product_hierarchy)</p><p>@param partition_service (optional)  Identifier of the lb-web service used to export a CSV file that controls  how the data will be partitioned. The partition must have at least 2  columns, one that identifies each partition and the others that are  joined with columns in the data files to decide which data goes to which  partition. Currently all columns in the partition file must also be in  all data files and all files need to use the same delimiter. It is also  assumed that the last column in the partition file is the partition  identifier. Exactly one of partition_service or partition_column is  required to be set.</p><p>@param partition_column (optional)  Name of the column in the data files that contains the partition  identifier. This is used to partition a data file by a column in the  data file instead with a file produced by the partition_service. Exactly  one of partition_service or partition_column is required to be set.</p><p>@param dest (required)  A pseudo path that identifies where to put the partitioned files. This  should start with an S3 bucket path like &ldquo;s3://cb-fr-dev/partition_dest/&rdquo;  (exporting to a local directory is not currently supported). If the  path contains %PARTITION_ID%, it will be replaced with the partition  identifier, allowing sets of data files to be grouped by partition.</p><p>@param dest_files (required)  A list of destination file names that will be generated in the specified  dest directory. There must be one dest file specified for each data  service and they must be in the same order.</p><p>@param delim (optional)  Delimiter character used in both the exported data and partition files.  Defaults to comma if not specified.</p><p>@param txn_timeout (optional)  Number of seconds allowed for the entire partitioned export task to  complete. Defaults to 320 seconds.</p><p>@param txn_service (optional)  Identifies the transaction service used to wrap the data exports.  Defaults to 320 seconds.</p><p>@param export_timeout (optional)  Number of seconds allowed for each individual data export to complete.  Defaults to 320 seconds.</p><p>@param gzip (optional)  If &ldquo;true&rdquo;, export data to a gzip file. Otherwise export to a CSV file.</p><p>@param key (optional)  encryption key used for S3 upload/download</p><p>@param chunk_size (optional)  If specified and &gt; 0, the partition file will be processed by chunk_size  rows at a time. This limits the maximum number of files that need to  be open at once by the partitioning code. By default, the entire  partition file is processed at once which means you can have as many  concurrently open files as there are rows in the file.</p><p>@param fix_file_names (optional)  If true, replace all spaces in the partition file names with underscores  (_). Default is false.</p><p>@param full_dest (optional)  If defined, the full unpartitioned files will be copied into the  specified S3 folder</p><p>@param partition_dest (optional)  If defined, the the partition file generated by the partition service  will be copied to the specified S3 location.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.ExportPartitionedCsv</span>(
+    workspace<span class="separator">,</span>
+    data<span class="keyword">*</span><span class="separator">,</span>
+    dest<span class="separator">,</span>
+    partition_service<span class="keyword">?</span><span class="separator">,</span>
+    partition_column<span class="keyword">?</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    txn_service<span class="keyword">?</span><span class="separator">,</span>
+    key<span class="keyword">?</span><span class="separator">,</span>
+    delim = <span class="string">","</span><span class="separator">,</span>
+    chunk_size<span class="keyword">?</span><span class="separator">,</span>
+    fix_file_names = <span class="boolean">false</span><span class="separator">,</span>
+    gzip = <span class="boolean">false</span><span class="separator">,</span>
+    full_dest<span class="keyword">?</span><span class="separator">,</span>
+    partition_dest<span class="keyword">?</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    export_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.ExportPartitionedCsv"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1376753748">
+<p>working_dir defaults to system tmp dir. deprecate src_file. replaced with src_files</p><p>master_partition_file and master_partition_column can be used to create empty partition files. this is useful if you are partitioning a source file that is missing rows for some partitions and you want to create empty files (with just a header) for these missing partitions. if master_partition_column is defined, it must be the name of a column header in the master_partition_file. otherwise, the first column in the file is used.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.PartitionCsv</span>(
+    src_file<span class="keyword">?</span><span class="separator">,</span>
+    src_files<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    dest_dir<span class="separator">,</span>
+    partition_file<span class="keyword">?</span><span class="separator">,</span>
+    partition_column<span class="keyword">?</span><span class="separator">,</span>
+    delim = <span class="string">","</span><span class="separator">,</span>
+    chunk_size<span class="keyword">?</span><span class="separator">,</span>
+    fix_file_names = <span class="boolean">false</span><span class="separator">,</span>
+    gzip = <span class="boolean">false</span><span class="separator">,</span>
+    s3_config<span class="keyword">?</span><span class="separator">,</span>
+    key<span class="keyword">?</span><span class="separator">,</span>
+    working_dir<span class="keyword">?</span><span class="separator">,</span>
+    master_partition_file<span class="keyword">?</span><span class="separator">,</span>
+    master_partition_column<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.PartitionCsv"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="2092655549">
+<p>Execute LogiQL in a workspace.</p><p>There are 2 ways to define the LogiQL to execute:</p>
+<ol>
+  <li><p>send a static query in the <code>query</code> parameter. This is a string that represents the LogiQL to execute.</p></li>
+  <li><p>define a set of inactive blocks to execute in a transaction. The blocks can be defined via the <code>block</code> and/or <code>blocks</code> parameters. They will be merged as a single set and executed together in a single transaction.</p></li>
+</ol><p>This task requires that <code>service</code> points to a connectblox <code>exec_inactive_service</code> hosted by lb-web.</p><p>Unfortunatelly there&rsquo;s currently no support for getting output from the LogiQL execution.</p>
+<hr/><p>@param <code>service</code> the URI to the connectblox service that performs the logiql  execution (e.g. &ldquo;/connectblox_exec&rdquo;). This is by default a standard LB4  connectblox service. If <code>legacy</code> is true, then this is the legacy custom  handler service.</p><p>@param <code>block</code> name of a block installed in the workspace that will be  executed.</p><p>@param <code>blocks</code> set of blocks installed in the workspace that will be  executed. This is the same as <code>block</code> but accepts a set of names.</p><p>@param <code>query</code> a static LogiQL query that will be executed in the workspace.</p><p>@param <code>workspace</code> name of the workspace in which to execute the query. If  not specified, the workspace hosting the service will be the target. If  <code>legacy</code> is used, this is a required parameter.</p><p>@param <code>transport</code> if not specified, the workspace will be located on the  local server. This parameter is an URL that identifies the server on which  the workspace will be located along with the port used to communicate with  the server (e.g. http://remote_server:8080).</p><p>@param <code>txn_timeout</code> a duration specifying the timeout of the call to the  service. The driver will drop the connection if this timeout is reached.</p><p>@param <code>legacy</code> true if the legacy custom handler is to be used. Only use this  if you are in the C&amp;B project and have a custom handler.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.ExecuteLogiQL</span>(
+    service<span class="keyword">?</span><span class="separator">,</span>
+    block<span class="keyword">?</span><span class="separator">,</span>
+    blocks<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    query<span class="keyword">?</span><span class="separator">,</span>
+    workspace<span class="keyword">?</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    legacy = <span class="boolean">false</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.ExecuteLogiQL"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="813688923">
+<p>Create a tgz archive of a workspace and copy to a folder on S3.</p><p><strong>This task currently only works in 3.x because <code>export_workspace</code> is not implemented in 4.x.</strong></p>
+<hr/><p>@param workspace (required)  Path to the workspace that will be archived</p><p>@param dest (required)  Path to a folder on S3 that will receive the workspace (i.e.  &ldquo;s3://my_bucket/workspace_archives&rdquo;)</p><p>@param service (optional)  If not specified, this task uses a custom bloxweb handler to implement  workspace backup. If specified, the task assumes it is set to the URI  of the standard LB4 connectblox export_workspace service that will  used to implement the workspace backup.</p><p>@param transport (optional)  If not specified, the workspace will be located on the local server.  This parameter can also start with &ldquo;sqs:&rdquo; to identify the SQS queue  associated with a server containing the workspace. Or it can be  an URL that identifies the server on which the workspace will be  located along with the port used to communicate with the server  and the name of the workspace (i.e. http://remote_server:8080/my/db)</p><p>@param key (optional)  Name of an encryption key used to encrypt the archive when it is  transferred to S3.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.BackupWorkspace</span>(
+    workspace<span class="separator">,</span>
+    dest<span class="separator">,</span>
+    service<span class="keyword">?</span><span class="separator">,</span>
+    key<span class="keyword">?</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.BackupWorkspace"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="2129407807">
+<p>Copy a tgz archive of a workspace from S3 and import it.</p>
+<hr/><p>@param src (required)  Path to a tgz file on S3 that contains an LB workspace (i.e.  &ldquo;s3://my_bucket/workspace_archives/my_db.tgz&rdquo;)</p><p>@param workspace (required)  Path to the workspace that will be created from the archive.</p><p>@param service (optional)  If not specified, this task uses a custom bloxweb handler to implement  workspace restore. If specified, the task assumes it is set to the URI  of the standard LB4 connectblox import_workspace service that will  used to implement the workspace restore.</p><p>@param overwrite (optional)  If &ldquo;true&rdquo; then an existing workspace will be replace with the archive.  Otherwise an existing workspace with the same name will cause the task  to fail.</p><p>@param start_services (optional)  If &ldquo;true&rdquo; then any LB services registered in the restored workspace will  be initialized.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.RestoreWorkspace</span>(
+    src<span class="separator">,</span>
+    workspace<span class="separator">,</span>
+    service<span class="keyword">?</span><span class="separator">,</span>
+    overwrite<span class="keyword">?</span><span class="separator">,</span>
+    start_services<span class="keyword">?</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.RestoreWorkspace"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="524427256">
+<p>Read a delimited file convert each row into a JSON string that will be returned in the workflow variable referenced by the tuples parameter. The column headers in the file will be used as the JSON field names. All values will be strings. The data file may be a local file or in S3. Note that this won&rsquo;t scale to large data files because all values are pulled into memory. Also see lb.ParseJsonObject.</p>
+<hr/><p>@param file (required)  Path to a delimited file. If file starts with &ldquo;s3:&rdquo;, we will download  the file from and S3 bucket before processing it. Otherwise the file is  assumed to be local.</p><p>@param delim (optional)  Field delimiter for the file. Defaults to comma ( , ).</p><p>@param s3_config (optional)  Name of a section in the lb-web config file that has s3 connection info.  Used to download a file from S3. Defaults to &ldquo;default&rdquo;.</p><p>@param columns (optional)  A set of column names that will be included in the JSON output. If not  specified or if empty, all columns will be included.</p><p>@param output_mode (optional)  Controls whether tuples or rows output variable will be set. Defaults to  &ldquo;TUPLES&rdquo;. Allowed values are &ldquo;TUPLES&rdquo; or &ldquo;ROWS&rdquo;.</p><p>@param unquote (default false)  Controls whether the values should be unquoted, i.e. quotes around the values  in the CSV file should be removed before setting them into tuples.</p><p>@param tuples (required, output)  Reference to an output variable that will receive the set of JSON strings.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.ReadCsv</span>(
+    file<span class="separator">,</span>
+    delim = <span class="string">","</span><span class="separator">,</span>
+    s3_config<span class="keyword">?</span><span class="separator">,</span>
+    columns<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    output_mode = <span class="string">"TUPLES"</span><span class="separator">,</span>
+    unquote = <span class="boolean">false</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (tuples<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span> rows<span class="keyword">*</span><span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.ReadCsv"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="206464830">
+<p>Take a JSON object string like &lsquo;{&ldquo;SKU&rdquo;:&ldquo;sku_123&rdquo;, &ldquo;STORE&rdquo;:&ldquo;store_abc&rdquo;}&rsquo; and map some of the JSON fields to workflow variables.</p><p>If the field is a JSON primitive, the value will be unquoted and bound to the variable. For example, 1 becomes 1 and &ldquo;foo&rdquo; becomes foo (no quotes).</p><p>If the field is a JSON object or array, the whole element is serialized. For example, you may get {&ldquo;foo&rdquo;: &ldquo;bar&rdquo;} or [1, 2, [3]].</p><p>If the binding is to one of the set variables (0s, 1s, etc), then the field must be an array, and each element of the array will be serialized according to the above rules and become a string in the set.</p>
+<hr/><p>@param json (required)  JSON object string</p><p>@param json_file</p><p>@param optional a set of binding keys that are optional. All bindings are by default  required, so if they are not found in the object they will cause a failure.</p><p>@param bindings (required)  Set of strings that define which fields in the JSON string map to which  output variables. The strings must be the format &ldquo;#=field&rdquo; where # is  0 through 9 and field is the name of a field in the json string.</p><p>@param 0-9 (optional)  For each # zero through nine used in the bindings parameter, you must  include a corresponding parameter 0-9 that is assigned a reference to  a workflow variable that will receive the value of the corresponding  JSON field.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.ParseJsonObject</span>(
+    json<span class="keyword">?</span><span class="separator">,</span>
+    json_file<span class="keyword">?</span><span class="separator">,</span>
+    optional<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    bindings<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (
+    ...<span class="keyword">?</span><span class="separator">,</span>
+    0<span class="keyword">?</span><span class="separator">,</span>
+    1<span class="keyword">?</span><span class="separator">,</span>
+    2<span class="keyword">?</span><span class="separator">,</span>
+    3<span class="keyword">?</span><span class="separator">,</span>
+    4<span class="keyword">?</span><span class="separator">,</span>
+    5<span class="keyword">?</span><span class="separator">,</span>
+    6<span class="keyword">?</span><span class="separator">,</span>
+    7<span class="keyword">?</span><span class="separator">,</span>
+    8<span class="keyword">?</span><span class="separator">,</span>
+    9<span class="keyword">?</span><span class="separator">,</span>
+    0s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    1s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    2s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    3s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    4s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    5s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    6s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    7s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    8s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    9s<span class="keyword">?</span><span class="keyword">*</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.ParseJsonObject"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1681287477">
+<p>This task can take a set of patterns, replacing a substring within each pattern with a new string. It can take a single pattern and a set of replacement strings, creating a copy of the pattern for each replacement string where the copy has some substring replaced with the replacement string.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.StringReplace</span>(
+    patterns<span class="keyword">*</span><span class="separator">,</span>
+    replace<span class="separator">,</span>
+    with<span class="keyword">*</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (strings<span class="keyword">*</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.StringReplace"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="311910870">
+<ul>
+  <li>file is required. can be local or in s3 bucket. must be a | delimited  file with header of  USER|EMAIL|DEFAULT_LOCALE|ACTIVE|PASSWORD|PUBLIC_KEY</li>
+  <li>if app is specified, users are loaded into a blade workspace using  the /authorization/users service in the master workspace. if not  specified, users are loaded into bloxweb using the  /admin/credentials/users service</li>
+  <li>replace defaults to false. if true, deletes all previous users before  loading the new data</li>
+  <li>if_missing defaults to &ldquo;FAIL&rdquo; (task fails if file not found). other  allowed values are &ldquo;WARN&rdquo; and &ldquo;IGNORE&rdquo;</li>
+</ul><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.LoadUsers</span>(
+    file<span class="separator">,</span>
+    app<span class="keyword">?</span><span class="separator">,</span>
+    replace = <span class="boolean">false</span><span class="separator">,</span>
+    if_missing = <span class="string">"FAIL"</span><span class="separator">,</span>
+    timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    s3_config<span class="keyword">?</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.LoadUsers"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="542792164">
+<pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.ExportUsers</span>(
+    server_uri<span class="separator">,</span>
+    dest<span class="separator">,</span>
+    timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    key<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(task_implementation_class = <span class="string">"com.logicblox.workflow.task.ExportUsers"</span>)
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="439938571">
+<pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.LoadPositionAccess</span>(
+    file<span class="separator">,</span>
+    app<span class="separator">,</span>
+    template<span class="separator">,</span>
+    level<span class="separator">,</span>
+    replace = <span class="boolean">false</span><span class="separator">,</span>
+    if_missing = <span class="string">"FAIL"</span><span class="separator">,</span>
+    timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    s3_config<span class="keyword">?</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.LoadPositionAccess"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="461873308">
+<pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.LoadTemplateAccess</span>(
+    file<span class="separator">,</span>
+    app<span class="separator">,</span>
+    replace = <span class="boolean">false</span><span class="separator">,</span>
+    if_missing = <span class="string">"FAIL"</span><span class="separator">,</span>
+    timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    s3_config<span class="keyword">?</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.LoadTemplateAccess"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1738493576">
+<pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.SftpUpload</span>(
+    files<span class="keyword">*</span><span class="separator">,</span>
+    server<span class="separator">,</span>
+    dest_dir<span class="keyword">?</span><span class="separator">,</span>
+    create_dir = <span class="boolean">false</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.SftpUpload"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1362466744">
+<hr/><p>@param transport (optional)  If not specified, the workspace will be located on the local server.  This parameter can also start with &ldquo;sqs:&rdquo; to identify the SQS queue  associated with a server that will receive the request. Or it can be  an URL that identifies the server on which the workspace will be  located along with the port used to communicate with the remote service  and the name of the workspace (i.e. http://remote_server:8080)</p><p>@param version (optional)  Can be set to 3 or 4. If &ldquo;3&rdquo;, the task uses LB 3 bloxweb admin services.  If 4, it uses LB 4 lb-web admin services. Defaults to 3 for backwards  compatibility.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.StartServices</span>(
+    workspaces<span class="keyword">*</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    version = <span class="number">3</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.StartServices"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1360321560">
+<hr/><p>@param transport (optional)  If not specified, the workspace will be located on the local server.  This parameter can also start with &ldquo;sqs:&rdquo; to identify the SQS queue  associated with a server that will receive the request. Or it can be  an URL that identifies the server on which the workspace will be  located along with the port used to communicate with the remote service  and the name of the workspace (i.e. http://remote_server:8080)</p><p>@param version (optional)  Can be set to 3 or 4. If 3, the task uses LB 3 bloxweb admin services.  If 4, it uses LB 4 lb-web admin services. Defaults to 3 for backwards  compatibility.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.StopServices</span>(
+    workspaces<span class="keyword">*</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    version = <span class="number">3</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.StopServices"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="957270104">
+<p>Kill 3.x Connectblox Processes.</p><p>This task will send an admin connectblox request to kill processes. It only works in 3.x deployments.</p>
+<hr/><p>@param host the address of the target connectblox server.</p><p>@param port the port of where the target connectblox server is listening for admin requests.</p><p>@param pid the process id of the process to be killed. If -1, all connectblox processes in that  server will be killed.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.KillConnectbloxProcess</span>(
+    host = <span class="string">"localhost"</span><span class="separator">,</span>
+    port = <span class="string">"55181"</span><span class="separator">,</span>
+    pid = <span class="number">-1</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.KillConnectbloxProcess"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="414322582">
+<p>Activate the web application hosted in this container (stop maintenance mode).</p><p>This workflow will execute a JSON request to the lb-web admin handler to activate the web application hosted by the lb web-server. The mechanism used to activate/deactivate the application is configured in the admin handler. It is safe to activate an application that is already active, the operation has no effect.</p><p>The default parameters target the default admin URI in the localhost.</p>
+<hr/><p>@param transport the transport to communicate to lb-web server.</p><p>@param uri the service prefix in the server.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.ActivateApp</span>(transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span> uri = <span class="string">"/lb-web/admin"</span><span class="separator">,</span> driver_meta<span class="keyword">?</span>) {
+  <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="#2035775467">lb.JsonService</a></span>(
+    json = <span class="string">"{ activation: { activated: true } }"</span><span class="separator">,</span>
+    uri = <span class="varref">$uri</span><span class="separator">,</span>
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1156161141">
+<p>Deactivate the web application hosted in this container (start maintenance mode).</p><p>This workflow will execute a JSON request to the lb-web admin handler to deactivate the web application hosted by the lb web-server. The mechanism used to activate/deactivate the application is configured in the admin handler. It is safe to activate an application that is already active, the operation has no effect.</p><p>The default parameters target the default admin URI in the localhost.</p>
+<hr/><p>@param transport the transport to communicate to lb-web server.</p><p>@param uri the service prefix in the server.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.DeactivateApp</span>(transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span> uri = <span class="string">"/lb-web/admin"</span><span class="separator">,</span> driver_meta<span class="keyword">?</span>) {
+  <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="#2035775467">lb.JsonService</a></span>(
+    json = <span class="string">"{ activation: { activated: false } }"</span><span class="separator">,</span>
+    uri = <span class="varref">$uri</span><span class="separator">,</span>
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1395876043">
+<p><strong>This task is deprecated. Consider using lb.tdx.Import!</strong></p><p>Execute a TDX service to load data into a workspace. The file may be local or on S3. If the file is a local file, the workspace must be local as well. The data file may be a vanilla csv or gzip file.</p>
+<hr/><p>@param <code>input</code>  A JSON message that defines a TDX file to import. The message must conform  to the <code>TDXInput</code> message in the <code>task_config</code> protocol. It must therefore  contain a <em>file</em> attribute that identifies the file to import, and a  <em>service</em> attribute that identifies the relative URI of the service; it  optionally contains an <em>error</em> attribute that defines the location to store  a CSV file with erroneous data rows found in the import.  Example: <code>&quot;{ file: &#39;s3://bucket/file.csv&#39;, service: &#39;/io/file&#39;, error: &#39;s3://bucket/file-errors.csv&#39;}&quot;</code></p><p>@param <code>async</code>  Whether to use the asynchronous TDX protocol. This requires a <code>txn_service</code>.</p><p>@param <code>async_poll_delay</code>  Number of seconds to wait between polling requests to check whether the  transaction is done. This is only used when <code>async</code> is set.</p><p>@param <del>load</del> (optional, deprecated: use input)  A set of &ldquo;service=file&rdquo; pairs that defines what files will be loaded and  what services are used to load the data. If the file compoonent starts  with &ldquo;s3:&rdquo;, we will try to find the file in an S3 folder. Otherwise, we  assume it is a local data file. An example entry in this set is  &ldquo;/my/db/io/dims/cal=s3://bucket/data.csv&rdquo;.</p><p>@param <del>files</del> (deprecated: use input)</p><p>@param <del>load_delim</del> (optional, deprecated: use input)  Character used to split service and file pieces from the load parameter  strings. Defaults to equals ( = ).</p><p>@param transport (optional)  If not specified, the workspace will be located on the local server.  This parameter can also start with &ldquo;sqs:&rdquo; to identify the SQS queue  associated with a server that will receive the request. Or it can be  an URL that identifies the server on which the workspace will be  located along with the port used to communicate with the remote service  and the name of the workspace (i.e. http://remote_server:8080)</p><p>@param if_missing (optional)  Action to take if the data file cannot be located. Value must be one of  FAIL, IGNORE, WARN to cause the task to fail, silently ignore the  missing file, or log a warning respectively.</p><p>@param file_type (optional)  Indicates if the file is a normal CSV file or a gzip file. Value must  be one of AUTO, GZIP, or TEXT. Defaults to AUTO, in which case a &ldquo;.gz&rdquo;  file extension will be interpreted as a GZIP file and all others as  CSV files.</p><p>@param full (optional)  If &ldquo;true&rdquo;, predicates being loaded in the workspace will be cleared  before the data is loaded. Otherwise the data will be overlayed on any  existing data in the workspace.</p><p>@param txn_service (optional)  Identifies the transaction service used to wrap the data load.</p><p>@param txn_timeout (optional)  Number of seconds allowed for the transaction processing the data load  to complete. Defaults to 320 seconds. Note that if load_timeout is  greater than txn_timeout, load_timeout will be used as the txn_timeout.</p><p>@param load_timeout (optional)  Number of seconds allowed for the data load to complete. Defaults to  320 seconds.</p><p>@param abort_on_error (optional)  If true, a bad row in a data file will cause the import job to fail.  The default is to continue the import (false).</p><p>@param error_threshold (optional)  If set to a value &gt;= 0 and if an error file is specified via the error  property of the input structure, this task will check the number of  import errors found during the load and act according to the  on_error_threshold_exceeded parameter. The default threshold value  is -1, which means don&rsquo;t report errors.</p><p>@param on_error_threshold_exceeded (optional)  Defaults to WARN. Allowed values are FAIL, WARN, IGNORE. See the  error_threshold parameter for more information. If this is set to  FAIL and the error threshold is exceeded, the task will fail. If set  to WARN, a warning will be logged and the task will continue. If set  to IGNORE, no error message will be logged.</p><p>@param <del>workspace</del> (deprecated: use input)  Path to the workspace in which to load data (i.e. /my/db)</p><p>@param <del>log_record_errors</del> (deprecated: use input)  If true, any rows with errors will be retrieved and logged. Default is  false.</p><p>@param <del>max_logged_errors</del> (deprecated: use input)  If specified and &gt; 0, this will cap the number of rows with errors that  are logged. If not specified, all errors will be logged.</p><p>Note: If multiple files or load values are provided, we will sort  alphanumerically by the file name and execute the imports in the  sorted order. This is the only way you can control import order  of multiple files in a single TdxImport task.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.TdxImport</span>(
+    input<span class="keyword">*</span><span class="keyword">?</span><span class="keyword">:</span> <span class="message-type" >TDXInput</span><span class="separator">,</span>
+    load<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    files<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    service<span class="keyword">?</span><span class="separator">,</span>
+    if_missing = <span class="string">"FAIL"</span><span class="separator">,</span>
+    file_type = <span class="string">"AUTO"</span><span class="separator">,</span>
+    full = <span class="boolean">false</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    txn_service<span class="keyword">?</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    load_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    load_delim = <span class="string">"="</span><span class="separator">,</span>
+    abort_on_error = <span class="boolean">false</span><span class="separator">,</span>
+    async = <span class="boolean">false</span><span class="separator">,</span>
+    async_poll_delay = <span class="number">5</span><span class="separator">,</span>
+    error_threshold = <span class="number">-1</span><span class="separator">,</span>
+    on_error_threshold_exceeded = <span class="string">"WARN"</span><span class="separator">,</span>
+    workspace<span class="keyword">?</span><span class="separator">,</span>
+    log_record_errors = <span class="boolean">false</span><span class="separator">,</span>
+    max_logged_errors = <span class="number">-1</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.TdxImport"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1500233916">
+<p><strong>This task is deprecated. Consider using lb.tdx.Export!</strong></p><p>Execute a TDX service to export data from a workspace. The generated data file may be local or on S3. If the file is a local file, the workspace must be local as well. The data file may be a vanilla csv or gzip file.</p>
+<hr/><p>@param <code>input</code>  A JSON message that defines a TDX file to export. The message must conform  to the <code>TDXInput</code> message in the <code>task_config</code> protocol. It must therefore  contain a <em>file</em> attribute that identifies the file to create during export,  and a <em>service</em> attribute that identifies the relative URI of the service; the  <em>error</em> attribute is ignored.  Example: <code>&quot;{ file: &#39;s3://bucket/file.csv&#39;, service: &#39;/io/file&#39;} &quot;</code></p><p>@param <code>async</code>  Whether to use the asynchronous TDX protocol. This requires a <code>txn_service</code>.</p><p>@param <code>async_poll_delay</code>  Number of seconds to wait between polling requests to check whether the  transaction is done. This is only used when <code>async</code> is set.</p><p>@param transport (optional)  If not specified, the workspace will be located on the local server.  This parameter can also start with &ldquo;sqs:&rdquo; to identify the SQS queue  associated with a server that will receive the request. Or it can be  an URL that identifies the server on which the workspace will be  located along with the port used to communicate with the remote service  and the name of the workspace (i.e. http://remote_server:8080)</p><p>@param txn_timeout (optional)  Number of seconds allowed for the transaction processing the data load  to complete. Defaults to 320 seconds. Note that if export_timeout is  greater than txn_timeout, export_timeout will be used as the txn_timeout.</p><p>@param export_timeout (optional)  Number of seconds allowed for the data export to complete. Defaults to  320 seconds.</p><p>@param gzip (optional)  If &ldquo;true&rdquo;, export data to a gzip file. Otherwise export to a CSV file.</p><p>@param key (optional)  encryption key used for S3 upload/download</p><p>@param <del>file</del> (deprecated: use input)  Path to the file to be generated. If this starts with &ldquo;s3:&rdquo;, the data  will be written to S3. Otherwise, a local file will be created.</p><p>@param <del>service</del> (deprecated: use input)  Identifier of the lb-web service used to export the data  (i.e. /my/db/io/dims/cal)</p><p>@param <del>export</del> (deprecated: use input)  A set of &ldquo;service=file&rdquo; pairs that defines what files will be created and  what services are used to create the data. An example entry in this set  is &ldquo;/my/db/io/dims/cal=s3://bucket/data.csv&rdquo;.</p><p>@param <del>export_delim</del> (deprecated: use input)  Character used to split service and file pieces from the export parameter  strings. Defaults to equals ( = ).</p><p>@param <del>workspace</del> (deprecated)  Path to the workspace from which data is exported (i.e. /my/db)</p><p>Note: either export or file/service params must be used</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.TdxExport</span>(
+    input<span class="keyword">*</span><span class="keyword">?</span><span class="keyword">:</span> <span class="message-type" >TDXInput</span><span class="separator">,</span>
+    export<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    file<span class="keyword">?</span><span class="separator">,</span>
+    service<span class="keyword">?</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    key<span class="keyword">?</span><span class="separator">,</span>
+    gzip = <span class="boolean">false</span><span class="separator">,</span>
+    txn_service<span class="keyword">?</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    export_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    export_delim = <span class="string">"="</span><span class="separator">,</span>
+    async = <span class="boolean">false</span><span class="separator">,</span>
+    async_poll_delay = <span class="number">5</span><span class="separator">,</span>
+    workspace<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.TdxExport"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="631343385">
+<p><strong>Consider using the tasks in the lb.wb namespace!</strong></p><p>FIXME - document the workbook tasks&hellip;.  timeout is in secs  commit/refresh_groups default to [&ldquo;default&rdquo;,&quot;__legacy_ui&quot;]</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.ImportWorkbookMaster</span>(
+    app<span class="separator">,</span>
+    src<span class="separator">,</span>
+    overwrite = <span class="boolean">false</span><span class="separator">,</span>
+    start_services = <span class="boolean">true</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.ImportWorkbookMaster"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="474850959">
+<p><strong>Consider using the tasks in the lb.wb namespace!</strong></p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.ImportWorkbookTemplate</span>(
+    app<span class="separator">,</span>
+    src<span class="separator">,</span>
+    template<span class="separator">,</span>
+    overwrite = <span class="boolean">false</span><span class="separator">,</span>
+    start_services = <span class="boolean">true</span><span class="separator">,</span>
+    link = <span class="boolean">true</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.ImportWorkbookTemplate"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="257785277">
+<p><strong>Consider using the tasks in the lb.wb namespace!</strong></p><p>need this to allow CreateWorkbooks to run in parallel params is a set of json strings that describe all workbooks that can be built</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.GetWorkbookCreationParams</span>(
+    app<span class="separator">,</span>
+    template<span class="separator">,</span>
+    timeout = <span class="number">320</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (params<span class="keyword">*</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.GetWorkbookCreationParams"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="86962181">
+<p><strong>Consider using the tasks in the lb.wb namespace!</strong></p><p>workbooks is a set of json strings returned by GetWorkbookInfo params is a set of json strings returned by GetWorkbookCreationParams</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.CreateWorkbooks</span>(
+    params<span class="keyword">*</span><span class="separator">,</span>
+    timeout = <span class="number">320</span><span class="separator">,</span>
+    start_services = <span class="boolean">false</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (workbooks<span class="keyword">*</span><span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.CreateWorkbooks"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="674158810">
+<p><strong>Consider using the tasks in the lb.wb namespace!</strong> this allows refresh/commit/delete workbook to run in parallel workbooks is a set of json strings describing all workbooks found paths contains the set of wb paths that can be used in conjuntion with ExecuteLogiQL and similar commands that need a workspace path on_error can be FAIL, WARN, or IGNORE</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.GetWorkbookInfo</span>(
+    app<span class="separator">,</span>
+    template<span class="keyword">?</span><span class="separator">,</span>
+    user<span class="keyword">?</span><span class="separator">,</span>
+    timeout = <span class="number">320</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    on_error = <span class="string">"FAIL"</span><span class="separator">,</span>
+    if_missing = <span class="string">"WARN"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (workbooks<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span> paths<span class="keyword">*</span><span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.GetWorkbookInfo"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1300473654">
+<p><strong>Consider using the tasks in the lb.wb namespace!</strong></p><p>workbooks is a set of json strings returned by GetWorkbookInfo</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.RefreshWorkbooks</span>(
+    workbooks<span class="keyword">*</span><span class="separator">,</span>
+    refresh_groups<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    timeout = <span class="number">320</span><span class="separator">,</span>
+    if_missing = <span class="string">"WARN"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.RefreshWorkbooks"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="444299818">
+<p><strong>Consider using the tasks in the lb.wb namespace!</strong></p><p>workbooks is a set of json strings returned by GetWorkbookInfo</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.CommitWorkbooks</span>(
+    workbooks<span class="keyword">*</span><span class="separator">,</span>
+    commit_groups<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    timeout = <span class="number">320</span><span class="separator">,</span>
+    if_missing = <span class="string">"WARN"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.CommitWorkbooks"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1960648650">
+<p><strong>Consider using the tasks in the lb.wb namespace!</strong></p><p>workbooks is a set of json strings returned by GetWorkbookInfo</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.DeleteWorkbooks</span>(
+    workbooks<span class="keyword">*</span><span class="separator">,</span>
+    timeout = <span class="number">320</span><span class="separator">,</span>
+    stop_services = <span class="boolean">false</span><span class="separator">,</span>
+    if_missing = <span class="string">"WARN"</span><span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.DeleteWorkbooks"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="386615000">
+<pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.GetBranchNames</span>(
+    ws<span class="separator">,</span>
+    service<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    include_auto_versions = <span class="boolean">false</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (branches<span class="keyword">*</span><span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.GetBranchNames"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="2093840554">
+<pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.CreateBranch</span>(
+    ws<span class="separator">,</span>
+    branch<span class="separator">,</span>
+    service<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    parent<span class="keyword">?</span><span class="separator">,</span>
+    on_error = <span class="string">"FAIL"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.CreateBranch"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="94704443">
+<pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.DeleteBranch</span>(
+    ws<span class="separator">,</span>
+    branch<span class="separator">,</span>
+    service<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    on_error = <span class="string">"FAIL"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.DeleteBranch"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="239689351">
+<pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.ReplaceDefaultBranch</span>(
+    ws<span class="separator">,</span>
+    branch<span class="separator">,</span>
+    service<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    on_error = <span class="string">"FAIL"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.ReplaceDefaultBranch"</span>
+  )
+</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" 
+                                    id="popup_lb_JsonService" 
+                                    tabindex="-1" 
+                                    role="dialog" 
+                                    aria-labelledby="lb.JsonService" 
+                                    aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content contents">
+          <div class="modal-body">
+          <div class="lb-workflow-block" id="2035775467">
+<p>Call a JSON service.</p>
+<hr/><p>Additional constraints on the parameters.</p>
+<pre>
+  uri
+  ? transport
+  ? txn_timeout = 320
+  ? format = true
+  ? gzip = true
+  xor
+      json
+      json_file
+  ? xor
+      output
+      output_file
+</pre><p>@param <code>uri</code></p><p>@param <code>transport</code></p><p>@param <code>json</code> the JSON string to send as a request to the service. Either this or <code>json_file</code> is mandatory.</p><p>@param <code>json_file</code> a local file from where JSON is loaded and then sent as a request to the service. Either this or  <code>json</code> is mandatory.</p><p>@param <code>output_file</code> a local file where to store the returned response as JSON. It is possible to use this together  with <code>output</code>.</p><p>@param <code>method</code></p><p>@param <code>txn_timeout</code></p><p>@param <code>format</code></p><p>@param <code>gzip</code></p><p>@return <code>output</code> the returned response as JSON. This is set only if it is bound to a variable.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.JsonService</span>(
+    uri<span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    json<span class="keyword">?</span><span class="separator">,</span>
+    json_file<span class="keyword">?</span><span class="separator">,</span>
+    output_file<span class="keyword">?</span><span class="separator">,</span>
+    method = <span class="string">"POST"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    format = <span class="boolean">true</span><span class="separator">,</span>
+    gzip = <span class="boolean">true</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (output<span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.JsonService"</span>
+  )
+</code></pre>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="jquery.min.js"></script>
+    <script src="jquery.hoverIntent.minified.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('[data-toggle="popover"]').popover();   
+    });
+    $(".modal-hook").hoverIntent({
+      over: function () {
+        var target = $(this).attr("data-target");
+        $(target).modal("show");
+      },
+      interval: 700
+    });
+    </script>
+  </body>
+</html>

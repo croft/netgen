@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The lb-workflow Samples Directory</title>
+
+    <link href="lb-favicon.png"    rel="shortcut icon" type="image/x-icon" />
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="lb-workflow.css"   rel="stylesheet">    
+  </head>
+  <body>
+    <div class="container header-container">
+      <div class="row header">
+        <div class="col-lg-2">
+          <a href="http://logicblox.com"><img src="lblogo.png" alt="LogicBlox, Inc."></a>
+        </div>
+        <div class="col-lg-10">
+          <a href="index.html"><h1 class="text-center">The lb-workflow Samples Directory</h1></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container contents-container">
+      <div class="row">
+        <div class="col-lg-2 sidebar">
+          <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
+            <ul class="nav">
+              <li class="sidebar-group-header">Workflows
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="#302080338" title="lb.wb.AddUsers">lb.wb.AddUsers</a></li>
+                    <li class="other"><a href="#1144569614" title="lb.wb.AddUsersByWorkbookName">lb.wb.AddUsersByWorkbookName</a></li>
+                    <li class="other"><a href="#773445921" title="lb.wb.CommitAll">lb.wb.CommitAll</a></li>
+                    <li class="other"><a href="#2111399159" title="lb.wb.CommitWorkbooks">lb.wb.CommitWorkbooks</a></li>
+                    <li class="other"><a href="#1886361793" title="lb.wb.CreateTemplate">lb.wb.CreateTemplate</a></li>
+                    <li class="other"><a href="#1051796031" title="lb.wb.CreateWorkbook">lb.wb.CreateWorkbook</a></li>
+                    <li class="other"><a href="#359007723" title="lb.wb.DeleteAll">lb.wb.DeleteAll</a></li>
+                    <li class="other"><a href="#293549309" title="lb.wb.DeleteWorkbooks">lb.wb.DeleteWorkbooks</a></li>
+                    <li class="other"><a href="#1482764907" title="lb.wb.ListWorkbookIds">lb.wb.ListWorkbookIds</a></li>
+                    <li class="other"><a href="#453414257" title="lb.wb.RefreshAll">lb.wb.RefreshAll</a></li>
+                    <li class="other"><a href="#1440945673" title="lb.wb.RefreshWorkbooks">lb.wb.RefreshWorkbooks</a></li>
+                    <li class="other"><a href="#2038981479" title="lb.wb.RemoveUsers">lb.wb.RemoveUsers</a></li>
+                    <li class="other"><a href="#1341501903" title="lb.wb.SetUsers">lb.wb.SetUsers</a></li>
+                    <li class="other"><a href="#22478345" title="lb.wb.util.CreateWorkbook">lb.wb.util.CreateWorkbook</a></li>
+                    <li class="other"><a href="#1557974286" title="lb.wb.util.GetTaggedTemplateInstantiationRefByTemplate">lb.wb.util.GetTaggedTemplateInstantiationRefByTemplate</a></li>
+                    <li class="other"><a href="#619361242" title="lb.wb.util.GetTemplateInstantiationRefByTemplate">lb.wb.util.GetTemplateInstantiationRefByTemplate</a></li>
+                    <li class="other"><a href="#2142273118" title="lb.wb.util.GetWorkbookPermission">lb.wb.util.GetWorkbookPermission</a></li>
+                    <li class="other"><a href="#4204920" title="lb.wb.util.GetWorkbookPosition">lb.wb.util.GetWorkbookPosition</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Tasks
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="#1539070793" title="lb.wb.BackupMasterWorkbook">lb.wb.BackupMasterWorkbook</a></li>
+                    <li class="other"><a href="#1703706357" title="lb.wb.RecoverMasterWorkbook">lb.wb.RecoverMasterWorkbook</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Standard Library
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="control_1096407654.html" title="control.wf">control.wf</a></li>
+                    <li class="other"><a href="jobs_2064022591.html" title="jobs.wf">jobs.wf</a></li>
+                    <li class="other"><a href="log_1948900833.html" title="log.wf">log.wf</a></li>
+                    <li class="other"><a href="stdlib_623000472.html" title="stdlib.wf">stdlib.wf</a></li>
+                    <li class="other"><a href="string_1421446234.html" title="string.wf">string.wf</a></li>
+                    <li class="other"><a href="tasks_1083303394.html" title="tasks.wf">tasks.wf</a></li>
+                    <li class="other"><a href="tdx_1729519909.html" title="tdx.wf">tdx.wf</a></li>
+                    <li class="other"><a href="testing-tasks_1856821761.html" title="testing-tasks.wf">testing-tasks.wf</a></li>
+                    <li class="current"><a href="workbooks_290480778.html" title="workbooks.wf">workbooks.wf</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Additional Resources
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="index.html" title="Index">Index</a></li>
+                    <li class="other"><a href="backup_1332419570.html" title="backup/wf/backup.wf">backup/wf/backup.wf</a></li>
+                    <li class="other"><a href="load_2058935082.html" title="backup/wf/load.wf">backup/wf/load.wf</a></li>
+                    <li class="other"><a href="restore_1204968188.html" title="backup/wf/restore.wf">backup/wf/restore.wf</a></li>
+                    <li class="other"><a href="exec_logiql_1742551485.html" title="connectblox/wf/exec_logiql.wf">connectblox/wf/exec_logiql.wf</a></li>
+                    <li class="other"><a href="main_633623232.html" title="param/wf/main.wf">param/wf/main.wf</a></li>
+                    <li class="other"><a href="partition_1866736532.html" title="partition/wf/partition.wf">partition/wf/partition.wf</a></li>
+                    <li class="other"><a href="bar_840371832.html" title="purge/bar.wf">purge/bar.wf</a></li>
+                    <li class="other"><a href="fail_1033209759.html" title="purge/fail.wf">purge/fail.wf</a></li>
+                    <li class="other"><a href="foo_713015307.html" title="purge/foo.wf">purge/foo.wf</a></li>
+                    <li class="other"><a href="url_1270117002.html" title="string/wf/url.wf">string/wf/url.wf</a></li>
+                    <li class="other"><a href="export_961675574.html" title="tdx/wf/export.wf">tdx/wf/export.wf</a></li>
+                    <li class="other"><a href="import_1592603335.html" title="tdx/wf/import.wf">tdx/wf/import.wf</a></li>
+                    <li class="other"><a href="create_873980314.html" title="workbookutil/wf/create.wf">workbookutil/wf/create.wf</a></li>
+                    <li class="other"><a href="create2_1323635598.html" title="workbookutil/wf/create2.wf">workbookutil/wf/create2.wf</a></li>
+                    <li class="other"><a href="create3_1323665389.html" title="workbookutil/wf/create3.wf">workbookutil/wf/create3.wf</a></li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="col-lg-10 contents">
+          <div class="lb-workflow-block">
+<h3>Workbook Workflows</h3><p>This module declares workflows that wrap service calls to provide workbook-specific functionality.</p>          </div>
+          <div class="lb-workflow-block" id="1886361793">
+<p>Create a workbook template.</p><p>This workflow calls a JSON service to create a workbook template. The workflow is a wrapper around an <em>lb.JsonService</em> task to provide a simpler interface; consider using that task directly if you need to fine tune parameters.</p>
+<hr/><p>@see <code>lb.JsonService</code></p><p>@param <code>json_spec_file</code> the path to a file that contains a json specification for the template.</p><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute the service call.</p><p>@param <code>txn_timeout</code> service transaction timeout.</p><p>@param <code>driver_meta</code> meta information to pass to the task placing the create template service call.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.CreateTemplate</span>(
+    json_spec_file<span class="separator">,</span>
+    app_prefix<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) {
+  <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+    json_file = <span class="varref">$json_spec_file</span><span class="separator">,</span>
+    uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbook-templates</span><span class="string">"</span><span class="separator">,</span>
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    txn_timeout = <span class="varref">$txn_timeout</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1051796031">
+<p>Create a workbook from a template.</p><p>This workflow will call a workbook service to instantiate a workbook named <code>workbook_name</code> from the template named <code>template_name</code>; the <code>request_values</code> parameter defines the position at which the workbook is instantiated. It returns a set with the id of the created workflow.</p>
+<hr/><p>@see <code>lb.JsonService</code></p><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>template_name</code> the name of the template from which to create a workbook.</p><p>@param <code>workbook_name</code> the name to be given to the workbook.</p><p>@param <code>request_values</code> an optional string that should contain a JSON array. This will be added  to the request to the workbook service when creating the workbook. It should contain  PositionIdentifier messages from the workbooks.proto, which define the position at which  the template is instantiated. By default the array is empty, which means that a global  workbook will be created.</p><p>@param <code>transport</code> the transport used to execute service calls.</p><p>@param <code>txn_timeout</code> service transaction timeout.</p><p>@return <code>workbook_ids</code> the id of the created workbook; this is a set with a single entry (due  to the protocol returning an array of ids).</p><p>@param <code>driver_meta</code> meta information to pass to the task placing the template instantiation  service call.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.CreateWorkbook</span>(
+    app_prefix<span class="separator">,</span>
+    template_name<span class="separator">,</span>
+    workbook_name<span class="separator">,</span>
+    request_values = <span class="string">"[]"</span><span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"6000s"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (workbook_ids<span class="keyword">*</span>)
+  <span class="separator">[</span>output<span class="separator">]</span> {
+
+  (<span class="varref">$output</span> = output) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbook-template-instantiation?id_only=true</span><span class="string">"</span><span class="separator">,</span>
+    json = <span class="string">"</span><span class="string">{
+        template_name: '</span><span class="varref">$(template_name)</span><span class="string">',
+        workbook_name: '</span><span class="varref">$(workbook_name)</span><span class="string">',
+        values: </span><span class="varref">$(request_values)</span><span class="string">
+      }</span><span class="string">"</span><span class="separator">,</span>
+    format = <span class="boolean">false</span><span class="separator">,</span>
+    txn_timeout = <span class="varref">$txn_timeout</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+  <span class="keyword">;</span>
+  (<span class="varref">$workbook_ids</span> = id) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_ParseJsonObject"><a href="tasks_1083303394.html#206464830">lb.ParseJsonObject</a></span>(json = <span class="varref">$output</span>)
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="302080338">
+<p>Add the users to the workbooks.</p>
+<hr/><p>@param <code>workbook_ids</code> a set with ids of the workbooks to which the users should be added.</p><p>@param <code>user_ids</code> a JSON array that contains all users that should be added to the workbooks.  Array elements must be JSON strings. E.g. &ldquo;[&lsquo;user1&rsquo;, &lsquo;user2&rsquo;]&rdquo;.</p><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute service calls.</p><p>@param <code>txn_timeout</code> service transaction timeout.</p><p>@param <code>max</code> the maximum number of concurrent calls to the add user service to make. Default is  to place all calls at once in parallel.</p><p>@param <code>driver_meta</code> meta information to pass to the task placing add user service calls.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.AddUsers</span>(
+    workbook_ids<span class="keyword">*</span><span class="separator">,</span>
+    user_ids<span class="separator">,</span>
+    app_prefix<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"6000s"</span><span class="separator">,</span>
+    max<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) {
+  <span class="keyword">forall</span>&lt;max=<span class="varref">$max</span>&gt;(workbook_id <span class="keyword">in</span> <span class="varref">$workbook_ids</span>) {
+    <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+      transport = <span class="varref">$transport</span><span class="separator">,</span>
+      txn_timeout = <span class="varref">$txn_timeout</span><span class="separator">,</span>
+      uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbooks/addusers</span><span class="string">"</span><span class="separator">,</span>
+      json = <span class="string">"</span><span class="string">{ workbook_id: '</span><span class="varref">$(workbook_id)</span><span class="string">', user_id: </span><span class="varref">$(user_ids)</span><span class="string"> }</span><span class="string">"</span><span class="separator">,</span>
+      driver_meta = <span class="varref">$driver_meta</span>
+    )
+  }
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1144569614">
+<p>Add the users to the workbook identified by this name.</p>
+<hr/><p>@param <code>workbook_name</code> the name of the workbook to which users will be added.</p><p>@param <code>user_ids</code> a JSON array that contains all users that should be added to the workbooks.  Array elements must be JSON strings. E.g. &ldquo;[&lsquo;user1&rsquo;, &lsquo;user2&rsquo;]&rdquo;.</p><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute service calls.</p><p>@param <code>txn_timeout</code> service transaction timeout.</p><p>@param <code>driver_meta</code> meta information to pass to the task placing the add user service call.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.AddUsersByWorkbookName</span>(
+    workbook_name<span class="separator">,</span>
+    user_ids<span class="separator">,</span>
+    app_prefix<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"6000s"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) {
+  <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    txn_timeout = <span class="varref">$txn_timeout</span><span class="separator">,</span>
+    uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbooks/addusers</span><span class="string">"</span><span class="separator">,</span>
+    json = <span class="string">"</span><span class="string">{ workbook_name: '</span><span class="varref">$(workbook_name)</span><span class="string">', user_id: </span><span class="varref">$(user_ids)</span><span class="string"> }</span><span class="string">"</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="2038981479">
+<p>Remove the users from the workbooks.</p>
+<hr/><p>@param <code>workbook_ids</code> a set with ids of the workbooks from which the users should be removed.</p><p>@param <code>user_ids</code> a JSON array that contains all users that should be removed from the workbooks.  Array elements must be JSON strings. E.g. &ldquo;[&lsquo;user1&rsquo;, &lsquo;user2&rsquo;]&rdquo;. <strong>note</strong> that the default  is the empty array, which means all users that have access to the workbooks will be removed.</p><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute service calls.</p><p>@param <code>txn_timeout</code> service transaction timeout.</p><p>@param <code>max</code> the maximum number of concurrent calls to the remove user service to make. Default is  to place all calls at once in parallel.</p><p>@param <code>driver_meta</code> meta information to pass to the task placing remove user service calls.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.RemoveUsers</span>(
+    workbook_ids<span class="keyword">*</span><span class="separator">,</span>
+    user_ids = <span class="string">"[]"</span><span class="separator">,</span>
+    app_prefix<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"6000s"</span><span class="separator">,</span>
+    max<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) {
+  <span class="keyword">forall</span>&lt;max=<span class="varref">$max</span>&gt;(workbook_id <span class="keyword">in</span> <span class="varref">$workbook_ids</span>) {
+    <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+      transport = <span class="varref">$transport</span><span class="separator">,</span>
+      txn_timeout = <span class="varref">$txn_timeout</span><span class="separator">,</span>
+      uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbooks/deleteusers</span><span class="string">"</span><span class="separator">,</span>
+      json = <span class="string">"</span><span class="string">{ workbook_id: '</span><span class="varref">$(workbook_id)</span><span class="string">', user_id: </span><span class="varref">$(user_ids)</span><span class="string"> }</span><span class="string">"</span><span class="separator">,</span>
+      driver_meta = <span class="varref">$driver_meta</span>
+    )
+  }
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1341501903">
+<p>Set the users for workbooks.</p>
+<hr/><p>@param <code>workbook_ids</code> a set with ids of the workbooks for which the users should be set</p><p>@param <code>user_ids</code> a JSON array that contains the list of users &ldquo;[&lsquo;user1&rsquo;, &lsquo;user2&rsquo;]&rdquo;.</p><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute service calls.</p><p>@param <code>txn_timeout</code> service transaction timeout.</p><p>@param <code>max</code> the maximum number of concurrent calls to the add user service to make. Default is  to place all calls at once in parallel.</p><p>@param <code>driver_meta</code> meta information to pass to the task placing add user service calls.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.SetUsers</span>(
+    workbook_ids<span class="keyword">*</span><span class="separator">,</span>
+    user_ids<span class="separator">,</span>
+    app_prefix<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    txn_timeout = <span class="string">"6000s"</span><span class="separator">,</span>
+    max<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) {
+  <span class="keyword">forall</span>&lt;max=<span class="varref">$max</span>&gt;(workbook_id <span class="keyword">in</span> <span class="varref">$workbook_ids</span>) {
+    <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+      transport = <span class="varref">$transport</span><span class="separator">,</span>
+      txn_timeout = <span class="varref">$txn_timeout</span><span class="separator">,</span>
+      uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbooks/setusers</span><span class="string">"</span><span class="separator">,</span>
+      json = <span class="string">"</span><span class="string">{ workbook_id: '</span><span class="varref">$(workbook_id)</span><span class="string">', user_id: </span><span class="varref">$(user_ids)</span><span class="string"> }</span><span class="string">"</span><span class="separator">,</span>
+      driver_meta = <span class="varref">$driver_meta</span>
+    )
+  }
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1482764907">
+<p>Collect the list of workbooks.</p>
+<hr/><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute service calls.</p><p>@param <code>txn_timeout</code> service transaction timeout.</p><p>@param <code>active_only</code> whether only active workbooks should be returned (otherwise, also return  inactive&mdash;deleted&mdash; workbook ids).</p><p>@return <code>workbook_ids</code> the set of ids of workbooks availables for the application.</p><p>@param <code>driver_meta</code> meta information to pass to the task placing the list workbooks service call.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.ListWorkbookIds</span>(
+    app_prefix<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"6000s"</span><span class="separator">,</span>
+    active_only = <span class="string">"true"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (workbook_ids<span class="keyword">*</span>)
+  <span class="separator">[</span>output<span class="separator">]</span> {
+
+  (<span class="varref">$output</span> = output) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    txn_timeout = <span class="varref">$txn_timeout</span><span class="separator">,</span>
+    uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbooks?id_only=true&active_only=</span><span class="varref">$(active_only)</span><span class="string">"</span><span class="separator">,</span>
+    method = <span class="string">"GET"</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+  <span class="keyword">;</span>
+  (<span class="varref">$workbook_ids</span> = id) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_ParseJsonObject"><a href="tasks_1083303394.html#206464830">lb.ParseJsonObject</a></span>(json = <span class="varref">$output</span><span class="separator">,</span> optional = {<span class="string">"id"</span>})
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1440945673">
+<p>Refresh workbooks, getting data from the master.</p>
+<hr/><p>@param <code>workbook_ids</code> a set of workbook ids to refresh. This can be the values returned by  <em>lb.wb.ListWorkbookIds</em>.</p><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>refresh_name</code> the name of the &ldquo;named refresh&rdquo; action to use.</p><p>@param <code>transport</code> the transport used to execute service calls.</p><p>@param <code>txn_timeout</code> service transaction timeout.</p><p>@param <code>max</code> the maximum number of concurrent calls to the refresh workbook service to make (i.e.,  maximum number of workbooks to refresh in parallel). Default is to serialize the calls so  that only one workbook is refreshed at a time. Any value that does not convert to a positive  integer will instruct the driver to execute all calls in parallel.</p><p>@param <code>driver_meta</code> meta information to pass to the task placing refresh workbook service calls.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.RefreshWorkbooks</span>(
+    workbook_ids<span class="keyword">*</span><span class="separator">,</span>
+    app_prefix<span class="separator">,</span>
+    refresh_name = <span class="string">"default"</span><span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"6000s"</span><span class="separator">,</span>
+    max = <span class="number">1</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) {
+  <span class="keyword">forall</span>&lt;max=<span class="varref">$max</span>&gt;(workbook_id <span class="keyword">in</span> <span class="varref">$workbook_ids</span>) {
+    <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+      transport = <span class="varref">$transport</span><span class="separator">,</span>
+      txn_timeout = <span class="varref">$txn_timeout</span><span class="separator">,</span>
+      uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbooks/refresh</span><span class="string">"</span><span class="separator">,</span>
+      json = <span class="string">"</span><span class="string">{ name: '</span><span class="varref">$(refresh_name)</span><span class="string">' , workbook_id: '</span><span class="varref">$(workbook_id)</span><span class="string">'}</span><span class="string">"</span><span class="separator">,</span>
+      driver_meta = <span class="varref">$driver_meta</span>
+    )
+  }
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="2111399159">
+<p>Commit workbooks into master.</p>
+<hr/><p>@param <code>workbook_ids</code> a set of workbook ids to commit. This can be the values returned by  <em>lb.wb.ListWorkbookIds</em>.</p><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>commit_name</code> the name of the &ldquo;named commit&rdquo; action to use.</p><p>@param <code>transport</code> the transport used to execute service calls.</p><p>@param <code>txn_timeout</code> service transaction timeout.</p><p>@param <code>max</code> the maximum number of concurrent calls to the commit workbook service to make (i.e.,  maximum number of workbooks to commit in parallel). Default is to serialize the calls so  that only one workbook is committed at a time. Any value that does not convert to a positive  integer will instruct the driver to execute all calls in parallel.</p><p>@param <code>driver_meta</code> meta information to pass to the task placing commit workbook service calls.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.CommitWorkbooks</span>(
+    workbook_ids<span class="keyword">*</span><span class="separator">,</span>
+    app_prefix<span class="separator">,</span>
+    commit_name = <span class="string">"default"</span><span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"6000s"</span><span class="separator">,</span>
+    max = <span class="number">1</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) {
+  <span class="keyword">forall</span>&lt;max=<span class="varref">$max</span>&gt;(workbook_id <span class="keyword">in</span> <span class="varref">$workbook_ids</span>) {
+    <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+      transport = <span class="varref">$transport</span><span class="separator">,</span>
+      txn_timeout = <span class="varref">$txn_timeout</span><span class="separator">,</span>
+      uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbooks/commit</span><span class="string">"</span><span class="separator">,</span>
+      json = <span class="string">"</span><span class="string">{ name: '</span><span class="varref">$(commit_name)</span><span class="string">', workbook_id: '</span><span class="varref">$(workbook_id)</span><span class="string">' }</span><span class="string">"</span><span class="separator">,</span>
+      driver_meta = <span class="varref">$driver_meta</span>
+    )
+  }
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="293549309">
+<p>Delete workbooks.</p>
+<hr/><p>@param <code>workbook_ids</code> a set of workbook ids to delete. This can be the values returned by  <em>lb.wb.ListWorkbookIds</em>.</p><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute service calls.</p><p>@param <code>txn_timeout</code> service transaction timeout.</p><p>@param <code>max</code> the maximum number of concurrent calls to the delete workbook service to make (i.e.,  maximum number of workbooks to delete in parallel). Default is to place all calls at  once in parallel.</p><p>@param <code>driver_meta</code> meta information to pass to the task placing delete workbook service calls.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.DeleteWorkbooks</span>(
+    workbook_ids<span class="keyword">*</span><span class="separator">,</span>
+    app_prefix<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"6000s"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  )
+  <span class="separator">[</span>ids<span class="separator">]</span> {
+
+  (<span class="varref">$ids</span> = out) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_string_Join"><a href="string_1421446234.html#1663446897">lb.string.Join</a></span>(
+    parts = <span class="varref">$workbook_ids</span><span class="separator">,</span>
+    separator = <span class="string">"&workbook-id="</span>
+  )
+  <span class="keyword">;</span>
+  <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    txn_timeout = <span class="varref">$txn_timeout</span><span class="separator">,</span>
+    uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbooks?workbook-id=</span><span class="varref">$(ids)</span><span class="string">"</span><span class="separator">,</span>
+    method = <span class="string">"DELETE"</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="453414257">
+<p>Convenience workflow to refresh all workbooks of a given application.</p><p>This workflow connects <em>lb.wb.ListWorkbookIds</em> with lb.wb.RefreshWorkbooks* with the default values for parameters.</p>
+<hr/><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute service calls.</p><p>@param <code>txn_timeout</code> service transaction timeout.</p><p>@param <code>max</code> the maximum number of concurrent calls to the refresh workbook service to make (i.e.,  maximum number of workbooks to refresh in parallel). Default is to serialize the calls so  that only one workbook is refreshed at a time. Any value that does not convert to a positive  integer will instruct the driver to execute all calls in parallel.</p><p>@param <code>driver_meta</code> meta information to pass to the task placing refresh workbook service calls.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.RefreshAll</span>(
+    app_prefix<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"6000s"</span><span class="separator">,</span>
+    max = <span class="number">1</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  )
+  <span class="separator">[</span>workbook_ids<span class="keyword">*</span><span class="separator">]</span> {
+
+  (<span class="varref">$workbook_ids</span> = workbook_ids) <span class="keyword"><~</span> <span class="workflow"><a href="#1482764907">lb.wb.ListWorkbookIds</a></span>(
+    app_prefix = <span class="varref">$app_prefix</span><span class="separator">,</span>
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    txn_timeout = <span class="varref">$txn_timeout</span>
+  )
+  <span class="keyword">;</span>
+  <span class="workflow"><a href="#1440945673">lb.wb.RefreshWorkbooks</a></span>(
+    app_prefix = <span class="varref">$app_prefix</span><span class="separator">,</span>
+    workbook_ids = <span class="varref">$workbook_ids</span><span class="separator">,</span>
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    txn_timeout = <span class="varref">$txn_timeout</span><span class="separator">,</span>
+    max = <span class="varref">$max</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="773445921">
+<p>Convenience workflow to commit all workbooks of a given application.</p><p>This workflow connects <em>lb.wb.ListWorkbookIds</em> with lb.wb.CommitWorkbooks* with the default values for parameters.</p>
+<hr/><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute service calls.</p><p>@param <code>txn_timeout</code> service transaction timeout.</p><p>@param <code>max</code> the maximum number of concurrent calls to the commit workbook service to make (i.e.,  maximum number of workbooks to commit in parallel). Default is to serialize the calls so  that only one workbook is committed at a time. Any value that does not convert to a positive  integer will instruct the driver to execute all calls in parallel.</p><p>@param <code>driver_meta</code> meta information to pass to the task placing commit workbook service calls.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.CommitAll</span>(
+    app_prefix<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"6000s"</span><span class="separator">,</span>
+    max = <span class="number">1</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  )
+  <span class="separator">[</span>workbook_ids<span class="keyword">*</span><span class="separator">]</span> {
+
+  (<span class="varref">$workbook_ids</span> = workbook_ids) <span class="keyword"><~</span> <span class="workflow"><a href="#1482764907">lb.wb.ListWorkbookIds</a></span>(
+    app_prefix = <span class="varref">$app_prefix</span><span class="separator">,</span>
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    txn_timeout = <span class="varref">$txn_timeout</span>
+  )
+  <span class="keyword">;</span>
+  <span class="workflow"><a href="#2111399159">lb.wb.CommitWorkbooks</a></span>(
+    app_prefix = <span class="varref">$app_prefix</span><span class="separator">,</span>
+    workbook_ids = <span class="varref">$workbook_ids</span><span class="separator">,</span>
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    txn_timeout = <span class="varref">$txn_timeout</span><span class="separator">,</span>
+    max = <span class="varref">$max</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="359007723">
+<p>Convenience workflow to delete all workbooks of a given application.</p><p>This workflow connects <em>lb.wb.ListWorkbookIds</em> with lb.wb.DeleteWorkbooks* with the default values for parameters.</p>
+<hr/><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute service calls.</p><p>@param <code>txn_timeout</code> service transaction timeout.</p><p>@param <code>driver_meta</code> meta information to pass to the task placing delete workbook service calls.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.DeleteAll</span>(
+    app_prefix<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"6000s"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) {
+  <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    txn_timeout = <span class="varref">$txn_timeout</span><span class="separator">,</span>
+    uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbooks?all=true</span><span class="string">"</span><span class="separator">,</span>
+    method = <span class="string">"DELETE"</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1539070793">
+<p>Backup the data for the EDB measures of a master workbook.</p><p>If <code>generate_index</code> is true, the result of this task will be a new folder under <em>backup_root</em> whose name is a timestamp in the format YYYYMMDD_HHmmss (e.g. 20150520_062848). This folder will contain a <code>backup-spec.proto</code> file with the specification for the backup, and a set of csv files for the data. Also, the backup_root will also contain a <code>latest_backup.txt</code> file with the timestamp of the latest backup. This file can be used by <code>lb.wb.RecoverWorkbook</code> to locate the data files and specification to recover. Note that currently all files are stored in gzip format.</p><p>If <code>generate_index</code> is false, then the <em>backup_root</em> folder itself will be used to store <code>backup-spec.proto</code> and the set of csv files. No <code>latest_backup.txt</code> will be generated.</p>
+<hr/><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>backup_root</code> the location where the backup is to be stored. If <em>generate_index</em> is true,  this should be a directory or cloud store location where the index and a new folder will  be created for the backup; otherwise, it should point to the place where the data will be  stored. Avoid trailing slashes.</p><p>@param <code>generate_index</code> whether the task should generate an index file in <em>backup_root</em> containing  the timestamp of the latest backup. This is useful to allow <code>lb.wb.RecoverWorkbook</code> to  lookup the latest backup when recovering.</p><p>@param <code>transport</code> the transport used to execute service calls. This is used both to lookup the  backup specification service as well as the dynamic TDX services exposed by the workbook  framework.</p><p>@param <code>async</code> whether to use the asynchronous transaction protocol when exporting the backup  data. This is highly recommended as it uses much fewer resources than the synchronous  protocol.</p><p>@param <code>poll_delay</code> when using the asynchronous transaction protocol, the client will send all the specification of  the files to import in a transaction and will then start polling until the transaction is over. This parameter  determines the duration to wait between polls. Note that the client polls immediately after the  commit requests returns, so short transactions may never need to wait.</p><p>@param <code>backup_service</code> the service to call in order to get a backup specification. If not set,  the default will be the concatenation of <em>app_prefix</em> and <code>&quot;/backup-cri&quot;</code>, which is the  prefix exposed by the workbook framework by default.</p><p>@param <code>txn_service</code> the transaction service to use when exporting the backup files. If not set,  the default will be the concatenation of <em>app_prefix</em> and <code>&quot;/workbooks/txn&quot;</code>, which is  the prefix exposed by the workbook framework by default. A transaction service is <em>always</em>  used, to ensure that a consistent snapshot is exported.</p><p>@param <code>key</code> the alias of the encryption key to be used when sending data to cloud store locations.</p><p>@param <code>txn_timeout</code> the timeout for the transaction that exports data, in seconds.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.wb.BackupMasterWorkbook</span>(
+    app_prefix<span class="separator">,</span>
+    backup_root<span class="separator">,</span>
+    generate_index = <span class="boolean">true</span><span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    async = <span class="boolean">true</span><span class="separator">,</span>
+    poll_delay<span class="keyword">:</span> <span class="message-type" >Duration</span><span class="keyword">?</span><span class="separator">,</span>
+    backup_service<span class="keyword">?</span><span class="separator">,</span>
+    txn_service<span class="keyword">?</span><span class="separator">,</span>
+    key<span class="keyword">?</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"6000s"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.wb.BackupMasterWorkbook"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1703706357">
+<p>Recover the data for the EDB measures of a master workbook from a previous backup.</p><p>If <code>generate_index</code> is true, this task will read a file called <code>latest_backup.txt</code> under <em>backup_root</em>, which should contain a single line with the timestamp of the latest backup. The task will then lookup <code>backup-spec.proto</code> under the directory <em>backup_root/$timestamp</em>, and will proceed loading the csv files in there.</p><p>If <code>generate_index</code> is false, then the <em>backup_root</em> folder itself will be used to lookup <code>backup-spec.proto</code> and the set of csv files.</p>
+<hr/><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>backup_root</code> the location where the files to recover are stored. This should be a directory or  cloud store location. If <em>lookup_index</em> is true, this should point to the directory that  contains the index file; otherwise, this should point to the directory that contains the  data and the backup specification. Avoid trailing slashes.</p><p>@param <code>lookup_index</code> whether the task should use the file in <em>backup_root</em> containing  the timestamp of the latest backup. This is often generated by &ldquo;lb.wb.BackupWorkbook&rdquo;.</p><p>@param <code>transport</code> the transport used to execute service calls. This is used both to lookup the  backup specification service as well as the dynamic TDX services exposed by the workbook  framework.</p><p>@param <code>async</code> whether to use the asynchronous transaction protocol when importing the recovery  data. This is highly recommended as it uses much fewer resources than the synchronous  protocol.</p><p>@param <code>poll_delay</code> when using the asynchronous transaction protocol, the client will send all the specification of  the files to import in a transaction and will then start polling until the transaction is over. This parameter  determines the duration to wait between polls. Note that the client polls immediately after the  commit requests returns, so short transactions may never need to wait.</p><p>@param <code>txn_service</code> the transaction service to use when importing the backup files. If not set,  the default will be the concatenation of <em>app_prefix</em> and <code>&quot;/workbooks/txn&quot;</code>, which is  the prefix exposed by the workbook framework by default. A transaction service is <em>always</em>  used, to ensure that a consistent snapshot is imported.</p><p>@param <code>txn_timeout</code> the timeout for the transaction that imports data, in seconds.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.wb.RecoverMasterWorkbook</span>(
+    app_prefix<span class="separator">,</span>
+    backup_root<span class="separator">,</span>
+    lookup_index = <span class="boolean">true</span><span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    async = <span class="boolean">true</span><span class="separator">,</span>
+    poll_delay<span class="keyword">:</span> <span class="message-type" >Duration</span><span class="keyword">?</span><span class="separator">,</span>
+    txn_service<span class="keyword">?</span><span class="separator">,</span>
+    key<span class="keyword">?</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"6000s"</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.wb.RecoverMasterWorkbook"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="619361242">
+<p>Query the list of TemplateInstantiationRef for a template</p>
+<hr/><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute service calls. This is used both to lookup the  backup specification service as well as the dynamic TDX services exposed by the workbook  framework.</p><p>@param <code>template_name</code> the template for which we want the TemplateInstantiationRef</p><p>@param <code>positions</code> the positions we are interested in. Typically use to build subsets of the workbooks  in development situations</p><p>@return <code>template_instantiation</code> the TemplateInstantiationRef as a json array</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.util.GetTemplateInstantiationRefByTemplate</span>(
+    app_prefix<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    template_name<span class="separator">,</span>
+    positions = <span class="string">"[]"</span>
+  ): (template_instantiation<span class="keyword">*</span>)
+  <span class="separator">[</span>tmpdir<span class="separator">]</span> {
+
+  (<span class="varref">$tmpdir</span> = dir) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_CreateTmpDir"><a href="tasks_1083303394.html#1582726742">lb.CreateTmpDir</a></span>()
+  <span class="keyword">;</span>
+  <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbooks/util/template_instantiation</span><span class="string">"</span><span class="separator">,</span>
+    json = <span class="string">"</span><span class="string">{ template_name: '</span><span class="varref">$(template_name)</span><span class="string">', with_positions: </span><span class="varref">$(positions)</span><span class="string"> }</span><span class="string">"</span><span class="separator">,</span>
+    output_file = <span class="string">"</span><span class="varref">$(tmpdir)</span><span class="string">/workbook_spec_by_template_</span><span class="varref">$(template_name)</span><span class="string">.json</span><span class="string">"</span>
+  )
+  <span class="keyword">;</span>
+  (<span class="varref">$template_instantiation</span> = template_instantiation) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_ParseJsonObject"><a href="tasks_1083303394.html#206464830">lb.ParseJsonObject</a></span>(
+    json_file = <span class="string">"</span><span class="varref">$(tmpdir)</span><span class="string">/workbook_spec_by_template_</span><span class="varref">$(template_name)</span><span class="string">.json</span><span class="string">"</span><span class="separator">,</span>
+    optional = {<span class="string">"template_instantiation"</span>}
+  )
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1557974286">
+<p>Query the list of TemplateInstantiationRef for a template and a tag</p>
+<hr/><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute service calls. This is used both to lookup the  backup specification service as well as the dynamic TDX services exposed by the workbook  framework.</p><p>@param <code>template_name</code> the template for which we want the TemplateInstantiationRef</p><p>@param <code>tag</code> the tag used to filter the template_instantiation</p><p>@param <code>positions</code> the positions we are interested in. Typically use to build subsets of the workbooks  in development situations</p><p>@return <code>template_instantiation</code> the TemplateInstantiationRef as a json array</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.util.GetTaggedTemplateInstantiationRefByTemplate</span>(
+    app_prefix<span class="separator">,</span>
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    template_name<span class="separator">,</span>
+    tag<span class="separator">,</span>
+    positions = <span class="string">"[]"</span>
+  ): (template_instantiation<span class="keyword">*</span>)
+  <span class="separator">[</span>tmpdir<span class="separator">]</span> {
+
+  (<span class="varref">$tmpdir</span> = dir) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_CreateTmpDir"><a href="tasks_1083303394.html#1582726742">lb.CreateTmpDir</a></span>()
+  <span class="keyword">;</span>
+  <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbooks/util/template_instantiation</span><span class="string">"</span><span class="separator">,</span>
+    json = <span class="string">"</span><span class="string">{ template_name: '</span><span class="varref">$(template_name)</span><span class="string">', with_positions: </span><span class="varref">$(positions)</span><span class="string">,tag: '</span><span class="varref">$(tag)</span><span class="string">' }</span><span class="string">"</span><span class="separator">,</span>
+    output_file = <span class="string">"</span><span class="varref">$(tmpdir)</span><span class="string">/workbook_spec_by_template_</span><span class="varref">$(template_name)</span><span class="string">.json</span><span class="string">"</span>
+  )
+  <span class="keyword">;</span>
+  (<span class="varref">$template_instantiation</span> = template_instantiation) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_ParseJsonObject"><a href="tasks_1083303394.html#206464830">lb.ParseJsonObject</a></span>(
+    json_file = <span class="string">"</span><span class="varref">$(tmpdir)</span><span class="string">/workbook_spec_by_template_</span><span class="varref">$(template_name)</span><span class="string">.json</span><span class="string">"</span><span class="separator">,</span>
+    optional = {<span class="string">"template_instantiation"</span>}
+  )
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="4204920">
+<p>Query the positions specified by a TemplateInstantiation entity so they can be passed to the instantiation service</p>
+<hr/><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute service calls. This is used both to lookup the  backup specification service as well as the dynamic TDX services exposed by the workbook  framework.</p><p>@param <code>template_instantiation_id</code> the id of the template instantiation</p><p>@return <code>position</code> The PositionIdentifier for this TemplateInstantiation</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.util.GetWorkbookPosition</span>(app_prefix<span class="separator">,</span> transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span> template_instantiation_id): (position)
+  <span class="separator">[</span>position_resp<span class="separator">]</span> {
+
+  (<span class="varref">$position_resp</span> = output) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbooks/util/positions</span><span class="string">"</span><span class="separator">,</span>
+    json = <span class="string">"</span><span class="string">{
+        template_instantiation_id: '</span><span class="varref">$(template_instantiation_id)</span><span class="string">'
+      }</span><span class="string">"</span>
+  )
+  <span class="keyword">;</span>
+  (<span class="varref">$position</span> = position) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_ParseJsonObject"><a href="tasks_1083303394.html#206464830">lb.ParseJsonObject</a></span>(json = <span class="varref">$position_resp</span><span class="separator">,</span> optional = {<span class="string">"position"</span>})
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="2142273118">
+<p>Query the permission specified by a TemplateInstantiation entity</p>
+<hr/><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute service calls. This is used both to lookup the  backup specification service as well as the dynamic TDX services exposed by the workbook  framework.</p><p>@param <code>template_instantiation_id</code> the id of the template instantiation</p><p>@return <code>user_ids</code> The user ids for this instantiation as a json array</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.util.GetWorkbookPermission</span>(app_prefix<span class="separator">,</span> transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span> template_instantiation_id): (user_ids)
+  <span class="separator">[</span>permision_resp<span class="separator">]</span> {
+
+  (<span class="varref">$permision_resp</span> = output) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_JsonService"><a href="tasks_1083303394.html#2035775467">lb.JsonService</a></span>(
+    transport = <span class="varref">$transport</span><span class="separator">,</span>
+    uri = <span class="string">"</span><span class="string">/</span><span class="varref">$(app_prefix)</span><span class="string">/workbooks/util/permissions</span><span class="string">"</span><span class="separator">,</span>
+    json = <span class="string">"</span><span class="string">{ template_instantiation_id: '</span><span class="varref">$(template_instantiation_id)</span><span class="string">' }</span><span class="string">"</span>
+  )
+  <span class="keyword">;</span>
+  (<span class="varref">$user_ids</span> = user_id) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_ParseJsonObject"><a href="tasks_1083303394.html#206464830">lb.ParseJsonObject</a></span>(json = <span class="varref">$permision_resp</span><span class="separator">,</span> optional = {<span class="string">"user_id"</span>})
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="22478345">
+<p>Create a workbook for a given TemplateInstantiationRef</p>
+<hr/><p>@param <code>app_prefix</code> a URI path to construct the service URI. This is the prefix used when  configuring workbook services (via <em>lb:web:workbooks:config:app_prefix</em>) or the modeler  (via <em>modeler_config:services:prefix:master</em>). E.g. <code>&quot;my_project&quot;</code>.</p><p>@param <code>transport</code> the transport used to execute service calls. This is used both to lookup the  backup specification service as well as the dynamic TDX services exposed by the workbook  framework.</p><p>@param <code>template_instantiation</code> the TemplateInstantiationRef message</p><p>@param txn_timeout the timeout for the workbook instantiation</p><p>@return <code>workbook_ids*</code> id of the created workbook, as a singleton set</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.wb.util.CreateWorkbook</span>(
+    transport = <span class="string">"http://localhost:55183"</span><span class="separator">,</span>
+    app_prefix<span class="separator">,</span>
+    template_instantiation<span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"6000s"</span>
+  ): (workbook_ids<span class="keyword">*</span>)
+  <span class="separator">[</span>
+    template_instantiation_id<span class="separator">,</span>
+    workbook_name<span class="separator">,</span>
+    template_name<span class="separator">,</span>
+    position<span class="separator">,</span>
+    user_ids
+  <span class="separator">]</span> {
+
+  (<span class="varref">$template_instantiation_id</span> = id<span class="separator">,</span> <span class="varref">$workbook_name</span> = workbook_name<span class="separator">,</span> <span class="varref">$template_name</span> = template_name) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_ParseJsonObject"><a href="tasks_1083303394.html#206464830">lb.ParseJsonObject</a></span>(json = <span class="varref">$template_instantiation</span>)
+  <span class="keyword">;</span>
+  (
+    (<span class="varref">$user_ids</span> = user_ids) <span class="keyword"><~</span> <span class="workflow"><a href="#2142273118">lb.wb.util.GetWorkbookPermission</a></span>(
+      app_prefix = <span class="varref">$app_prefix</span><span class="separator">,</span>
+      template_instantiation_id = <span class="varref">$template_instantiation_id</span>
+    )
+  ) <span class="keyword">||</span> (
+    (<span class="varref">$position</span> = position) <span class="keyword"><~</span> <span class="workflow"><a href="#4204920">lb.wb.util.GetWorkbookPosition</a></span>(
+      app_prefix = <span class="varref">$app_prefix</span><span class="separator">,</span>
+      template_instantiation_id = <span class="varref">$template_instantiation_id</span>
+    )
+    <span class="keyword">;</span>
+    (<span class="varref">$workbook_ids</span> = workbook_ids) <span class="keyword"><~</span> <span class="workflow"><a href="#1051796031">lb.wb.CreateWorkbook</a></span>(
+      app_prefix = <span class="varref">$app_prefix</span><span class="separator">,</span>
+      template_name = <span class="varref">$template_name</span><span class="separator">,</span>
+      workbook_name = <span class="varref">$workbook_name</span><span class="separator">,</span>
+      request_values = <span class="varref">$position</span><span class="separator">,</span>
+      transport = <span class="varref">$transport</span><span class="separator">,</span>
+      txn_timeout = <span class="varref">$txn_timeout</span>
+    )
+  )
+  <span class="keyword">;</span>
+  <span class="keyword">forall</span>(ui <span class="keyword">in</span> {<span class="varref">$user_ids</span>}) {
+    <span class="workflow"><a href="#302080338">lb.wb.AddUsers</a></span>(
+      transport = <span class="varref">$transport</span><span class="separator">,</span>
+      app_prefix = <span class="varref">$app_prefix</span><span class="separator">,</span>
+      txn_timeout = <span class="varref">$txn_timeout</span><span class="separator">,</span>
+      user_ids = <span class="varref">$user_ids</span><span class="separator">,</span>
+      workbook_ids = <span class="varref">$workbook_ids</span>
+    )
+  }
+}
+</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" 
+                                    id="popup_lb_ParseJsonObject" 
+                                    tabindex="-1" 
+                                    role="dialog" 
+                                    aria-labelledby="lb.ParseJsonObject" 
+                                    aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content contents">
+          <div class="modal-body">
+          <div class="lb-workflow-block" id="206464830">
+<p>Take a JSON object string like &lsquo;{&ldquo;SKU&rdquo;:&ldquo;sku_123&rdquo;, &ldquo;STORE&rdquo;:&ldquo;store_abc&rdquo;}&rsquo; and map some of the JSON fields to workflow variables.</p><p>If the field is a JSON primitive, the value will be unquoted and bound to the variable. For example, 1 becomes 1 and &ldquo;foo&rdquo; becomes foo (no quotes).</p><p>If the field is a JSON object or array, the whole element is serialized. For example, you may get {&ldquo;foo&rdquo;: &ldquo;bar&rdquo;} or [1, 2, [3]].</p><p>If the binding is to one of the set variables (0s, 1s, etc), then the field must be an array, and each element of the array will be serialized according to the above rules and become a string in the set.</p>
+<hr/><p>@param json (required)  JSON object string</p><p>@param json_file</p><p>@param optional a set of binding keys that are optional. All bindings are by default  required, so if they are not found in the object they will cause a failure.</p><p>@param bindings (required)  Set of strings that define which fields in the JSON string map to which  output variables. The strings must be the format &ldquo;#=field&rdquo; where # is  0 through 9 and field is the name of a field in the json string.</p><p>@param 0-9 (optional)  For each # zero through nine used in the bindings parameter, you must  include a corresponding parameter 0-9 that is assigned a reference to  a workflow variable that will receive the value of the corresponding  JSON field.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.ParseJsonObject</span>(
+    json<span class="keyword">?</span><span class="separator">,</span>
+    json_file<span class="keyword">?</span><span class="separator">,</span>
+    optional<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    bindings<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (
+    ...<span class="keyword">?</span><span class="separator">,</span>
+    0<span class="keyword">?</span><span class="separator">,</span>
+    1<span class="keyword">?</span><span class="separator">,</span>
+    2<span class="keyword">?</span><span class="separator">,</span>
+    3<span class="keyword">?</span><span class="separator">,</span>
+    4<span class="keyword">?</span><span class="separator">,</span>
+    5<span class="keyword">?</span><span class="separator">,</span>
+    6<span class="keyword">?</span><span class="separator">,</span>
+    7<span class="keyword">?</span><span class="separator">,</span>
+    8<span class="keyword">?</span><span class="separator">,</span>
+    9<span class="keyword">?</span><span class="separator">,</span>
+    0s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    1s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    2s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    3s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    4s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    5s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    6s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    7s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    8s<span class="keyword">?</span><span class="keyword">*</span><span class="separator">,</span>
+    9s<span class="keyword">?</span><span class="keyword">*</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.ParseJsonObject"</span>
+  )
+</code></pre>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" 
+                                    id="popup_lb_string_Join" 
+                                    tabindex="-1" 
+                                    role="dialog" 
+                                    aria-labelledby="lb.string.Join" 
+                                    aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content contents">
+          <div class="modal-body">
+          <div class="lb-workflow-block" id="1663446897">
+<p>Create a string by joining a set of parts using a separator.</p><p>The separator will be applied between the parts. Note that parts is a set, so there is no inherent order. However, this task guarantees that the join order is based on alphanumerically sorting of the input as strings.</p>
+<hr/><p>@param <code>parts</code> the set of parts to join.</p><p>@param <code>separator</code> the string to insert between each part.</p><p>@return <code>out</code> the resulting joined string.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.string.Join</span>(parts<span class="keyword">*</span><span class="separator">,</span> separator = <span class="string">", "</span><span class="separator">,</span> driver_meta<span class="keyword">?</span>): (out) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#1881367264">SyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.string.Join"</span>
+  )
+</code></pre>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" 
+                                    id="popup_lb_JsonService" 
+                                    tabindex="-1" 
+                                    role="dialog" 
+                                    aria-labelledby="lb.JsonService" 
+                                    aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content contents">
+          <div class="modal-body">
+          <div class="lb-workflow-block" id="2035775467">
+<p>Call a JSON service.</p>
+<hr/><p>Additional constraints on the parameters.</p>
+<pre>
+  uri
+  ? transport
+  ? txn_timeout = 320
+  ? format = true
+  ? gzip = true
+  xor
+      json
+      json_file
+  ? xor
+      output
+      output_file
+</pre><p>@param <code>uri</code></p><p>@param <code>transport</code></p><p>@param <code>json</code> the JSON string to send as a request to the service. Either this or <code>json_file</code> is mandatory.</p><p>@param <code>json_file</code> a local file from where JSON is loaded and then sent as a request to the service. Either this or  <code>json</code> is mandatory.</p><p>@param <code>output_file</code> a local file where to store the returned response as JSON. It is possible to use this together  with <code>output</code>.</p><p>@param <code>method</code></p><p>@param <code>txn_timeout</code></p><p>@param <code>format</code></p><p>@param <code>gzip</code></p><p>@return <code>output</code> the returned response as JSON. This is set only if it is bound to a variable.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.JsonService</span>(
+    uri<span class="separator">,</span>
+    transport<span class="keyword">?</span><span class="separator">,</span>
+    json<span class="keyword">?</span><span class="separator">,</span>
+    json_file<span class="keyword">?</span><span class="separator">,</span>
+    output_file<span class="keyword">?</span><span class="separator">,</span>
+    method = <span class="string">"POST"</span><span class="separator">,</span>
+    txn_timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"320s"</span><span class="separator">,</span>
+    format = <span class="boolean">true</span><span class="separator">,</span>
+    gzip = <span class="boolean">true</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (output<span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.JsonService"</span>
+  )
+</code></pre>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" 
+                                    id="popup_lb_CreateTmpDir" 
+                                    tabindex="-1" 
+                                    role="dialog" 
+                                    aria-labelledby="lb.CreateTmpDir" 
+                                    aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content contents">
+          <div class="modal-body">
+          <div class="lb-workflow-block" id="1582726742">
+<p>Generate a directory with a unique name. If the parent parameter is specified, the new directory will be created in the parent directory (the parent will be created if it is missing). If parent is not specified, the new directory will be created in the system tmp directory. If prefix is specified, it will be used as the prefix for the new directory. If timestamp is specified, the current time will be included after any specified prefix. If neither prefix or timestamp are used, the new directory will start with &ldquo;tmp&rdquo;. The full path to the new directory will be stored in the workflow variable indicated by the dir parameter.</p>
+<hr/><p>@param parent (optional)  path to a directory that will contain the new directory. system tmp  directory will be used if not specified (usually /tmp)</p><p>@param prefix (optional)  string that will prefix the name of the new directory</p><p>@param timestamp (optional)  format for a timestamp that will be included in the name of the new  directory (see Timestamp task for details)</p><p>@param dir (required, output)  reference to a workflow variable that will receive the full path to the  new directory</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.CreateTmpDir</span>(
+    parent<span class="keyword">?</span><span class="separator">,</span>
+    prefix<span class="keyword">?</span><span class="separator">,</span>
+    timestamp<span class="keyword">?</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (dir) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.CreateTmpDir"</span>
+  )
+</code></pre>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="jquery.min.js"></script>
+    <script src="jquery.hoverIntent.minified.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('[data-toggle="popover"]').popover();   
+    });
+    $(".modal-hook").hoverIntent({
+      over: function () {
+        var target = $(this).attr("data-target");
+        $(target).modal("show");
+      },
+      interval: 700
+    });
+    </script>
+  </body>
+</html>

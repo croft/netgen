@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>name</key>
+	<string>LogicBlox</string>
+	<key>ordering</key>
+	<array>
+		<string>D1BBA5FC-D59E-4C36-9700-85C1FE09BB8D</string>
+		<string>2F0B132E-033D-478D-BF17-3A06DB93D356</string>
+		<string>20C927FC-2F60-4E7D-A9AB-5C262AB93EBE</string>
+		<string>A6A707DB-14DA-4C34-8404-4869FA6C93D6</string>
+		<string>B3E2F6C8-E5CF-45F0-A3A2-487C54F2210E</string>
+		<string>0282C6D8-DDF2-4BE1-B06D-F21B6FD55370</string>
+		<string>0373E132-9AA1-43F0-9630-A85836EBB452</string>
+		<string>D3F0D79D-C79B-4F5E-A275-B8333960574A</string>
+		<string>9169A16A-2B7E-4DF0-861A-303975F69288</string>
+		<string>218648EC-6201-42F5-A643-34598BFD22F1</string>
+		<string>A1B83333-377B-4509-942B-1778CD0B13D1</string>
+	</array>
+	<key>uuid</key>
+	<string>A308F3EE-0AA5-4C4E-AEE7-CA24291B83AF</string>
+</dict>
+</plist>

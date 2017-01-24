@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>transaction
+$0
+commit
+</string>
+	<key>name</key>
+	<string>transaction…commit</string>
+	<key>scope</key>
+	<string>source.logicblox</string>
+	<key>tabTrigger</key>
+	<string>tr</string>
+	<key>uuid</key>
+	<string>2F0B132E-033D-478D-BF17-3A06DB93D356</string>
+</dict>
+</plist>

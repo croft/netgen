@@ -1,0 +1,18 @@
+
+ï
+lb/web/email.protobloxweb.email"v
+SendEmailRequest
+from (	
+reply_to (	
+
+to (	
+
+cc (	
+bcc (	
+subject (	
+body (	"1
+VoidResponse
+error (	
+
+error_code (	B
+com.logicblox.bloxweb.emailH

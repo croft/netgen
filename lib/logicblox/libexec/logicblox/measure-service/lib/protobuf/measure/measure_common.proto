@@ -1,0 +1,22 @@
+import "blox/options.proto";
+package lb.web.measure.common;
+
+option java_package = "com.logicblox.bloxweb.measure";
+
+/**
+ * Representation of a location in a file or string
+ */
+message Location
+{
+   required int64 row = 1;
+   required int64 column = 2;
+}
+
+/**
+ * Representation of a region in a file or string
+ */
+message Region
+{
+   required Location start = 1;
+   required Location end = 2;
+}

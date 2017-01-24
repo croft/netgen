@@ -1,0 +1,264 @@
+package lb.web.internal;
+
+import "blox/options.proto";
+
+option java_package = "com.logicblox.bloxweb.internal";
+
+/**
+ * Specication of a BloxWeb service
+ */
+message Service
+{
+  /**
+   * URLs starting with this prefix will be served by this service
+   */
+   // TODO: temporarily made optional.
+   // need to refactor these into a message for HTTP
+   optional string prefix = 1;
+
+   // Optional human-readable description of the service.
+   optional string description = 28;
+
+  /**
+   * Optional handler-id for processing requests of this service.
+   */
+  optional string handler = 7;
+  optional HandlerConfig handler_config = 15;
+
+  /**
+   * A set of inactive blocks to execute in the service transaction.
+   */
+  repeated string block_name = 2 [(blox.options.set) = true];
+
+  /**
+   * A set of after-fixpoint inactive blocks to execute in the service transaction.
+   */
+  repeated string after_fixpoint_block_name = 27 [(blox.options.set) = true];
+
+  /**
+   * The protobuf protocol and message type for requests to the server
+   */
+  optional string request_protocol = 3;
+  optional string request_message = 4;
+
+  /**
+   * The protobuf protocol and message type for responses from the
+   * server.  This can be omitted, in which case the response should
+   * be saved to a file. The name of that file should be stored in
+   * lb:web:responseFile.
+   */
+  optional string response_protocol = 5;
+  optional string response_message = 6;
+
+  optional string file_binding = 8;
+
+  optional Encoding request_encoding = 9 [default = AUTO];
+  optional Encoding response_encoding = 10 [default = AUTO];
+
+  // for now default to http unless specified otherwise
+  // TODO: make required
+  optional TransferProtocol transfer_protocol = 11;
+
+  // status service config.
+  optional StatusService status_service = 12;
+
+  optional string authenticator = 13;
+
+  optional bool readonly = 14 [default = false] ;
+
+  optional bool exclusive = 16 [default = false] ;
+
+  repeated ServiceParameter parameter = 17 [(blox.options.set) = true];
+
+  repeated string group = 18 [(blox.options.set) = true];
+  optional int64 disabled_status = 19;
+
+  optional bool ignore_authentication_requirement = 21 [default = false];
+
+
+  required string http_method = 23;
+
+  optional string operation = 24;
+
+  // whether the handler should only be initialized when the service is used
+  optional bool lazy = 25 [default = false] ;
+
+  /**
+   * The workspace that hosts the service, in case it is not same as the
+   * workspace that declares the service.
+   */
+  optional string host_workspace = 26;
+  
+  /**
+   * The syncmode configured for this service.
+   */
+  optional string sync_mode = 29;
+}
+
+message CORSRule {
+  message Prefix {
+    required string prefix = 1;
+    optional string group = 2;
+  }
+
+  repeated string allowed_origin = 1 [(blox.options.set) = true];
+  repeated string allowed_method = 2 [(blox.options.set) = true];
+  repeated string allowed_header = 3 [(blox.options.set) = true];
+  repeated Prefix prefixes = 4 [(blox.options.set) = true];
+  required string name = 5;
+}
+
+
+/**
+ * Generic key value pairs passed as parameters to the service.
+ */
+message ServiceParameter
+{
+  required string key = 1;
+  required string value = 2;
+}
+
+/**
+ * Specification of an instance of BloxWeb Service
+ * with workspace
+ */
+message ServiceInstance
+{
+  optional string workspace = 1;
+  required Service service = 2;
+}
+
+/**
+ * Configuration options for the BloxWeb service handler.
+ */
+message HandlerConfig
+{
+  // TODO move all handler-specific info to this union from the
+  // Service message.
+  optional ProxyHandler proxy = 1;
+  optional GlobalProtoBufHandler global_protobuf = 2;
+  optional SQSS3ProxyHandler sqs_s3_proxy = 3;
+}
+
+message ProxyHandler
+{
+  required string target = 1;
+  optional string host = 2;
+
+  // Only applicable to the proxy prefix
+  optional string prefix = 3;
+}
+
+message GlobalProtoBufHandler {
+  // local services to distribute work
+  repeated ServiceClient target = 1 [(blox.options.set) = true];
+  // whether it's acceptable for parts to fail without failing the whole request
+  optional bool accept_failure = 2;
+}
+
+message SQSS3ProxyHandler
+{
+  required string request_queue = 1;
+  required string response_queue = 2;
+  required string bucket = 3;
+  required string enc_key_name = 4;
+}
+
+/**
+ * Encoding of the request or response
+ */
+enum Encoding {
+  NONE = 1;      // None is supplied
+  BINARY = 2;    // Binary protobuf (default)
+  JSON = 3;      // JSON protobuf
+  AUTO = 4;      // decided by http headers - assumes BINARY if no headers
+}
+
+message TransferProtocol
+{
+  optional bool http = 1;
+  optional SQS_S3 sqs_s3 = 2;
+}
+
+message SQS_S3
+{
+  required string queue_name = 1;
+  required string bucket_name = 2;
+
+  optional string sqs_endpoint = 3;
+  optional string s3_endpoint = 4;
+  optional string s3_region = 5;
+
+  optional bool delete_from_sqs = 6 [default = true] ;
+  optional bool delete_from_s3 = 7 [default = true] ;
+
+  // TODO: probably shouldn't specify this here.
+  required string access_key = 8;
+  required string secret_key = 9;
+}
+
+/**
+ * Message stored in SQS that serves as the header of the SQS+S3 protocol
+ **/
+message SQSHeader
+{
+  // key used to look up the message body in S3
+  required string message_key = 1;
+
+  // this is only used by Infor currently. We need to generalized header
+  // definition later.
+  optional string tenant = 2;
+}
+
+message StatusService
+{
+  required string primary_queue_name = 1;
+  repeated string backup_queue_name = 2;
+
+  // TODO: probably shouldn't specify this here.
+  required string access_key = 8;
+  required string secret_key = 9;
+}
+
+message Realm {
+   required string name = 1;
+   optional string config = 5;
+   optional bool stateful = 2;
+   optional string session_key = 6;
+   optional Mechanism mechanism = 3;
+   repeated Option options = 4;
+}
+
+message Mechanism {
+  optional string clazz = 1;
+  repeated Option options = 2;
+}
+
+message Option {
+   required string key = 1;
+   required string value = 2;
+}
+
+/**
+ * ServiceClient
+ */
+message ServiceClient
+{
+  required string uri = 1;
+  optional Transport transport = 2;
+
+}
+
+message Transport
+{
+  optional TCPTransport tcp = 1;
+  optional SQSTransport sqs = 2;
+}
+
+message TCPTransport
+{
+}
+
+message SQSTransport
+{
+}

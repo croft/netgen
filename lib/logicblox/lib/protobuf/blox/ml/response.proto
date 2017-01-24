@@ -1,0 +1,38 @@
+package fl.com;
+
+message PaperBoatResponse {
+  enum ResponseId {
+    TABLE_IS_READY=0;   
+    TABLE_IS_NOT_READY=1;
+    TASK_IS_READY=2;
+    TASK_SCHEDULED=3;
+    WORKSPACE_NOT_FOUND=4;
+    WORKSPACE_FOUND=5;
+    TABLE_FOUND=6;
+    TABLE_NOT_FOUND=7;
+    WAITING_TABLE=8;
+    LOAD_SYMBOL_NOT_FOUND=9;
+    LOAD_SYMBOL_FOUND=10;
+  }
+  enum TableId {
+        DEFAULT_TABLE_T=0;
+        DEFAULT_SPARSE_INT_TABLE_T=1;
+        DEFAULT_SPARSE_DOUBLE_TABLE_T=2;
+        UINTEGER_TABLE_T=3;
+        INTEGER_TABLE_T=4;
+        DENSE=5;
+        DENSE_BALL=6;
+        SPARSE=7;
+        DENSE_SPARSE=8;
+        CATEGORICAL=9;
+        DENSE_CATEGORICAL=10;
+        SPARSE_UINT8=11;
+        SPARSE_UINT16=12;
+  };
+  required ResponseId response_id=1;
+  required string workspace_id=2;
+  optional string table_name=3;
+  optional TableId table_type=4;
+  optional string task_name=5;
+  optional string log=6;
+}

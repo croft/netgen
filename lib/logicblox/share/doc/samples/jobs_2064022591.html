@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The lb-workflow Samples Directory</title>
+
+    <link href="lb-favicon.png"    rel="shortcut icon" type="image/x-icon" />
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="lb-workflow.css"   rel="stylesheet">    
+  </head>
+  <body>
+    <div class="container header-container">
+      <div class="row header">
+        <div class="col-lg-2">
+          <a href="http://logicblox.com"><img src="lblogo.png" alt="LogicBlox, Inc."></a>
+        </div>
+        <div class="col-lg-10">
+          <a href="index.html"><h1 class="text-center">The lb-workflow Samples Directory</h1></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container contents-container">
+      <div class="row">
+        <div class="col-lg-2 sidebar">
+          <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
+            <ul class="nav">
+              <li class="sidebar-group-header">Workflows
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="#252367826" title="lb.steve.CreateJob">lb.steve.CreateJob</a></li>
+                    <li class="other"><a href="#358506220" title="lb.steve.Output">lb.steve.Output</a></li>
+                    <li class="other"><a href="#1739780407" title="lb.steve.UploadJobImpl">lb.steve.UploadJobImpl</a></li>
+                    <li class="other"><a href="#1264648776" title="lb.steve.Wait">lb.steve.Wait</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Tasks
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="#861987615" title="lb.jobs.CreateJob">lb.jobs.CreateJob</a></li>
+                    <li class="other"><a href="#123577665" title="lb.jobs.Output">lb.jobs.Output</a></li>
+                    <li class="other"><a href="#1218875908" title="lb.jobs.UploadJobImpl">lb.jobs.UploadJobImpl</a></li>
+                    <li class="other"><a href="#1715851851" title="lb.jobs.Wait">lb.jobs.Wait</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Standard Library
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="control_1096407654.html" title="control.wf">control.wf</a></li>
+                    <li class="current"><a href="jobs_2064022591.html" title="jobs.wf">jobs.wf</a></li>
+                    <li class="other"><a href="log_1948900833.html" title="log.wf">log.wf</a></li>
+                    <li class="other"><a href="stdlib_623000472.html" title="stdlib.wf">stdlib.wf</a></li>
+                    <li class="other"><a href="string_1421446234.html" title="string.wf">string.wf</a></li>
+                    <li class="other"><a href="tasks_1083303394.html" title="tasks.wf">tasks.wf</a></li>
+                    <li class="other"><a href="tdx_1729519909.html" title="tdx.wf">tdx.wf</a></li>
+                    <li class="other"><a href="testing-tasks_1856821761.html" title="testing-tasks.wf">testing-tasks.wf</a></li>
+                    <li class="other"><a href="workbooks_290480778.html" title="workbooks.wf">workbooks.wf</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Additional Resources
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="index.html" title="Index">Index</a></li>
+                    <li class="other"><a href="backup_1332419570.html" title="backup/wf/backup.wf">backup/wf/backup.wf</a></li>
+                    <li class="other"><a href="load_2058935082.html" title="backup/wf/load.wf">backup/wf/load.wf</a></li>
+                    <li class="other"><a href="restore_1204968188.html" title="backup/wf/restore.wf">backup/wf/restore.wf</a></li>
+                    <li class="other"><a href="exec_logiql_1742551485.html" title="connectblox/wf/exec_logiql.wf">connectblox/wf/exec_logiql.wf</a></li>
+                    <li class="other"><a href="main_633623232.html" title="param/wf/main.wf">param/wf/main.wf</a></li>
+                    <li class="other"><a href="partition_1866736532.html" title="partition/wf/partition.wf">partition/wf/partition.wf</a></li>
+                    <li class="other"><a href="bar_840371832.html" title="purge/bar.wf">purge/bar.wf</a></li>
+                    <li class="other"><a href="fail_1033209759.html" title="purge/fail.wf">purge/fail.wf</a></li>
+                    <li class="other"><a href="foo_713015307.html" title="purge/foo.wf">purge/foo.wf</a></li>
+                    <li class="other"><a href="url_1270117002.html" title="string/wf/url.wf">string/wf/url.wf</a></li>
+                    <li class="other"><a href="export_961675574.html" title="tdx/wf/export.wf">tdx/wf/export.wf</a></li>
+                    <li class="other"><a href="import_1592603335.html" title="tdx/wf/import.wf">tdx/wf/import.wf</a></li>
+                    <li class="other"><a href="create_873980314.html" title="workbookutil/wf/create.wf">workbookutil/wf/create.wf</a></li>
+                    <li class="other"><a href="create2_1323635598.html" title="workbookutil/wf/create2.wf">workbookutil/wf/create2.wf</a></li>
+                    <li class="other"><a href="create3_1323665389.html" title="workbookutil/wf/create3.wf">workbookutil/wf/create3.wf</a></li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="col-lg-10 contents">
+          <div class="lb-workflow-block">
+<h3>LB-Jobs Tasks</h3><p>Tasks to submit job implementations to the lb-jobs service, and then create new jobs, wait for their termination and collect the results.</p>          </div>
+          <div class="lb-workflow-block" id="1218875908">
+<p>Upload a job implementation.</p>
+<hr/><h4>Inputs:</h4><p>@param <code>job_impl_id</code> Name of the job implementation (needs to be unique)</p><p>@param <code>archive_url</code> S3 URL of the .tar.gz archive of the implementation</p><p>@param <code>metadata</code> key=value pairs of metadata on the job implementation</p><p>@param <code>service</code> service URL</p><p>@param <code>username</code> username used for authentication</p><p>@param <code>key</code> private key used for authentication</p><h4>Outputs:</h4><p>@return <code>job_id</code> Uploads are asynchronously processed and the progress should  be checked with this id.</p><p>@return <code>job_impl_id</code> If input id was not given, then the unique id chosen. Otherwise, the input id.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.jobs.UploadJobImpl</span>(
+    job_impl_id<span class="keyword">?</span><span class="separator">,</span>
+    archive_url<span class="separator">,</span>
+    metadata<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    service = <span class="string">"https://steve.logicblox.com/job"</span><span class="separator">,</span>
+    username<span class="separator">,</span>
+    key<span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (job_id<span class="separator">,</span> out_job_impl_id<span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.steve.UploadJobImpl"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="861987615">
+<p>Create a new job.</p>
+<hr/><h4>Inputs:</h4><p>@param <code>job_impl_id</code> Id of the implementation.</p><p>@param <code>correlation</code></p><p>@param <code>queue</code></p><p>@param <code>timeout</code></p><p>@param <code>output</code></p><p>@param <code>output_encryption_key</code></p><p>@param <code>unique_output</code></p><p>@param <code>input</code></p><p>@param <code>metadata</code></p><p>@param <code>service</code> service URL</p><p>@param <code>username</code> username used for authentication</p><p>@param <code>key</code> private key used for authentication</p><h4>Outputs:</h4><p>@return <code>job_id</code> Job id of the newly created job</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.jobs.CreateJob</span>(
+    job_impl_id<span class="separator">,</span>
+    correlation<span class="keyword">?</span><span class="separator">,</span>
+    queue<span class="keyword">?</span><span class="separator">,</span>
+    timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"0s"</span><span class="separator">,</span>
+    output<span class="separator">,</span>
+    output_encryption_key<span class="keyword">?</span><span class="separator">,</span>
+    unique_output = <span class="boolean">false</span><span class="separator">,</span>
+    input<span class="keyword">*</span><span class="separator">,</span>
+    metadata<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    service = <span class="string">"https://steve.logicblox.com/job"</span><span class="separator">,</span>
+    username<span class="separator">,</span>
+    key<span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (job_id) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.steve.CreateJob"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1715851851">
+<p>Wait for a job to complete.</p>
+<hr/><h4>Inputs:</h4><p>@param <code>job_id</code> Job id to wait for</p><p>@param <code>poll_delay_seconds</code> Polling delay</p><p>@param <code>fail_on_failure</code> If false, do not fail if the job completed  (this might work better when the output is obtained)</p><p>@param <code>service</code> service URL</p><p>@param <code>username</code> username used for authentication</p><p>@param <code>key</code> private key used for authentication</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.jobs.Wait</span>(
+    job_id<span class="separator">,</span>
+    poll_delay_seconds = <span class="number">60</span><span class="separator">,</span>
+    fail_on_failure = <span class="boolean">true</span><span class="separator">,</span>
+    service = <span class="string">"https://steve.logicblox.com/job"</span><span class="separator">,</span>
+    username<span class="separator">,</span>
+    key<span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.steve.Wait"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="123577665">
+<p>Obtain the output listing of a job</p>
+<hr/><h4>Inputs:</h4><p>@param <code>job_id</code> Job id to obtain results for</p><p>@param <code>output</code> Set of S3 URLs</p><p>@param <code>service</code> service URL</p><p>@param <code>username</code> username used for authentication</p><p>@param <code>key</code> private key used for authentication</p><h4>Outputs:</h4><p>@return <code>output</code></p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.jobs.Output</span>(
+    job_id<span class="separator">,</span>
+    service = <span class="string">"https://steve.logicblox.com/job"</span><span class="separator">,</span>
+    username<span class="separator">,</span>
+    key<span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (output<span class="keyword">*</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.steve.Output"</span>
+  )
+</code></pre>
+          </div>
+          <div class="lb-workflow-block">
+<p>The definitions bellow are deprecated and are only here for backwards compatibility. They will eventually be removed from the standard library. Do <strong>NOT</strong> use them.</p>          </div>
+          <div class="lb-workflow-block" id="1739780407">
+<p><del>DEPRECATED</del>! Use lb.jobs.UploadJobImpl.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.steve.UploadJobImpl</span>(
+    job_impl_id<span class="keyword">?</span><span class="separator">,</span>
+    archive_url<span class="separator">,</span>
+    metadata<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    service = <span class="string">"https://steve.logicblox.com/job"</span><span class="separator">,</span>
+    username<span class="separator">,</span>
+    key<span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (job_id<span class="separator">,</span> out_job_impl_id) {
+  (<span class="varref">$job_id</span> = job_id<span class="separator">,</span> <span class="varref">$out_job_impl_id</span> = out_job_impl_id) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_jobs_UploadJobImpl"><a href="#1218875908">lb.jobs.UploadJobImpl</a></span>(
+    job_impl_id = <span class="varref">$job_impl_id</span><span class="separator">,</span>
+    archive_url = <span class="varref">$archive_url</span><span class="separator">,</span>
+    metadata = <span class="varref">$metadata</span><span class="separator">,</span>
+    service = <span class="varref">$service</span><span class="separator">,</span>
+    username = <span class="varref">$username</span><span class="separator">,</span>
+    key = <span class="varref">$key</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="252367826">
+<p><del>DEPRECATED</del>! Use lb.jobs.CreateJob.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.steve.CreateJob</span>(
+    job_impl_id<span class="separator">,</span>
+    correlation<span class="keyword">?</span><span class="separator">,</span>
+    queue<span class="keyword">?</span><span class="separator">,</span>
+    timeout = <span class="number">0</span><span class="separator">,</span>
+    output<span class="separator">,</span>
+    output_encryption_key<span class="keyword">?</span><span class="separator">,</span>
+    unique_output = <span class="boolean">false</span><span class="separator">,</span>
+    input<span class="keyword">*</span><span class="separator">,</span>
+    metadata<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    service = <span class="string">"https://steve.logicblox.com/job"</span><span class="separator">,</span>
+    username<span class="separator">,</span>
+    key<span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (job_id) {
+  (<span class="varref">$job_id</span> = job_id) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_jobs_CreateJob"><a href="#861987615">lb.jobs.CreateJob</a></span>(
+    job_impl_id = <span class="varref">$job_impl_id</span><span class="separator">,</span>
+    correlation = <span class="varref">$correlation</span><span class="separator">,</span>
+    queue = <span class="varref">$queue</span><span class="separator">,</span>
+    timeout = <span class="varref">$timeout</span><span class="separator">,</span>
+    output = <span class="varref">$output</span><span class="separator">,</span>
+    output_encryption_key = <span class="varref">$output_encryption_key</span><span class="separator">,</span>
+    unique_output = <span class="varref">$unique_output</span><span class="separator">,</span>
+    input = <span class="varref">$input</span><span class="separator">,</span>
+    metadata = <span class="varref">$metadata</span><span class="separator">,</span>
+    service = <span class="varref">$service</span><span class="separator">,</span>
+    username = <span class="varref">$username</span><span class="separator">,</span>
+    key = <span class="varref">$key</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="1264648776">
+<p><del>DEPRECATED</del>! Use lb.jobs.Wait.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.steve.Wait</span>(
+    job_id<span class="separator">,</span>
+    poll_delay_seconds = <span class="number">60</span><span class="separator">,</span>
+    fail_on_failure = <span class="boolean">true</span><span class="separator">,</span>
+    service = <span class="string">"https://steve.logicblox.com/job"</span><span class="separator">,</span>
+    username<span class="separator">,</span>
+    key<span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) {
+  <span class="task modal-hook" data-target="#popup_lb_jobs_Wait"><a href="#1715851851">lb.jobs.Wait</a></span>(
+    job_id = <span class="varref">$job_id</span><span class="separator">,</span>
+    poll_delay_seconds = <span class="varref">$poll_delay_seconds</span><span class="separator">,</span>
+    fail_on_failure = <span class="varref">$fail_on_failure</span><span class="separator">,</span>
+    service = <span class="varref">$service</span><span class="separator">,</span>
+    username = <span class="varref">$username</span><span class="separator">,</span>
+    key = <span class="varref">$key</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+}
+</code></pre>
+          </div>
+          <div class="lb-workflow-block" id="358506220">
+<p><del>DEPRECATED</del>! Use lb.jobs.Output.</p><pre><code class="lb-workflow"><span class="keyword">workflow</span> <span class="workflow">lb.steve.Output</span>(
+    job_id<span class="separator">,</span>
+    service = <span class="string">"https://steve.logicblox.com/job"</span><span class="separator">,</span>
+    username<span class="separator">,</span>
+    key<span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (output<span class="keyword">*</span>) {
+  (<span class="varref">$output</span> = output) <span class="keyword"><~</span> <span class="task modal-hook" data-target="#popup_lb_jobs_Output"><a href="#123577665">lb.jobs.Output</a></span>(
+    job_id = <span class="varref">$job_id</span><span class="separator">,</span>
+    service = <span class="varref">$service</span><span class="separator">,</span>
+    username = <span class="varref">$username</span><span class="separator">,</span>
+    key = <span class="varref">$key</span><span class="separator">,</span>
+    driver_meta = <span class="varref">$driver_meta</span>
+  )
+}
+</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" 
+                                    id="popup_lb_jobs_Output" 
+                                    tabindex="-1" 
+                                    role="dialog" 
+                                    aria-labelledby="lb.jobs.Output" 
+                                    aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content contents">
+          <div class="modal-body">
+          <div class="lb-workflow-block" id="123577665">
+<p>Obtain the output listing of a job</p>
+<hr/><h4>Inputs:</h4><p>@param <code>job_id</code> Job id to obtain results for</p><p>@param <code>output</code> Set of S3 URLs</p><p>@param <code>service</code> service URL</p><p>@param <code>username</code> username used for authentication</p><p>@param <code>key</code> private key used for authentication</p><h4>Outputs:</h4><p>@return <code>output</code></p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.jobs.Output</span>(
+    job_id<span class="separator">,</span>
+    service = <span class="string">"https://steve.logicblox.com/job"</span><span class="separator">,</span>
+    username<span class="separator">,</span>
+    key<span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (output<span class="keyword">*</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.steve.Output"</span>
+  )
+</code></pre>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" 
+                                    id="popup_lb_jobs_Wait" 
+                                    tabindex="-1" 
+                                    role="dialog" 
+                                    aria-labelledby="lb.jobs.Wait" 
+                                    aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content contents">
+          <div class="modal-body">
+          <div class="lb-workflow-block" id="1715851851">
+<p>Wait for a job to complete.</p>
+<hr/><h4>Inputs:</h4><p>@param <code>job_id</code> Job id to wait for</p><p>@param <code>poll_delay_seconds</code> Polling delay</p><p>@param <code>fail_on_failure</code> If false, do not fail if the job completed  (this might work better when the output is obtained)</p><p>@param <code>service</code> service URL</p><p>@param <code>username</code> username used for authentication</p><p>@param <code>key</code> private key used for authentication</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.jobs.Wait</span>(
+    job_id<span class="separator">,</span>
+    poll_delay_seconds = <span class="number">60</span><span class="separator">,</span>
+    fail_on_failure = <span class="boolean">true</span><span class="separator">,</span>
+    service = <span class="string">"https://steve.logicblox.com/job"</span><span class="separator">,</span>
+    username<span class="separator">,</span>
+    key<span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.steve.Wait"</span>
+  )
+</code></pre>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" 
+                                    id="popup_lb_jobs_CreateJob" 
+                                    tabindex="-1" 
+                                    role="dialog" 
+                                    aria-labelledby="lb.jobs.CreateJob" 
+                                    aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content contents">
+          <div class="modal-body">
+          <div class="lb-workflow-block" id="861987615">
+<p>Create a new job.</p>
+<hr/><h4>Inputs:</h4><p>@param <code>job_impl_id</code> Id of the implementation.</p><p>@param <code>correlation</code></p><p>@param <code>queue</code></p><p>@param <code>timeout</code></p><p>@param <code>output</code></p><p>@param <code>output_encryption_key</code></p><p>@param <code>unique_output</code></p><p>@param <code>input</code></p><p>@param <code>metadata</code></p><p>@param <code>service</code> service URL</p><p>@param <code>username</code> username used for authentication</p><p>@param <code>key</code> private key used for authentication</p><h4>Outputs:</h4><p>@return <code>job_id</code> Job id of the newly created job</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.jobs.CreateJob</span>(
+    job_impl_id<span class="separator">,</span>
+    correlation<span class="keyword">?</span><span class="separator">,</span>
+    queue<span class="keyword">?</span><span class="separator">,</span>
+    timeout<span class="keyword">:</span> <span class="message-type" >Duration</span> = <span class="string">"0s"</span><span class="separator">,</span>
+    output<span class="separator">,</span>
+    output_encryption_key<span class="keyword">?</span><span class="separator">,</span>
+    unique_output = <span class="boolean">false</span><span class="separator">,</span>
+    input<span class="keyword">*</span><span class="separator">,</span>
+    metadata<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    service = <span class="string">"https://steve.logicblox.com/job"</span><span class="separator">,</span>
+    username<span class="separator">,</span>
+    key<span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (job_id) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.steve.CreateJob"</span>
+  )
+</code></pre>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" 
+                                    id="popup_lb_jobs_UploadJobImpl" 
+                                    tabindex="-1" 
+                                    role="dialog" 
+                                    aria-labelledby="lb.jobs.UploadJobImpl" 
+                                    aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content contents">
+          <div class="modal-body">
+          <div class="lb-workflow-block" id="1218875908">
+<p>Upload a job implementation.</p>
+<hr/><h4>Inputs:</h4><p>@param <code>job_impl_id</code> Name of the job implementation (needs to be unique)</p><p>@param <code>archive_url</code> S3 URL of the .tar.gz archive of the implementation</p><p>@param <code>metadata</code> key=value pairs of metadata on the job implementation</p><p>@param <code>service</code> service URL</p><p>@param <code>username</code> username used for authentication</p><p>@param <code>key</code> private key used for authentication</p><h4>Outputs:</h4><p>@return <code>job_id</code> Uploads are asynchronously processed and the progress should  be checked with this id.</p><p>@return <code>job_impl_id</code> If input id was not given, then the unique id chosen. Otherwise, the input id.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.jobs.UploadJobImpl</span>(
+    job_impl_id<span class="keyword">?</span><span class="separator">,</span>
+    archive_url<span class="separator">,</span>
+    metadata<span class="keyword">*</span><span class="keyword">?</span><span class="separator">,</span>
+    service = <span class="string">"https://steve.logicblox.com/job"</span><span class="separator">,</span>
+    username<span class="separator">,</span>
+    key<span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ): (job_id<span class="separator">,</span> out_job_impl_id<span class="keyword">?</span>) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.steve.UploadJobImpl"</span>
+  )
+</code></pre>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="jquery.min.js"></script>
+    <script src="jquery.hoverIntent.minified.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('[data-toggle="popover"]').popover();   
+    });
+    $(".modal-hook").hoverIntent({
+      over: function () {
+        var target = $(this).attr("data-target");
+        $(target).modal("show");
+      },
+      interval: 700
+    });
+    </script>
+  </body>
+</html>

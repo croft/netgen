@@ -1,0 +1,6 @@
+{
+  "handler": "meta",
+  "prefix": "/meta",
+  "http_method": "GET",
+  "group": ["lb:web:internal"]
+}

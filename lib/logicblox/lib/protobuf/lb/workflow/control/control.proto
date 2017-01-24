@@ -1,0 +1,183 @@
+package workflow_control;
+
+import "blox/options.proto";
+option java_package = "com.logicblox.workflow.control";
+
+/**
+ * An extension to provide additional type information to primitive fields.
+ *
+ * Some primitive fields in the messages of this protocol are annotated with
+ * this type information. This means that the primitive is expected to have
+ * additional semantics, like "PositiveInteger" or "Duration" (for strings).
+ * There is a section at the end of this file with specifications for each of
+ * the types used.
+ */
+import "google/protobuf/descriptor.proto";
+extend google.protobuf.FieldOptions {
+  optional string type = 34697;
+}
+
+
+//
+// REQUEST AND RESPONSE UNIONS
+//
+
+/**
+ * Command Request Union.
+ */
+message Request {
+  optional Purge purge = 2;
+  optional Action action = 3;
+  optional Start start = 4;
+}
+
+/**
+ * Command Response Union.
+ */
+message Response {
+  repeated Exception exception = 1 [(blox.options.set) = true];
+
+  optional PurgeResponse purge = 2;
+  optional ActionResponse action = 3;
+  optional StartResponse start = 4;
+}
+
+/**
+ * Container for errors.
+ */
+message Exception {
+  required string error = 1;
+  required string error_code = 2;
+}
+
+
+//
+// COMMANDS
+//
+
+// PURGE
+message Purge {
+  // workflow instances to purge
+  required WorkflowInstanceSelector selector = 1;
+}
+
+message PurgeResponse {
+  // ids of the workflow instances that were purged
+  repeated int64 root_uids = 1 [(blox.options.set) = true];
+}
+
+// ACTION
+message Action {
+  // the action to perform
+  required string action = 1;
+  // processes to search within workflow instances
+  required ProcessInstanceSelector selector = 2;
+}
+
+message ActionResponse {
+  // the uids of processes that were selected to receive the action
+  repeated int64 uids = 1 [(blox.options.set) = true];
+}
+
+// START
+message Start {
+  // the name of the workflow to start
+  required string name = 1;
+  // parameters to pass to the workflow
+  repeated Argument arg = 2 [(blox.options.set) = true];
+}
+
+message StartResponse {
+  // the id of the root process for the newly started workflow
+  required int64 root_uid = 1;
+}
+
+//
+// HELPERS
+//
+message Argument {
+  required string name = 1;
+  repeated string value = 2 [(blox.options.set) = true];
+}
+
+
+//
+// SELECTORS
+//
+
+/**
+ * Filter criteria to select workflow instances for which a command applies.
+ *
+ * The criteria will be joined to search for a workflow instance. If no
+ * criterion is used, all workflow instances are selected. For example, if
+ * `name` is used, then all workflow instances of the workflow with that name
+ * will be selected. This can be refined by also sending the `terminated_before`
+ * criterion to select only workflow instances that terminated before a certain
+ * point in time.
+ */
+message WorkflowInstanceSelector {
+
+  // select only instances of the workflow with this name
+  optional string name = 1;
+
+  // select the instances that have a process with any of these uids as root
+  repeated int64 root_uid = 2 [(blox.options.set) = true];
+
+  // select instances that started or terminated before (now[] - this duration)
+  optional string started_before    = 10 [(type) = "Duration"];
+  optional string terminated_before = 11 [(type) = "Duration"];
+
+  // select instances that started or terminated after (now[] - this duration)
+  optional string started_after    = 21 [(type) = "Duration"];
+  optional string terminated_after = 22 [(type) = "Duration"];
+}
+
+/**
+ * Filter criteria to select processes for which a command applies.
+ *
+ * Like with WorkflowInstanceSelector, the criteria will be joined to search for
+ * a process instance. If no criterion is used, all process instances of the
+ * selected workflow instance will be selected.
+ */
+message ProcessInstanceSelector {
+
+  // workflow instances to search for processes
+  required WorkflowInstanceSelector workflow = 1;
+
+  // select only the processes with these ids
+  repeated int64 id = 2 [(blox.options.set) = true];
+
+  // select only processes in some of these states. This can be a state of a
+  // task state machine or the special "FailedRestartable" state that selects
+  // the innermost restartables that have failed descendants.
+  repeated string state = 3 [(blox.options.set) = true];
+
+  // select only processes that were declared inside a workflow with this name;
+  // the name here refers to the language construct (e.g. workflow foo()).
+  repeated string workflow_source_name = 4 [(blox.options.set) = true];
+}
+
+
+//
+// TYPE SPECIFICATIONS
+//
+
+/**
+ * A representation of a duration, consisting of a length of time in a certain unit of time (a TimeResolution).
+ *
+ * The expected syntax is an integer (specifying the length) followed by a resolution specification, which can be in
+ * full or in a shorthand. It is safe to use blank spaces around and in between the parts. The following map is used for
+ * shorthands:
+ *    "s"  -> seconds
+ *    "m"  -> minutes
+ *    "h"  -> hours
+ *    "d"  -> days
+ *    "M"  -> months
+ *    "y"  -> years
+ *
+ * Examples:
+ *    "50s"         -> 50 seconds
+ *    "4 h"         -> 4 hours
+ *    " 21 months " -> 21 months
+ */
+//message Duration{}

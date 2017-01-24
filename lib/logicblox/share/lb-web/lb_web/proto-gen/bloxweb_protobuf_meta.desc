@@ -1,0 +1,14 @@
+
+¨
+lb/web/protobuf_meta.protolb.web.protometa"R
+ProtoBufMetaRequest;
+protocol (2).lb.web.protometa.ProtoBufProtocolRequest"
+ProtoBufProtocolRequest"T
+ProtoBufMetaResponse<
+protocol (2*.lb.web.protometa.ProtoBufProtocolResponse"
+ProtoBufProtocolResponse
+request_message_name (	
+request_descriptor (
+response_message_name (	
+response_descriptor (B 
+com.logicblox.bloxweb.protobuf

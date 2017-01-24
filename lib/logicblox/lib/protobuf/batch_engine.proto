@@ -1,0 +1,1227 @@
+// -------------------------------------------------------------------------
+// Developer : Wes Hunter (wes.hunter@logicblox.com)
+// Date : 07/02/2013
+// All code (c)2013 Predictix. All rights reserved
+// -------------------------------------------------------------------------
+
+// FIXME - many ValidateX messages have a when_* field that can be used to
+//         prune bad data from files.  need some mechanism for downstream
+//         batch functions to find the pruned files to support this.  also may
+//         want to consider a generalized transformation framework that this
+//         fits into (rename headers, trim spaces from fields, subset fields,
+//         etc).
+
+
+option java_package = "com.pdx.batch.proto";
+
+message Workflow
+{
+  required string flow = 1;
+//  optional Duration abort_timeout = 2;
+  optional Timeout timeout = 2;
+    // if not defined or <= 0, no timeout
+  optional bool abort_on_failure = 3;
+    // defaults to true
+  optional Job on_exit = 4;
+    // job that is executed when workflow finishes, regardless of success 
+    // or failure
+  optional Job on_success = 5;
+    // job that is executed when workflow finishes successfully
+  optional Job on_failure = 6;
+    // job that is executed when workflow fails
+  repeated Job job = 10;
+}
+
+message Timeout
+{
+  required Duration duration = 1;
+  required JobState state = 2;
+}
+
+enum JobState
+{
+  PENDING = 1; // defined but not ready to run
+  READY = 2; // ready to run (triggering conditions have been met)
+  SCHEDULED = 3; // added to scheduler
+  RUNNING = 4; // actively running
+  FAILED = 5; // execution failed
+  COMPLETE = 6; // execution completed successfully
+  IGNORED = 7; // job failed, but marked as ignored so dependent jobs can run
+  WAITING_ON_SUBTASKS = 8; // job complete, but subtasks have not yet completed
+}
+
+message Duration
+{
+  required int32 length = 1;
+  required TimeResolution resolution = 2;
+}
+
+enum TimeResolution
+{
+  MILLISECONDS = 1; SECONDS = 2; MINUTES = 3; HOURS = 4; DAYS = 5;
+}
+
+message Timestamp
+{
+  required string date = 1;
+    // "YYYY-MM-DD"
+  required string time = 2;
+    // "HH:MM:SS"
+}
+
+enum JobFailureMode
+{
+  ABORT = 1; // abort workflow if job fails
+  CONTINUE = 2; // warn and continue workflow if job fails
+  RETRY = 3; // retry job according to RetryPolicy if job fails
+}
+
+message Job
+{
+  optional string name = 1;
+    // should usually specify this since it is used to define job dependencies.
+    // some embedded jobs (if_else, on_exit, etc) don't need it
+  optional Trigger trigger = 2;
+    // defaults to manual trigger (some other job must cause this job to be
+    // scheduled)
+  optional Timeout timeout = 3;
+    // if not defined or <= 0, no timeout
+  optional RetryPolicy retry_policy = 4;
+    // defaults to NO_RETRY
+  optional int32 retry_limit = 5;
+    // if not defined or <= 0, no limit
+  optional JobFailureMode on_failure = 6;
+    // defaults to ABORT
+  repeated SubtaskGroup subtasks = 7;
+    // optional list of child jobs that are spawned dynamically when the
+    // parent job determines some criteria is met (file appearing, etc)
+
+  // only one of the following can be specified
+  optional FilePoller file_poller = 8;
+  optional JsonServiceInvoker json_service = 9;
+  optional ExecProcess exec_process = 10;
+  optional ManifestChecker manifest_checker = 11;
+  optional FileTransformer file_transformer = 12;
+  optional ExtractFiles extract_files = 14;
+  optional BackupWorkspace backup_workspace = 15;
+  optional RestoreWorkspace restore_workspace = 16;
+  optional CreateWorkspace create_workspace = 17;
+  optional StartServices start_services = 18;
+  optional StopServices stop_services = 19;
+  optional ReadCsv read_csv = 21;
+  optional PostCsv post_csv = 22;
+  optional GetCsv get_csv = 23;
+  optional PartitionCsv partition_csv = 24;
+  optional GetPartitionedCsv get_partitioned_csv = 26;
+  optional FilterCsv filter_csv = 27;
+  optional MergeCsvFiles merge_csv_files = 28;
+  optional Echo echo = 29;
+  optional Sleep sleep = 30;
+  optional Fail fail = 31;
+  optional CbfrCreateGen cbfr_create_gen = 32;
+  optional CreateTmpDir create_tmp_dir = 33;
+  optional CreateTmpFile create_tmp_file = 34;
+  optional DeleteDir delete_dir = 35;
+  optional DeleteFile delete_file = 36;
+  optional ListFiles list_files = 37;
+  optional RunFlow run_flow = 38;
+  optional RunKettle run_kettle = 39;
+  optional ExecBlock exec_block = 40;
+  optional ExecQuery exec_query = 41;
+  optional GenTimestamp gen_timestamp = 42;
+  optional SetVars set_vars = 43;
+  optional ValidateDataset validate_dataset = 44;
+  optional CheckExistingFile check_existing_file = 45;
+  optional RenameFile rename_file = 46;
+  optional CopyFiles copy_files = 47;
+  optional ImportWorkbookMaster import_wb_master = 48;
+  optional ImportWorkbookTemplate import_wb_template = 49;
+  optional ListWorkbooks list_wb = 50;
+  optional CreateWorkbooks create_wb = 51;
+  optional DeleteWorkbooks delete_wb = 52;
+  optional RefreshWorkbooks refresh_wb = 53;
+  optional CommitWorkbooks commit_wb = 54;
+  optional ExecWorkbookBlock exec_wb_block = 55;
+  optional LoadUsers load_users = 56;
+  optional LoadWorkbookTemplateAccess load_wb_template_access = 57;
+  optional LoadWorkbookPositionAccess load_wb_position_access = 58;
+  optional IfElse if_else = 59;
+  optional ConcatFiles concat_files = 60;
+  optional CreateDir create_dir = 61;
+  optional LogMessage log = 62;
+}
+
+message SubtaskGroup
+{
+  optional InstantiationPolicy instantiation_policy = 1;
+    // when a job has subtasks, it may create multiple instantiations of the
+    // set of subtasks (i.e., polling for a set of manifest files wants to
+    // spawn a set of jobs for each file, executed in sequence).  this property
+    // indicates if the subtask sets will be scheduled for sequential or
+    // parallel execution.  defaults to sequential
+  repeated Job job = 2;
+}
+
+enum InstantiationPolicy
+{
+  SEQUENTIAL = 1; PARALLEL = 2;
+}
+
+enum RetryPolicy
+{
+  NO_RETRY = 1; LIMITED_RETRY = 2; RETRY_FOREVER = 3;
+}
+
+message Trigger
+{
+  // only one of the following can be specified
+  optional ImmediateTrigger now = 1;
+  optional JobTrigger depends_on = 2;
+  optional RepeatedTrigger repeat = 3;
+  optional ManualTrigger manual = 4;
+}
+
+message ManualTrigger
+{
+}
+
+message ImmediateTrigger
+{
+}
+
+message JobTrigger
+{
+  repeated string job = 1;
+}
+
+message RepeatedTrigger
+{
+  optional Timestamp start_time = 1;
+    // if not specified, triggers immediately
+  optional Timestamp end_time = 2;
+    // if not specified, repeat forever or until count is exceeded
+  optional int32 repeat_count = 3;
+    // if not specified or <= 0, repeat forever or until end_time if specified
+  optional Duration polling_delay = 4;
+    // if not specified or <= 0, will only trigger once
+}
+
+// the FLOW_DIR variable will be set to the directory containing the currently
+// running workflow.  this can be used in the file property if you want to
+// run another workflow from a file in a location relative to the current flow.
+// you can use the prop property to set variable values for the workflow
+// that will be executed.  any properties set here will override those 
+// inherited from the parent flow.
+message RunFlow
+{
+  required string file = 1;
+  repeated KeyValue prop = 2;
+}
+
+// run a kettle ktr file, optionally passing in any specified vars as kettle
+// variables
+message RunKettle
+{
+  required string file = 1;
+  repeated KeyValue var = 2;
+  optional KettleLogLevel log_level = 3;
+}
+
+enum KettleLogLevel 
+{ 
+  NOTHING=0; 
+  ERROR=1;
+  MINIMAL=2;
+  BASIC=3;
+  DETAILED=4;
+  DEBUG=5;
+  ROWLEVEL=6;
+}
+
+message FilePoller
+{
+  required string file = 1;
+    // could be absolute path to file or could be pattern using * or ?
+  optional string src_dir = 2;
+    // if specified, files are assumed to be in this directory
+}
+
+// Manifest files are delimited text files with a header of "File|Hash".  Each
+// line has a file name (located relative to directory containing manifest)
+// and an md5 checksum.
+message ManifestChecker
+{
+  required string file = 1;
+    // could be absolute path to file or could be pattern using * or ?
+  optional string src_dir = 2;
+    // if specified, files are assumed to be in this directory
+  optional string base_file_pattern = 3;
+    // this is an optional regex that can be applied to the name of a file in
+    // the manifest to get the base file name used to identify def files or
+    // required files (usually stripping off a timestamp and extension like
+    // "_[0-9]*_[0-9]*\.zip").
+  repeated string required_file = 4;
+    // optional list of files that must be present.  these file names should be
+    // base file names with the base_file_pattern stripped from files in the
+    // manifest
+  optional Duration file_arrival_timeout = 5;
+    // if specified, we will wait this amount of time for all files in the 
+    // manifest to appear and to stop changing.  this is here to handle
+    // manifest files appearing before all the data files
+  optional Duration file_arrival_poll_interval = 6;
+    // how frequently do we poll after the arrival of the manifest while
+    // waiting for data files
+}
+
+message JsonServiceInvoker
+{
+  required string uri = 1;
+  required string json = 2;
+  optional Transport transport = 3;
+    // defaults to http://localhost:8080
+  repeated JsonExport export = 4;
+    // names of properties in the json response that should be exposed as batch
+    // workflow variables.  all response variables are converted to strings.
+    // nested response objects can be referred to by using dots between the
+    // component names.  i.e., "top_object.child.property".  by default, the
+    // json element is exported using the element name as the workflow variable
+    // name.  the export.as property can be used to modify this.
+}
+
+message JsonExport
+{
+  required string element = 1;
+  optional string as = 2;
+    // defaults to element
+  optional bool required = 3;
+    // defaults to false
+  optional string defaultValue = 4;
+    // if not required and element isn't found, use the defaultValue.  defaults
+    // to empty string.
+}
+
+message ExecProcess
+{
+  required string path = 1;
+  repeated string arg = 2;
+  repeated KeyValue env = 3;
+  optional string working_dir = 4;
+}
+
+message KeyValue
+{
+  required string key = 1;
+  required string value = 2;
+}
+
+message FileTransformer
+{
+  // FIXME - refine params for this
+  required string input = 1;
+  required string output = 2;
+  required string script = 3;
+}
+
+
+// FIXME - generalize this to work directly on archive as well as on manifest
+// if using a manifest, assume that each entry in the manifest is an archive
+// containing a single file.  also always generates an output file that is
+// named the same as the file in the manifest with .zip replaced with .dat.
+// may want to generalize this somehow.
+// FIXME - specify either manifest or src_file.  may want to create separate
+// jobs to extract from manifest or extract from single file
+message ExtractFiles
+{
+  optional string manifest = 1;
+  optional string src_file = 2;
+  optional string dest_dir = 3;
+  optional string dest_file = 4;
+}
+
+message BackupWorkspace
+{
+  required string ws_path = 1;
+  required string dest_dir = 2;
+  optional string key = 3;
+  optional string tmp_dir = 4;
+     // name of a working directory that will be used for temporary files if 
+     // necessary.  if not set the system tmp directory will be used.
+}
+
+message RestoreWorkspace
+{
+  required string src_uri = 1;
+  required string dest_ws_path = 2;
+  optional bool overwrite = 3;
+    // defaults to false
+  optional bool start_services = 4;
+    // defaults to false
+}
+
+// if no workspaces listed, start bloxweb services for all deployed workspaces.
+// otherwise start services for those workspace specified.
+message StartServices
+{
+  repeated string ws = 1;
+}
+
+// if no workspaces listed, stop bloxweb services for all deployed workspaces.
+// otherwise stop services for those workspace specified.
+message StopServices
+{
+  repeated string ws = 1;
+}
+
+message CreateWorkspace
+{
+  required string dest = 1;
+  required string archive = 2;
+  optional string overwrite = 3;
+    // defaults to false
+  optional string start_services = 4;
+    // defaults to false
+  optional Transport transport = 5;
+    // defaults to http://localhost:8080
+}
+
+message Transport
+{
+  optional string host = 1;
+    // defaults to localhost
+  optional string port = 2;
+    // defaults to 8080
+  optional string sqs_config = 3;
+    // default to empty string (use tcp by default)
+  optional uint32 timeout = 4;
+    // Max time the whole exchange can take (in ms). Defaults to the default
+    // transport timeout used by bloxweb batch jobs (currently 320000).
+}
+
+
+// read a local csv file and run subtasks for each line in the file
+message ReadCsv
+{
+  required string file = 1;
+  optional string delimiter = 2;
+    // defaults to comma ( , )
+  optional string include_header = 3;
+    // defaults to false
+}
+
+message Echo
+{
+  required string message = 1;
+}
+
+message Sleep
+{
+  required string milliseconds = 1;
+}
+
+message Fail
+{
+  optional string message = 1;
+  optional int32 rc = 2;
+}
+
+message CbfrCreateGen
+{
+  required string config_file = 1;
+  optional string ws_prefix = 2;
+    // defaults to "/cb/"
+  optional string overwrite = 3;
+    // defaults to "true"
+  optional string include_timestamp = 4;
+    // defaults to "true".  doesn't apply to ui and batch workspaces
+}
+
+// post csv data files to bloxweb services.  if the data_dir or files in the
+// load ServiceFilePair messages start with "s3:", pull the data from an S3
+// bucket to load into the workspace.  otherwise, assume the data file is 
+// local.
+message PostCsv
+{
+  optional string workspace = 1;
+  optional string data_dir = 2;
+    // if data_dir specified, prepended to each file in the load list
+  repeated ServiceFilePair load = 3;
+    // the service in the load list will have $<ws> replaced with the workspace
+    // value.  the file can contain wildcard characters to match files in the
+    // data_dir. if multiple files are matched, each will be passed to the
+    // specified service.  default behavior is to fail the task if the file
+    // doesn't exist unless load.if_missing is set to IGNORE or WARN.
+  optional FileType file_type = 4;
+    // defaults to AUTO, which means ZIP if file ends with ".zip", GZIP if file
+    // ends with ".gz" or ".gzip".  otherwize AUTO will default to TEXT.
+  optional bool full = 5;
+    // completely replace or incrementally update the destination predicate.  
+    // defaults to false (incremental)
+  optional Transport transport = 6;
+    // defaults to http://localhost:8080 with a 320 second timeout.  
+    // the timeout will be used for both the overall txn and for the bloxweb
+    // import requests unless overridden by the txn_timeout or load_timeout
+    // options below.
+  optional string txn_service = 7;
+    // if specified, all imports executed in one txn.  otherwise each is run
+    // in a separate txn
+  optional Duration txn_timeout = 8;
+    // defines how long the overall transaction can run while loading data
+    // before the job fails.  note that we cannot currently abort any running
+    // server process.  the workflow may abort while the server keeps grinding
+    // on the data load.  if defined, this will override the transport timeout
+    // above.  if no timeout is defined, bloxweb currently defaults to 
+    // 320 seconds
+  optional Duration load_timeout = 9;
+    // defines how long an individual bloxweb import request can run while 
+    // loading data before the job fails.  note that we cannot currently abort
+    // any running server process.  the workflow may abort while the server 
+    // keeps grinding on the data load.  if defined, this will override the 
+    // transport timeout above.  if no timeout is defined, bloxweb currently 
+    // defaults to 320 seconds
+  optional MissingFileAction if_missing = 10;
+    // if the if_missing field is not defined for any load in this job, use 
+    // this value as the default.  default behavior is to fail the job if
+    // not specified here or overridden by load.if_missing
+}
+
+enum FileType
+{
+  AUTO=0; GZIP=1; ZIP=2; TEXT=3;
+}
+
+message ServiceFilePair
+{
+  required string file = 1;
+  required string service = 2;
+  optional MissingFileAction if_missing = 3;
+     // behavior of this option depends on where the ServiceFilePair is used
+}
+
+enum MissingFileAction
+{
+  FAIL=0; IGNORE=1; WARN=2;
+}
+
+// retrieve csv data from a bloxweb service and store in a local file.  if the
+// file starts with "s3:", push the data to an S3 bucket.
+message GetCsv
+{
+  optional string workspace = 1;
+  optional string dest_dir = 2;
+    // if dest_dir specified, prepended to each file in the export list
+  repeated ServiceFilePair export = 3;
+    // each service in the export list is invoked, storing the results in the 
+    // specified file.  the service in the export list will have $<ws> 
+    // replaced with the workspace value.
+
+  optional bool gzip = 4;
+    // data files are compressed with gzip.  defaults to false
+  optional Transport transport = 5;
+    // defaults to http://localhost:8080
+}
+
+// create the directory identified by path, including any necessary parent
+// directories
+message CreateDir
+{
+  required string path = 1;
+}
+
+message CreateTmpDir
+{
+  required string var = 1;
+    // name of a workflow variable that will receive the new directory path
+  optional string parent = 2;
+    // if parent not specified, use system tmp directory
+  optional string prefix = 3;
+    // defines an optional prefix for the directory
+  optional string timestamp = 4;
+    // if defined, specifies the format of a date/timestamp that will be used
+    // as the prefix for the directory
+}
+
+message CreateTmpFile
+{
+  required string var = 1;
+    // name of a workflow variable that will receive the new file path
+}
+
+message MergeCsvFiles
+{
+  required string dest = 1;
+  required string delim = 2;
+  repeated string header = 3;
+    // list of header column names in the merged file
+  repeated MergeFileSrc src = 4;
+    // list of files to merge
+}
+
+message MergeFileSrc
+{
+  required string file = 1;
+     // file containing data to merge
+  repeated string column = 2;
+     // list of column names in this file that are mapped to those in 
+     // MergeCsvFiles.header (in the same order)
+}
+
+message DeleteDir
+{
+  required string path = 1;
+  optional bool recurse = 2;
+    // defaults to false
+}
+
+message DeleteFile
+{
+  required string path = 1;
+}
+
+message RenameFile
+{
+  required string src = 1;
+  required string dest = 2;
+}
+
+message CopyFiles
+{
+  repeated string src = 1;
+     // can be path to a file or a wildcard pattern that will be used to match
+     // a set of files.  directories are skipped.  doesn't currently support
+     // recursing through directories.  if src starts with "s3://" then we'll
+     // download files from an s3 bucket.  otherwise we assume they are local
+     // files.  note that pattern matching doesn't work with files in s3
+     // buckets.
+  required string dest = 2;
+     // directory that will receive the copied files.  if dest starts with
+     // "s3://" we'll upload files to s3.  otherwise we assume the destination
+     // is a local directory.
+  optional string key = 3;
+     // used for encrypted s3 uploads
+}
+
+// sets file_path and file_name variables that can be used in subtasks
+// to run jobs for each file that is found
+message ListFiles
+{
+  required string dir = 1;
+    // directory in which to list files
+  optional string pattern = 2;
+    // if specified, used to pattern match the files that are returned
+  optional bool subdirs_only = 3;
+    // defaults to false
+}
+
+// currently assumes that partition_file has 2 columns, the first must
+// join with a column in data_file.  the second column determines how the
+// data file is partitioned.  might want to generalize this at some point to
+// allow more columns in the partition file (specifying base and partition
+// columns) and to allow mapping of the column names between the file (i.e.
+// SKU in partition_file is sku in data_file).  may also need some control
+// over how the partitioned file names are generated (pattern of some sort?)
+message PartitionCsv
+{
+  required string data_file = 1;
+  required string delim = 2;
+  required string dest_file = 3;
+    // the variable $<partition_id> can be used anywhere in dest_file to create
+    // a unique destination file for each partition's data
+
+  optional string partition_file = 4;
+  optional string partition_column = 5;
+    // one of partition_file or partition_column is required
+
+  optional string extra_sort_fields = 6;
+    // if specified, it is a comma-delimited list of fields in the data file
+    // that will be used to sort the output files.  this list should not 
+    // include the first column in the partition file since this will be used
+    // as the primary sort field, required to partition the data file.  the
+    // field names listed here must be in the header row of the data file.
+
+  optional bool fix_partition_name = 7;
+    // if true, replace all spaces in the partition name with underscores (_).
+    // default is false.
+
+  optional int32 chunk_size = 8;
+    // if specified and > 0, the partition file will be processed by chunk_size
+    // rows at a time.  this limits the maximum number of files that need to
+    // be open at once by the partitioning code.  by default, the entire
+    // partition file is processed at once which means you can have as many
+    // concurrently open files as there are rows in the file.
+}
+
+message GetPartitionedCsv
+{
+  required string partition_file = 1;
+    // The partition file is a csv file that has at least 2 columns.  It is
+    // joined with other csv files to generate multiple partition files from 
+    // a single file.  Right now we assume that the last column in the 
+    // partition file is the partition identifier.  All other columns in the
+    // partition file need to join with columns in the data file to determine
+    // which rows end up in each partitioned data file.
+
+  required string delim = 2;
+    // need a delimiter to join exports with a partition file
+
+  optional string dest_dir = 3;
+    // if not specified, file property in export list should be an absolute 
+    // path
+  optional string tmp_dir = 4;
+    // if not specified, system tmp directory is used.  this will hold the 
+    // unpartitioned csv files exported from a workspace
+
+  optional Transport transport = 6;
+    // defaults to http://localhost:8080
+
+  repeated ServiceFilePair export = 7;
+    // should have at least one export or this job will do nothing.  each 
+    // service in the export list is invoked, storing the results in the 
+    // temporary file, which will then be split into multiple pieces based on
+    // the data in the partition file.
+
+  optional bool fix_partition_name = 8;
+    // if true, replace all spaces in the partition name with underscores (_).
+    // default is false.
+
+  optional int32 chunk_size = 9;
+    // if specified and > 0, the partition file will be processed by chunk_size
+    // rows at a time.  this limits the maximum number of files that need to
+    // be open at once by the partitioning code.  by default, the entire
+    // partition file is processed at once which means you can have as many
+    // concurrently open files as there are rows in the file.
+}
+
+
+message FilterCsv
+{
+  required string src = 1;
+  required string dest = 2;
+  required string delim = 3;
+  repeated ColumnFilter filter = 4;
+    // - do we enforce that we have only one filter per column name or do we
+    //   allow multiple filters and merge them?
+    // - if no filter is defined, just copy src file to dest
+}
+
+message ColumnFilter
+{
+//  required string column_name = 1;
+  repeated string column = 1;
+     // need at least one
+  repeated Comparison comparison = 2;
+  repeated Join join = 3;
+     // either join or comparison?  can you use both?  some way to merge the 2?
+  optional ColumnType type = 4;
+     // defaults to STRING
+  optional string format = 5;
+     // used with to convert strings to date -- required if type is DATE
+}
+
+message Join
+{
+  required string file = 1;
+  optional string join_column = 2;
+     // if not specified, defaults to the column name in the containing 
+     // ColumnFilter
+}
+
+message Comparison
+{
+  required Operation op = 1;
+  required string val = 2;
+     // for a MEMBER operation, the val is assumed to be a comma-delimited 
+     // list of possible values
+  optional float tolerance = 3;
+     // specifies a value like 0.001 that is used to bound floating point
+     // equality comparisons
+}
+
+enum Operation
+{
+  LT=0; LTE=1; GT=2; GTE=3; EQ=4; NEQ=5; MEMBER=6;
+}
+
+enum ColumnType
+{
+  STRING=0; NUMERIC=1; DATE=2;
+}
+
+message ExecBlock
+{
+  required string workspace = 1;
+  required string block = 2;
+}
+
+message ExecQuery
+{
+  required string workspace = 1;
+  optional string query = 2;
+  optional string file = 3;
+     // exactly one of query or file must be specified
+}
+
+message GenTimestamp
+{
+  required string var = 1;
+  required string format = 2;
+}
+
+message SetVars
+{
+  repeated KeyValue var = 1;
+//  required string var = 1;
+//  required string value = 2;
+}
+
+message ValidateDataset
+{
+  repeated LogThreshold log_threshold = 1;
+    // number of log messages of a particular severity that can be issued 
+    // across all files before the job fails.  negative number means no 
+    // threshold (i.e., infinite warnings can be issued). defaults to no 
+    // threshold.
+  optional ValidateFailureMode when_threshold_exceeded = 2;
+    // controls what happens if a log threshold is exceeded, either failing
+    // the job immediately (FAIL_IMMEDIATELY), failing the job once all checks
+    // have finished (FAIL_AT_END), or continuing to next job 
+    // (VALIDATE_CONTINUE).  defaults to FAIL_IMMEDIATELY
+  repeated ValidateFile validate = 3;
+    // list of file validations that will be performed, typically one per file
+  optional string working_dir = 4;
+    // defaults to system tmp dir.  if directory does not exist, it will be
+    // created.  this directory contain temporary files generated while doing
+    // the validations
+  optional string log = 5;
+    // if specified, a summary of all the file validations will be written to
+    // this file
+}
+
+enum ValidateFailureMode
+{
+  FAIL_IMMEDIATELY=0; FAIL_AT_END=1; VALIDATE_CONTINUE=2;
+}
+
+message ValidateFile
+{
+  required string spec = 1;
+    // file that contains a FileSpec message describing the file and checks
+    // to be performed
+  required string file = 2;
+    // the file that will be validated using the spec
+    // path to the file to be validated using the spec.  file can be a pattern
+    // (using ? or *).  if so, all files that match the pattern will be 
+    // validated.  file can be a zip file, a gzip file, or a text csv file.
+  optional FileType file_type = 3;
+    // defaults to AUTO, which means ZIP if file ends with ".zip", GZIP if file
+    // ends with ".gz" or ".gzip".  otherwize AUTO will default to TEXT.
+  optional string log = 4;
+    // if defined, all errors and warnings will be logged to the specified 
+    // file.  otherwise, they will be logged to standard output.  the job
+    // will always log a count of errors and warnings to standard output at
+    // the end of the job, regardless of whether we're also logging to a file.
+  repeated LogThreshold log_threshold = 5;
+    // number of log messages of a particular severity that can be issued 
+    // for a single file before the job fails.  negative number means no 
+    // threshold (i.e., infinite warnings can be issued). defaults to no 
+    // threshold.
+  optional ValidateSpecMissing ifSpecMissing = 6;
+    // defaults to issuing a warning if we can't find a file spec, but can
+    // be changed to log an error or fail the batch if no spec is found
+}
+
+enum ValidateSpecMissing
+{
+  SPEC_MISSING_IGNORE=0; SPEC_MISSING_INFO=1; SPEC_MISSING_WARN=2; 
+  SPEC_MISSING_ERROR=3; SPEC_MISSING_CRITICAL=4; SPEC_MISSING_FAIL=5;
+}
+
+message FileSpec
+{
+  optional FileEncoding encoding = 1;
+    // UTF8 is the only encoding supported right now.  if file doesn't
+    // have the specified encoding, a critical message is reported.  if the
+    // encoding is not specified, we won't check it.
+  optional bool required = 2;
+    // defaults to false.  if set to true a critical message will be reported 
+    // if no files match the specified file pattern.
+  optional string delimiter = 3;
+    // defaults to comma ( , )
+
+  // set of checks that can be performed on the file
+  optional ValidateHeader header = 4;
+  optional ValidateRowCount row_count = 5;
+  optional ValidateColumnsRequiringValue columns_requiring_value = 6;
+  optional ValidateAllColumnsRequireValue all_columns_require_value = 7;
+  repeated ValidateUniqueKey unique_key = 8;
+  optional ValidateFieldCount field_count = 9;
+  optional ValidateFieldDataTypes field_data_types = 10;
+  repeated ValidateFieldValue field_value = 11;
+}
+
+enum FileEncoding
+{
+  UTF8=0;
+}
+
+enum Severity
+{
+  SEV_IGNORE=0; SEV_INFO=1; SEV_WARN=2; SEV_ERROR=3; SEV_CRITICAL=4;
+}
+
+message LogThreshold
+{
+  required Severity severity = 1;
+  required int32 count = 2;
+}
+
+message ValidateRowCount
+{
+  required Comparison comparison = 1;
+    // report a message of the indicated severity if then number of rows in a 
+    // file (including the header) does not match expectations
+  optional Severity severity = 2;
+    // defaults to SEV_ERROR
+}
+
+message ValidateAllColumnsRequireValue
+{
+  optional Severity severity = 1;
+    // defaults to SEV_CRITICAL
+}
+
+message ValidateColumnsRequiringValue
+{
+  required string cols = 1;
+    // cols is a comma-delimited list of column header names.  for each column
+    // name, report a message of the indicated severity if the field is empty
+    // for all rows in a file.
+  optional Severity severity = 2;
+    // defaults to SEV_CRITICAL
+//  optional RowPruneOption when_missing = 3;
+             // to implement this, need to stage the modified files somewhere
+             // later batch steps can find....
+}
+
+//enum RowPruneOption
+//{
+//  DISCARD=0; KEEP=1;
+//}
+
+message ValidateUniqueKey
+{
+  required string cols = 1;
+    // cols is a comma-delimited list of column header names.  each row in the
+    // file must have a unique concatenation of the fields in these columns.
+    // report a message of the indicated severity if duplicate rows are found.
+  optional Severity severity = 2;
+    // defaults to SEV_ERROR
+//  optional WhenDuplicatedOption when_duplicated = 3;
+             // to implement this, need to stage the modified files somewhere
+             // later batch steps can find....
+}
+
+//enum WhenDuplicatedOption
+//{
+//  KEEP_FIRST=0; KEEP_ALL=1; DISCARD_ALL=2;
+//}
+
+message ValidateFieldCount
+{
+  optional int32 count = 1;
+    // this validation will report a warning for each row in the file whose 
+    // field count does not match what is specified.  if the count is not
+    // specified, the file's header count is used.
+  optional Severity severity = 2;
+    // defaults to SEV_ERROR
+//  optional RowPruneOption when_bad_count = 3;
+             // to implement this, need to stage the modified files somewhere
+             // later batch steps can find....
+}
+
+message ValidateFieldDataTypes
+{
+  required string types = 1;
+    // types is a comma-delimited list of native type names.  each field in 
+    // each row is checked to see if its value can be converted to the 
+    // specified type.  if not, a message of the indicated severity is 
+    // reported.  if the type name for a field is an empty string, no type 
+    // checking is performed on that field.  valid native type names include 
+    // alphanumeric, string, text, boolean, int, and float.  note that we do
+    // not try to validate a value if the field is empty
+  optional Severity severity = 2;
+    // defaults to SEV_ERROR
+//  optional RowPruneOption when_bad_type = 3;
+             // to implement this, need to stage the modified files somewhere
+             // later batch steps can find....
+}
+
+message ValidateFieldValue
+{
+  required string column_name = 1;
+  required Comparison comparison = 2;
+  optional ColumnType type = 3;
+     // defaults to STRING
+  optional string format = 4;
+     // used with to convert strings to date -- required if type is DATE
+  optional Severity severity = 5;
+    // defaults to SEV_ERROR
+}
+
+message ValidateHeader
+{
+  required string cols = 1;
+    // comma-separated list of column names expected in a file.  if the header
+    // in the file does not exactly match (including case and order), a message
+    // is logged with the specified severity
+  optional Severity severity = 2;
+    // defaults to SEV_CRITICAL
+  optional bool extra_columns_allowed = 3;
+    // defaults to false.  if true, then the file header can have additional
+    // columns over what is specified in cols
+  optional string optional_cols = 4;
+    // comma-separated list of column names that may be missing from a file.
+}
+
+// make sure all specified files exist.  if not, the job will fail.  for any
+// file values that contain wildcard characters (* or ?), the check will 
+// succeed if any file matches the pattern.
+message CheckExistingFile
+{
+  optional string dir = 1;
+     // if specified, all files are assumed to be relative to this directory
+  repeated string file = 2;
+     // file can contain wildards like * or ?
+}
+
+message ImportWorkbookMaster
+{
+  required string app = 1;
+  required string ws_path = 2;
+  optional bool overwrite = 3;
+    // defaults to true
+  optional bool start_services = 4;
+    // defaults to true
+  optional string tmp_dir = 5;
+    // if specified, the workspace to be deployed will be copied into a tmp
+    // directory before it is deployed.  this is to work around problems with
+    // "lb import" failing if the source workspace is on a read-only file
+    // system.
+}
+
+message ImportWorkbookTemplate
+{
+  required string app = 1;
+  required string ws_path = 2;
+  required string template_name = 3;
+  optional bool overwrite = 4;
+    // defaults to true
+  optional bool start_services = 5;
+    // defaults to true
+  optional bool link = 6;
+    // defaults to false
+  optional string tmp_dir = 7;
+    // if specified, the workspace to be deployed will be copied into a tmp
+    // directory before it is deployed.  this is to work around problems with
+    // "lb import" failing if the source workspace is on a read-only file
+    // system.
+}
+
+// list all current workbooks for a deployed blade app, setting $<wb_name>,
+// $<wb_app>, $<wb_template>, $<wb_user>, and $<wb_filepath>
+// variables for each workbook that can be used by subtasks like 
+// delete_workbook
+//
+// lb list-workbooks --app cbfr_mdo
+message ListWorkbooks
+{
+  required string app = 1;
+  optional string user = 2;
+    // if specified, only list workbooks that are accessible for a user
+  optional string template = 3;
+    // if specified, only list workbooks that belong to a particular template
+}
+
+// lb-workbook import-users --app blackbox user.dlm
+// bloxweb import-users --url http://localhost:55183/blade/blackbox/master/authorization/users user.dlm
+message LoadUsers
+{
+  optional string workspace = 1;
+     // if specified, loads users into a blade workspace using the
+     // $workspace/authorization/users service.  if this is not specified,
+     // load the users into bloxweb using the /admin/credentials/users service
+  required string file = 2;
+  optional bool replace = 3;
+    // defaults to false.  if true, deletes all previous users before loading 
+    // the new file
+  optional MissingFileAction if_missing = 4;
+    // default behavior is to fail the job if the file is missing
+}
+
+//lb-workbook import-template-access --app blackbox template-access.dlm --replace
+message LoadWorkbookTemplateAccess
+{
+  required string app = 1;
+  required string file = 2;
+  optional bool replace = 3;
+    // defaults to false.  if true, deletes all previous template access 
+    // data before loading the new file
+  optional MissingFileAction if_missing = 4;
+    // default behavior is to fail the job if the file is missing
+}
+
+// lb-workbook import-position-access --app blackbox --template WF_Template --level product:dept position-access.dlm --replace
+message LoadWorkbookPositionAccess
+{
+  required string app = 1;
+  required string template = 2;
+  required string level = 3;
+  required string file = 4;
+  optional bool replace = 5;
+    // defaults to false.  if true, deletes all previous position access 
+    // data before loading the new file
+  optional MissingFileAction if_missing = 6;
+    // default behavior is to fail the job if the file is missing
+}
+
+// lb-workbook create-workbook-batch --app cbfr_mdo --template $tmpl --execute --verbose --timeout 2000000
+message CreateWorkbooks
+{
+  required string app = 1;
+  required string template = 2;
+  optional int32 timeout = 3;
+    // number of seconds to wait for the wb build to complete before failing.
+    // defaults to 320
+  optional bool start_services = 4;
+    // defaults to false.  if true, start bloxweb services once the workbook 
+    // has been created
+  repeated WbAction action = 5;
+    // list of actions to execute on each workbook once it has been created
+  optional InstantiationPolicy instantiation_policy = 6;
+    // defaults to SEQUENTIAL
+}
+
+message WbAction
+{
+  // if all three are specified, all three will be executed.  block first,
+  // then query, then file
+  optional string block = 1;
+  optional string query = 2;
+  optional string file = 3;
+}
+
+// lb-workbook delete-workbook-batch --app cbfr_mdo --execute
+//
+// see comment for RefreshWorkbooks about specifying which workbooks will be 
+// selected
+message DeleteWorkbooks
+{
+  optional string app = 1;
+  optional string template = 2;
+  optional string wb = 3;
+  optional string user = 4;
+  optional int32 timeout = 5;
+    // number of seconds to wait for the wb build to complete before failing.
+    // defaults to 320
+  optional bool stop_services = 6;
+    // defaults to false.  if true, tell bloxweb to stop any services for the
+    // workbooks being deleted
+}
+
+// lb-workbook refresh-workbook-batch --app cbfr_mdo --execute
+//
+// if nothing is specified here, look up app, template, wb, and user from the
+// parent task so we can embed this within ListWorkbooks.  
+// if app is specified, then use the ListWorkbook functionality with optional
+// template, user, and wb to get a set of wb objects that are then refreshed.
+// need to add optional wb field to ListWorkbooks.  maybe make it a list.
+message RefreshWorkbooks
+{
+  optional string app = 1;
+  optional string template = 2;
+  optional string wb = 3;
+  optional string user = 4;
+  repeated string group = 5;
+     // refresh group to execute, defaults to ["default","__legacy_ui"]
+  optional int32 timeout = 6;
+    // number of seconds to wait for the wb build to complete before failing.
+    // defaults to 320
+}
+
+// lb-workbook commit-workbook-batch --app cbfr_mdo --execute
+//
+// see comment for RefreshWorkbooks about specifying which workbooks will be 
+// committed
+message CommitWorkbooks
+{
+  optional string app = 1;
+  optional string template = 2;
+  optional string wb = 3;
+  optional string user = 4;
+  repeated string group = 5;
+     // refresh group to execute, defaults to ["default","__legacy_ui"]
+  optional int32 timeout = 6;
+    // number of seconds to wait for the wb build to complete before failing.
+    // defaults to 320
+}
+
+// lb-workbook exec-workbook-batch --app cbfr_mdo --execute --block block_name
+//
+// see comment for RefreshWorkbooks about specifying which workbooks will be 
+// selected
+message ExecWorkbookBlock
+{
+  repeated string block = 1;
+  optional string app = 2;
+  optional string template = 3;
+  optional string wb = 4;
+  optional string user = 5;
+  optional int32 timeout = 6;
+    // number of seconds to wait for the wb build to complete before failing.
+    // defaults to 320
+}
+
+message IfElse
+{
+  required ValueComparison compare = 1;
+  optional Job if_true = 2;
+  optional Job if_false = 3;
+}
+
+message ValueComparison
+{
+  required string v1 = 1;
+     // first value to be compared.  will be converted to native type based on
+     // the type property if specified.
+  required string v2 = 2;
+     // second value to be compared.  will be converted to native type based on
+     // the type property if specified.
+  required Operation op = 3;
+     // what kind of operation to use for the comparison
+  optional ColumnType type = 4;
+     // defaults to STRING
+  optional string format = 5;
+     // used with to convert strings to date -- required if type is DATE
+  optional float tolerance = 6;
+     // specifies a value like 0.001 that is used to bound floating point
+     // equality comparisons
+}
+
+// concatenates a list of files to one destination file.  if first_header_only
+// is true, only the first src file's header line will be put into the
+// destination.  the header lines in all other files will be skipped
+message ConcatFiles
+{
+  repeated string src = 1;
+  required string dest = 2;
+  optional bool first_header_only = 3;
+    // defaults to false
+  optional bool overwrite = 4;
+    // defaults to false
+}
+
+message LogMessage
+{
+  required string message = 1;
+  optional Severity severity = 2;
+    // defaults to SEV_INFO
+}

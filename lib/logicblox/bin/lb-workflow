@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+
+import sys
+import os
+
+bindir = os.path.dirname(os.path.realpath(__file__))
+prefix = os.path.dirname(bindir)
+
+
+def run(args):
+    # most dependencies are already in the manifest, but we need to add some here
+    deps = [
+      'lb-workflow.jar',
+      'lb-workflow-tasks.jar',
+      'handlers/bloxweb-connectblox.jar'
+    ]
+
+    deps_paths = [prefix + '/lib/java/' + name for name in deps]
+
+    classpath = ':'.join(deps_paths)
+
+    subenv = os.environ.copy()
+    subenv['LB_WORKFLOW_HOME'] = prefix
+
+    if os.environ.get('LB_DEPLOYMENT_HOME') is None:
+        from os.path import expanduser
+        subenv['LB_DEPLOYMENT_HOME'] = os.path.join(expanduser("~"), "lb_deployment")
+
+    java_args = ['java', '-cp', classpath, 'com.logicblox.workflow.Main']
+    java_args.extend(args)
+    print >> sys.stderr, "[Deprecated] The standalone lb-workflow command is deprecated. Please use lb workflow."
+    os.execvpe('java', java_args, subenv)
+
+
+def main():
+    command_line = sys.argv[1:]
+    run(command_line)
+
+if __name__ == '__main__':
+    main()

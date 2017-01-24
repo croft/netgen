@@ -1,0 +1,43 @@
+package lb.web.credentials;
+
+import "blox/options.proto";
+
+option java_package = "com.logicblox.bloxweb.authorization";
+
+message Role {
+    required string name = 1;
+    optional string description = 2;
+    repeated string permissions = 3 [(blox.options.set) = true];
+}
+
+message Permission {
+    required string name = 1;
+    optional string description = 2;
+    repeated string operations = 3 [(blox.options.set) = true];
+}
+
+message Operation {
+    required string name = 1;
+    optional string description = 2;
+}
+
+message GetRolesRequest {
+    // specifying no roles will return all roles
+    repeated string roles = 1 [(blox.options.set) = true];
+}
+
+message GetPermissionsRequest {
+    // specifying no permissions will return all permissions
+    repeated string permissions = 1 [(blox.options.set) = true];
+}
+
+message GetOperationsRequest {
+    // specifying no operations will return all operations
+    repeated string operations = 1 [(blox.options.set) = true];
+}
+
+message GetAuthorizationResponse {
+    repeated Role roles = 1 [(blox.options.set) = true];
+    repeated Permission permissions = 2 [(blox.options.set) = true];
+    repeated Operation operations = 3 [(blox.options.set) = true];
+}

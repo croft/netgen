@@ -1,0 +1,38 @@
+To install these files do the following:
+
+  - Create a directory called ".vim" in your home directory and cd there
+  - Create a subdirectory called "syntax"
+  - Place the pulled "syntax" files into the syntax directory giving them
+    the name "logiql.vim" and "logiql_script.vim"
+  - Create a subdirectory of ".vim" called "ftdetect"
+  - Place the pulled "ftdetect" in the ftdetect directory giving it
+    the name "logiql.vim"
+  - Place the following line in your "~/.vimrc": syntax on
+
+
+To change the specific colors used in some rule, if the default is not good enough:
+
+  - Create a subdirectory of ".vim" called "colors"
+  - Create a file with the an arbitrary name like "myColours.vim"
+  - Add lines as the following to alter the colors used for specific groups
+
+let g:colors_name = "myColours"
+
+highlight Operator           ctermfg=gray
+
+highlight lbVar              ctermfg=darkblue guifg=#ffbf3d gui=bold
+highlight lbEngineDirective  ctermfg=yellow cterm=bold ctermbg=darkgreen
+highlight lbBuiltInType      ctermfg=blue cterm=NONE
+
+  - You can redefine the color for general groups (e.g. Operator) or specific to
+    some filetype (e.g. lbVar for logiQL).
+  - A list of the available general groups can be found here
+    http://vimdoc.sourceforge.net/htmldoc/syntax.html#group-name
+  - "cterm" is used for colors in the terminal editor (vim) and "gui" for the GUI version (gvim).
+  - "fg" stands for foreground color and "bg" for background color.
+  - "cterm" and "gui" (without a "fg"/"bg" suffix) can be used for specific effects (e.g. bold)
+  - for the terminal version, a list of available colors can be found here
+    http://vimdoc.sourceforge.net/htmldoc/syntax.html#highlight-cterm
+  - for the GUI version, hex numbers can be used as well
+
+  - add the following line in "~/.vimrc": colorscheme myColours

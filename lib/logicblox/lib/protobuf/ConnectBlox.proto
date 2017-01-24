@@ -1,0 +1,362 @@
+import "blox/connect/BloxCommand.proto";
+import "blox/connect/Exception.proto";
+
+package blox.connect;
+option java_package = "com.logicblox.connect3";
+
+option optimize_for = SPEED;
+
+/**
+ * Top-level request/response union
+ */
+message Request {
+  /* an identifier from the client can be used to identify a
+	   request for logging purposes (to document the rough purposes
+	   of a transaction). It does not have to be unique in any way for
+	   the database connectivity */
+  optional string client_id = 1;
+
+  /* GUID to identify this request for future operations such as aborting it */
+  optional string guid = 14;
+
+  /* log level for this request. The log level is according to the
+		 usual syntax e.g. debugDetail@factbus:debugDetail@benchmark).
+     The log level setting does not persist across requests */
+  optional string log_level = 2;
+  optional bool return_log = 3 [default = false];
+
+  /* priority for this request. Currently, requests of low priority
+		 are not handled before there are no more requests of normal
+		 priority to handle. */
+  optional Priority priority = 4;
+
+  /* TODO include something like an authentication token */
+
+  /* Execute a transaction */
+  optional Transaction transaction = 5;
+
+  /* Create workspace is currently not allowed as a general command
+     because that might make it difficult to do connection pooling and
+     keeping track of open workspaces per process. */
+  optional CreateWorkSpace create = 6;
+
+  /* See create workspace. There is an additional complication here
+     that copying workspaces might have requirements on blocking
+     incoming transactions and flushing outstanding changes to
+     disk  */
+  optional CopyWorkSpace copy = 7;
+
+  optional DeleteWorkSpace delete = 8;
+
+  optional ImportWorkSpace importws = 9;
+
+  optional ExportWorkSpace exportws = 10;
+
+  optional GetWorkSpacePath get_ws_path = 11;  
+
+  optional GetWorkSpaceVersion get_ws_version = 13;  
+
+  optional CancelRequests cancel_requests = 15;
+
+  /*
+     It contains the client working directory
+  */
+  optional string current_working_directory = 12;
+
+}
+
+message Response {
+  optional string client_id = 1;
+  optional ExceptionContainer exception = 2;
+  optional TransactionResponse transaction = 3;
+  optional CreateWorkSpaceResponse create = 4;
+  optional CopyWorkSpaceResponse copy = 5;
+  optional DeleteWorkSpaceResponse delete = 6;
+  optional ImportWorkSpaceResponse importws = 7;
+  optional ExportWorkSpaceResponse exportws = 8;
+  optional GetWorkSpacePathResponse get_ws_path = 9;  
+  optional GetWorkSpaceVersionResponse get_ws_version = 11; 
+  optional CancelRequestsResponse cancel_requests = 12;
+  optional bytes compressed_log = 10;
+}
+
+/**
+ * Request to execute a transaction
+ */
+message Transaction {
+  required string workspace = 1;
+  repeated Command command = 2;
+  repeated Command command_after_fixpoint = 3;
+  optional int32 timeout = 4 [default = -1];  // In milliseconds
+  optional bool exclusive = 5 [default = false];
+  optional bool readonly = 6 [default = false];
+}
+
+message TransactionResponse {
+  repeated CommandResponse command = 1;
+  repeated CommandResponse command_after_fixpoint = 2;
+}
+
+/**
+ * Request to create a workspace. A workspace cannot be accessed by
+ * other transactions until the transaction that creates it has been
+ * completed.
+ */
+message CreateWorkSpace {
+   optional string name = 1;
+   repeated Command command = 2;
+   repeated Command command_after_fixpoint = 3;
+
+   optional bool measure_engine = 4 [ default = false];
+   optional bool snapshot_isolation = 5 [ default = false];
+   optional string libraries = 6;
+   optional bool overwrite = 7;
+   optional bool unique = 8;
+}
+
+message CreateWorkSpaceResponse {
+  /* if no name was specified in the request, then the response
+     indicates the unique name that has been used */
+  required string name = 1;
+  repeated CommandResponse command = 2;
+  repeated CommandResponse command_after_fixpoint = 3;
+}
+
+/**
+ * Request to copy a workspace
+ */
+message CopyWorkSpace {
+  required string path = 1;
+  optional string new_path = 2;
+}
+
+message CopyWorkSpaceResponse {
+  /* if no name was specified in the request, then the response
+		 indicates the unique name that has been used */
+  optional string path = 1;
+}
+
+/**
+ * Request to delete a workspace
+ */
+message DeleteWorkSpace {
+  required string name = 1;
+}
+
+message DeleteWorkSpaceResponse {
+}
+
+/**
+ * Request to import (copy) an unmanaged workspace into ConnectBlox.
+ */
+message ImportWorkSpace
+{
+  required string src_filepath = 1;
+  optional string name = 2;
+  optional bool overwrite = 3;
+  optional bool unique = 4;
+  // Import by creating a symbolic link 
+  optional bool link = 7;
+  // Only meaningful if link is true. 
+  // Indicates the workspace should be moved 
+  // into the deployment directory and replaced
+  // with a link.
+  optional bool move = 8;
+  repeated Command command = 5;
+  repeated Command command_after_fixpoint = 6;
+}
+
+message ImportWorkSpaceResponse
+{
+  required string name = 1;
+  required string filepath = 2;
+  repeated CommandResponse command = 3;
+  repeated CommandResponse command_after_fixpoint = 4;
+}
+
+/**
+ * Request to export (copy) an managed workspace from ConnectBlox.
+ */
+message ExportWorkSpace
+{
+  required string name = 1;
+  required string dest_filepath = 2;
+  // Export by creating a symbolic link 
+  optional bool link = 3;
+  // Only meaningful if link is true. 
+  // Indicates the workspace should be moved 
+  // out of the deployment directory and 
+  // replaced with a link.
+  optional bool move = 4;
+  // If the directory already exists, overwrite
+  optional bool overwrite = 5;
+}
+
+message ExportWorkSpaceResponse
+{
+}
+
+/**
+ * Request to get an absolute workspace path to a managed workspace.
+ */
+message GetWorkSpacePath
+{
+   required string name = 1;
+   optional bool inverse = 2 [ default = false ];
+}
+
+message GetWorkSpacePathResponse
+{
+  required string filepath = 1;
+}
+
+/**
+ * Request to get the runtime version of managed workspace.
+ */
+message GetWorkSpaceVersion
+{
+   required string name = 1;
+}
+
+message GetWorkSpaceVersionResponse
+{
+  // Major version string. In principle there is no convention, but
+  // the suggestion is to keep this version people use in their
+  // discussions (e.g. "3.9" and "4.0")
+  required string version = 2;
+  // Minor version, for example "3" for release "3.9.3"
+  optional string minor_version = 3;
+  // Detailed identifier for a specific build.
+  required string build_number = 1;
+}
+
+/**
+ * Request to cancel/abort an already submitted request. Takes a list
+ * of request ids that should already have been submitted. It is not
+ * considered an error to submit values that the server is unaware of,
+ * because they could have completed by the time this message is received.
+ * The response breaks down how the requests were handled.
+ */
+message CancelRequests
+{
+   repeated string req_guid = 1;
+}
+
+message CancelRequestsResponse
+{
+   /* requests that were cancelled before starting */
+   repeated string cancelled_guids = 1;
+
+   /* requests that were forcibly aborted */
+   repeated string aborted_guids = 2;
+
+   /* requests that completed normally anyhow */
+   repeated string completed_guids = 3;
+
+   /* requests that the server didn't know about */
+   repeated string unknown_guids = 4;
+}
+
+
+// Request priority?
+
+enum Priority
+{
+  NORMAL = 1;
+  LOW = 2;
+}
+
+
+/**
+ * Top-level admin request/response union
+ */
+
+message AdminRequest {
+   optional string client_id = 1;
+   optional ShutdownServer shutdown_server = 2;
+   optional ProcessPoolStatus process_pool_status = 3;
+   optional AbortTransaction abort_transaction = 4;
+   optional KillProcess kill_process = 5;
+   optional bool list_workspaces = 6;
+   optional bool status = 7;
+}
+
+message AdminResponse {
+  optional string client_id = 1;
+  optional ExceptionContainer exception = 2;
+  optional ShutdownServerResponse shutdown_server = 3;
+  optional ProcessPoolStatusResponse process_pool_status = 4; 
+  optional AbortTransactionResponse abort_transaction = 5;
+  optional KillProcessResponse kill_process = 6;
+  optional ListWorkSpacesResponse list_workspaces = 7;
+  optional StatusResponse status = 8;
+}
+
+message ShutdownServer {
+   optional bool waitForProcesses = 1;
+}
+
+message ShutdownServerResponse {
+   optional string message = 1;
+}
+
+message ProcessPoolStatus {
+   optional bool show_available_processes = 1 [ default = false ];
+}
+
+message ProcessPoolStatusResponse {
+   required uint32 max_number_process_in_server = 1;
+   repeated ProcessStatus process_status = 2;
+}
+
+message ProcessStatus {
+   required uint32 pid = 1;
+   required bool is_active = 2;
+   required string ws_path = 3;
+   required Request request = 4;
+}
+
+message AbortTransaction {
+   required uint32 pid = 1;
+}
+
+message AbortTransactionResponse {
+   optional string message = 1;
+}
+
+message KillProcess {
+   required int32 pid = 1;
+   optional uint32 signal = 2 [default = 15]; // 15 = SIGTERM
+}
+
+message KillProcessResponse {
+   required string message = 1;
+}
+
+/**
+ * Request to list the available workspaces
+ */
+message ListWorkSpaces
+{
+}
+
+message ListWorkSpacesResponse
+{
+  repeated string name = 1;
+}
+
+enum ServerStatus {
+  ON = 1;
+  OFF = 2;
+}
+
+message StatusRequest
+{
+}
+
+message StatusResponse
+{
+  required ServerStatus server_status = 1;
+}
+
+

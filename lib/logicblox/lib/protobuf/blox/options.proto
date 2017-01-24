@@ -1,0 +1,17 @@
+import "google/protobuf/descriptor.proto";
+
+package blox.options;
+option java_package = "com.logicblox.common.protocol.blox";
+
+extend google.protobuf.FieldOptions {
+   optional bool is_constructor = 60000;
+   optional bool use_dictionary = 60001;
+   optional string use_dictionary_package = 60002;
+   optional string map_with_key = 60003;
+   optional bool inlined = 60004;
+   optional bool set = 60005;
+}
+
+extend google.protobuf.MessageOptions {
+   optional string lifetime = 70000;
+}

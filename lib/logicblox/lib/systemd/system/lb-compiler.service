@@ -1,0 +1,15 @@
+[Unit]
+Description=LogicBlox BloxCompiler Daemon
+PartOf=lb.target
+Before=lb.target
+
+[Service]
+ExecStart=/opt/logicblox/bin/lb compiler-server start
+ExecStop=-/opt/logicblox/bin/lb compiler-server stop
+Restart=always
+SyslogIdentifier=lb-compiler
+
+Environment=LB_PRODUCTION_ENVIRONMENT=1
+
+Environment=LB_DEPLOYMENT_HOME=/var/db/logicblox
+

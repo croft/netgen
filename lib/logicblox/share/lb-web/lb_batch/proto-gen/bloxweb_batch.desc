@@ -1,0 +1,169 @@
+
+¦
+lb/web/batch.protolb.web.batch"Q
+Spec)
+config (2.lb.web.batch.BatchConfig
+stm (2.lb.web.batch.Stm"¾
+BatchConfig
+keydir (	
+keyname (	
+	chunksize (
+max_concurrent (
+max_concurrent_s3 (
+tcp_client_threads (,
+tcp_max_connections_per_address (:100"Æ
+Stm!
+seq (2.lb.web.batch.StmSeq)
+transaction (2.lb.web.batch.StmTxn&
+parallel (2.lb.web.batch.StmPar'
+simple (2.lb.web.batch.StmSimple,
+	try_catch (2.lb.web.batch.StmTryCatch$
+status (2.lb.web.batch.Status
+	exception (	
+end_time (	
+description	 (	
+
+start_time
+ (	"(
+StmSeq
+stm (2.lb.web.batch.Stm"Ã
+StmTxn
+service (	
+config (	0
+	transport (2.lb.web.batch.TransportConfig
+stm (2.lb.web.batch.Stm
+transaction_id (	.
+	signature (2.lb.web.batch.SignatureAuth"5
+StmPar
+max (
+stm (2.lb.web.batch.Stm"O
+StmTryCatch
+try (2.lb.web.batch.Stm 
+catch (2.lb.web.batch.Stm"
+	StmSimple 
+echo (2.lb.web.batch.Echo 
+fail (2.lb.web.batch.Fail/
+import_delim (2.lb.web.batch.ImportDelim/
+export_delim (2.lb.web.batch.ExportDelim)
+	s3_upload (2.lb.web.batch.S3Upload-
+s3_download (2.lb.web.batch.S3Download+
+
+call_proto (2.lb.web.batch.CallProto 
+noop
+ (2.lb.web.batch.Noop$
+exec_stm (2.lb.web.batch.Exec
+retryd ("
+Noop"
+Fail
+text (	"
+Echo
+text (	"‡
+ImportDelim
+service (	
+	data_file (	
+data_url (	"
+input (2.lb.web.batch.Input
+config (	0
+	transport (2.lb.web.batch.TransportConfig
+gzip (
+full (
+out_file	 (	
+out_url
+ (	
+key (	
+abort_on_error (.
+	signature (2.lb.web.batch.SignatureAuth
+print_tdx_import_errors ('
+error_file_only_on_error (:false"Ð
+ExportDelim
+service (	
+	data_file (	
+data_url (	
+key (	
+config (	0
+	transport (2.lb.web.batch.TransportConfig
+gzip (.
+	signature (2.lb.web.batch.SignatureAuth"B
+S3Upload
+file (	
+url (	
+key (	
+config (	"7
+
+S3Download
+file (	
+url (	
+config (	"Ç
+	CallProto
+service (	
+config (	0
+	transport (2.lb.web.batch.TransportConfig0
+encoding (2.lb.web.batch.ProtoBufEncoding
+gzip ("
+input (2.lb.web.batch.Input
+output_file (	
+format (.
+method	 (2.lb.web.batch.HttpMethod:POST.
+	signature
+ (2.lb.web.batch.SignatureAuth"t
+Exec
+command (	
+timeout (
+destroy_on_timeout (
+pipe_stdout_to (	
+pipe_stderr_to (	"B
+SignatureAuth
+username (	
+keyname (	
+keydir (	"@
+Input
+binary (
+text (	
+file (	
+url (	"P
+TransportConfig
+config (	-
+tcp (2 .lb.web.batch.TCPTransportConfig"µ
+TCPTransportConfig$
+ssl (2.lb.web.batch.SSLConfig
+timeout (:600000
+connect_timeout (:75000
+idle_timeout (:20000#
+max_connections_per_address ("œ
+	SSLConfig
+keyManagerAlgorithm (	
+keyManagerPassword (	
+keyStoreLocation (	
+keyStorePassword (	
+keyStoreType (	
+secureRandomAlgorithm (	
+trustManagerAlgorithm (	
+trustStoreLocation (	
+trustStorePassword	 (	
+trustStoreType
+ (	"W
+AWSCredentials
+
+access_key (	
+
+secret_key (	
+iam_role (	
+env (	*(
+ProtoBufEncoding
+JSON
+
+BINARY*>
+
+HttpMethod
+GET
+POST
+PUT
+
+DELETE
+HEAD*<
+Status
+SUCCESS	
+ERROR
+ERROR_PARTIAL
+DNSB
+com.logicblox.bloxweb.batch

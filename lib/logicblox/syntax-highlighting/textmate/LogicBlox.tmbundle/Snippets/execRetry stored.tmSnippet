@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>execRetry --storedBlock ${1:name}
+$0</string>
+	<key>name</key>
+	<string>execRetry stored</string>
+	<key>scope</key>
+	<string>source.logicblox</string>
+	<key>tabTrigger</key>
+	<string>execRetryStored</string>
+	<key>uuid</key>
+	<string>218648EC-6201-42F5-A643-34598BFD22F1</string>
+</dict>
+</plist>

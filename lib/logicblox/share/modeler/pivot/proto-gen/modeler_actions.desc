@@ -1,0 +1,14 @@
+
+§
+protocols/actions.protomodeler.actions"
+ActionRequest"G
+ActionResponse5
+status (2%.modeler.actions.ActionResponseStatus" 
+ActionResponseStatusG
+type (20.modeler.actions.ActionResponseStatus.StatusType:Warning
+message (	".
+
+StatusType
+Info
+Warning	
+Error

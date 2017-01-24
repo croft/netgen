@@ -1,0 +1,252 @@
+/**
+ * This protocol contains messages that are used by clients of lb workflow to configure
+ * primitive tasks, such as TdxImport.
+ */
+option java_package = "com.logicblox.workflow.task";
+
+/**
+ * An extension that allows the implementation of custom type checkers. This can be used when the message does not
+ * describe the JSON structure of the string to parse, but only lists an implementation class that will parse the
+ * incoming string and determine if it is syntactically correct.
+ */
+import "google/protobuf/descriptor.proto";
+extend google.protobuf.MessageOptions {
+  optional string workflow_type_class = 55183;
+}
+
+//
+// DRIVER META INFORMATION
+//
+
+/**
+ * Configuration passed to the driver.
+ */
+message DriverMeta
+{
+  /**
+   * Concurrency control
+   */
+  // the group to which this task belongs
+  optional string group = 1;
+  // the max number of concurrent tasks allowed in this group
+  optional int64 max = 2;
+  // the priority of this task; lower means the task will be executed earlier
+  optional int64 priority = 3 [default = 0];
+  // extra metadata to show in the tasks status
+  optional string meta = 4;
+}
+
+/**
+ * A list of events emitted by the driver and sent by a notifier.
+ */
+message Events {
+  repeated Event event = 1;
+}
+
+/**
+ * A single event emitted by the driver.
+ */
+message Event {
+  // a short name for the event (e.g. startup, shutdown, stop, start, etc)
+  required string event = 1;
+
+  // may contain details about the event, like error messages
+  optional string details = 2;
+
+  // information available only if the event is specific to a task or workflow
+  optional TaskEvent task = 10;
+  optional WorkflowEvent workflow = 11;
+}
+
+message TaskEvent {
+  required string task_id = 1;
+  required string workspace = 2;
+
+  // information only available if "verbose" is requested
+  // the implementation class name?
+  optional string task_type = 3;
+  optional string description = 4;
+  // INFO we currently don't have but would be relatively simple to get
+  //optional string workflow_name =;
+  //optional string root_id =;
+}
+
+// TODO - we currently have no way to get this info
+message WorkflowEvent {
+  required string root_id = 1;
+  required string workflow_name = 2;
+}
+
+
+//
+// TASK PARAMETERS
+//
+
+/**
+ * Identifies an input to a TDX service.
+ */
+message TDXInput
+{
+  /**
+   * The path to the file to import or where to store the export.
+   *
+   * For imports or exports, this can be a file path or a URI (file://, s3://, etc).
+   *
+   * For imports, this can be a pattern which supports * and ? wildcards. The
+   * pattern will be expanded and each file will be imported using the same service.
+   *
+   * @example /tmp/file.csv
+   * @example /tmp/files_*.csv
+   * @example file://tmp/files_*.csv
+   */
+  required string file = 1;
+
+  /**
+   * The prefix of the service, relative to the transport.
+   *
+   * @example /tdx/my_service
+   */
+  required string service = 2;
+
+  /**
+   * The location to store the CSV file with error rows returned by TDX when
+   * importing. This is ignored on exports.
+   *
+   * If error is not set, TDX will not return error rows. Otherwise, this
+   * string should be one of the following:
+   *
+   *  - an s3 URL (s3:/...). This is the preferred option for production.
+   *  - a file URL (file:///...). The file URL resolves in the server
+   *    host. This is highly discouraged in production and should only be
+   *    used in local testing.
+   *  - an absolute file path (/...file.csv). The file resolves in the
+   *    client host. This is also only useful for testing of small files
+   *    because the client keeps the whole file in memory.
+   *
+   * If the file attribute contains a pattern, it may be expanded to multiple
+   * files. In this case, the error file must also be expanded so that there
+   * is a unique error file for each import file. If the error string does
+   * not contain any wildcard, then the task will generate a unique file
+   * extension for each import file. However, it is possible to use * to
+   * match the groups matched by the file pattern. For example:
+   *
+   * file: /tmp/files_*.csv
+   * matches: /tmp/files_foo.csv and /tmp/files_bar.csv
+   * error: /tmp/error_file_*.csv
+   *
+   * This will generate the following error files for the matches:
+   * error files: /tmp/error_file_foo.csv and /tmp/error_file_bar.csv
+   */
+  optional string error = 3;
+
+  /**
+   * Whether partial import is allowed for this file, i.e. even if there
+   * are error records, the records that do not contain errors will be
+   * imported. Default comes from the task parameters. Only used on imports.
+   */
+  optional bool allow_partial_import = 10;
+
+  /**
+   * Action to take if the file pattern is not matched by a file during
+   * an import. This is ignored on exports. Default comes from the task
+   * parameters. Only used on imports.
+   */
+  optional Reaction unmatched_import_reaction = 11;
+
+  /**
+   * Whether the import should overwrite previous data in the target
+   * predicates (i.e. use PUT). Default comes from the task parameters.
+   * Only used on imports.
+   */
+  optional bool full = 12;
+
+  /**
+   * Whether error files should only be exported if there is an actual
+   * import error (otherwise, always export the error file, even if it
+   * contains only the headers). Default comes from the task parameters.
+   * Only used on imports.
+   */
+  optional bool error_file_only_on_error = 13;
+}
+
+/**
+ * A reaction to be executed on some trigger. For example, should a TDX task fail when an import error is detected?
+ */
+enum Reaction {
+  // task should fail
+  FAIL = 1;
+  // task should continue and a warning raised
+  WARN = 2;
+  // task should continue silently
+  IGNORE = 3;
+}
+
+/**
+ * A representation of a duration, consisting of a length of time in a certain
+ * unit of time (a TimeResolution).
+ *
+ * The expected syntax is an integer (specifying the length) followed by an
+ * optional resolution specification. If not specified, the compiler and driver
+ * will currently issue a deprecation warning, which will turn into an error in
+ * a future release. In this case, the resolution is ms for lb.tdx.* tasks and
+ * seconds for other tasks. If specified, the following map is used:
+ *
+ *    "ms" -> MILLISECONDS
+ *    "s"  -> SECONDS
+ *    "m"  -> MINUTES
+ *    "h"  -> HOURS
+ *    "d"  -> DAYS
+ *    "M"  -> MONTHS
+ *    "y"  -> YEARS
+ *
+ * Examples:
+ *    "50ms" -> 50 MILLISECONDS
+ *    "4 h"  -> 4 HOURS
+ *    "5"    -> warning, 5 MILLISECONDS for lb.tdx.*; 5 SECONDS otherwise
+ *     7     -> warning, 7 MILLISECONDS for lb.tdx.*; 7 SECONDS otherwise
+ */
+message Duration {
+  option (workflow_type_class) = "com.logicblox.workflow.typesystem.Duration";
+}
+
+/**
+ * Possible units of time for a Duration.
+ */
+enum TimeResolution {
+  MILLISECONDS = 1;
+  SECONDS = 2;
+  MINUTES = 3;
+  HOURS = 4;
+  DAYS = 5;
+  MONTHS = 6;
+  YEARS = 7;
+}
+
+//
+// OLD MESSAGES NOT CURRENTLY IN USE
+//
+
+message TransportConfig
+{
+  optional string config = 1;
+  //optional SQSTransportConfig sqs = 2;
+  optional TCPTransportConfig tcp = 3;
+}
+
+message TCPTransportConfig
+{
+  //optional SSLConfig ssl = 1;
+
+  // Max time the whole exchange can take (in ms).
+  optional uint32 timeout = 2 [default = 600000];
+
+  // Max time to wait when establishing a connection to the server (in ms).
+  optional uint32 connect_timeout = 3 [default = 75000];
+
+  // Max time in a connection without processing anything (in ms).
+  // Processing is defined to be "parsing or generating".
+  optional uint32 idle_timeout = 4 [default = 20000];
+
+  // Default = BatchConfig.tcp_max_connections_per_address.
+  optional uint32 max_connections_per_address = 5;
+}

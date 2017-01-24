@@ -1,0 +1,529 @@
+import "blox/common/Common.proto";
+import "blox/connect/Exception.proto";
+
+package blox.connect;
+option java_package = "com.logicblox.connect";
+
+/**
+ * Command Union
+ */
+message Command {
+   optional AddBlock add_block = 1;
+   optional InstallLibrary install_library = 2;
+   optional ExecInactiveBlock exec_inactive = 3;
+   optional ExecBlock exec = 4;
+   optional QueryPredicate query_predicate = 5;
+   optional UpdatePredicate update_predicate = 6;
+   optional GetPredicateInfo pred_info = 7;
+   optional ImportProtoBuf import_protobuf = 8;
+   optional CompileBlock compile_block = 9;
+   optional InstallProject install_project = 10;
+   optional RemoveBlock remove_block = 11;
+   optional LogMessage log_message = 12;
+   optional ExportProtoBuf export_protobuf = 14;
+   optional ProtoAddSpec proto_add_spec = 15;
+   optional FaultInjection fault = 16;
+   optional GetPredicateInfoBulk pred_info_bulk = 17;
+   optional GetPredicatePopcount pred_popcount = 20;
+   optional GenerateFullUpdateDeltas pred_full_update_deltas = 21;
+   optional ExecuteImportScript exec_import_script = 22;
+   optional GetProtocolDescriptors proto_get_descriptors = 23;
+   /* Create an alias for a branch name */
+   optional BindBranchAlias bind_branch_alias = 24;
+}
+
+message CommandResponse {
+   optional ExceptionContainer exception = 1;
+
+   optional AddBlockResponse add_block = 2;
+   optional InstallLibraryResponse install_library = 3;
+   optional ExecInactiveBlockResponse exec_inactive = 4;
+   optional ExecBlockResponse exec = 5;
+   optional QueryPredicateResponse query_predicate = 6;
+   optional UpdatePredicateResponse update_predicate = 7;
+   optional GetPredicateInfoResponse pred_info = 8;
+   optional ImportProtoBufResponse import_protobuf = 9;
+   optional CompileBlockResponse compile_block = 10;
+   optional InstallProjectResponse install_project = 11;
+   optional RemoveBlockResponse remove_block = 12;
+   optional LogMessageResponse log_message = 13;
+   optional ExportProtoBufResponse export_protobuf = 15;
+   optional ProtoAddSpecResponse proto_add_spec = 16;
+   optional FaultInjection fault = 17;
+   optional GetPredicateInfoBulkResponse pred_info_bulk = 18;
+   optional GetPredicatePopcountResponse pred_popcount = 21;
+   optional GenerateFullUpdateDeltasResponse pred_full_update_deltas = 22;
+   optional ExecuteImportScriptResponse exec_import_script = 23;
+   optional GetProtocolDescriptorsResponse proto_get_descriptors = 24;
+   optional BindBranchAliasResponse bind_branch_alias = 25;
+}
+
+/**
+ * Add Block Command
+ */
+message AddBlock {
+   optional string block_name = 1;
+   // 2012.05.15 GAW
+   // Converted this to be an optional field,
+   // as it is unnecessary if we send LB0.
+   optional bool active = 2;
+   required bytes logic = 3;
+   optional Language language = 4;
+   optional bool after_fixpoint = 5;
+}
+
+message AddBlockResponse {
+   optional string block_name = 1;
+   optional blox.common.protocol.CompilationProblems problems = 2;
+}
+
+/**
+ * Remove Block Command
+ */
+message RemoveBlock {
+   repeated string block_name = 1;
+}
+
+message RemoveBlockResponse {
+   optional blox.common.protocol.CompilationProblems problems = 2;
+}
+
+/**
+ * Compile Block Command
+ */
+message CompileBlock {
+   optional string block_name = 1;
+   required blox.common.protocol.LogicSort sort = 2;
+   required string logic = 3;
+}
+
+message CompileBlockResponse {
+   optional blox.common.protocol.CompilationProblems problems = 1;
+   optional bytes result = 2;
+}
+
+/**
+ * Install library Command
+ */
+message InstallLibrary {
+   required string name = 1;
+}
+
+message InstallLibraryResponse {
+}
+
+/**
+ * Install project Command
+ */
+message InstallProject {
+   required string projDir = 1;
+   optional bool recurse = 2 [default = true];
+   optional bool copy = 3 [default = true];
+   optional string lib_path = 4;
+}
+
+message InstallProjectResponse {
+}
+
+/**
+ * Execute Inactive Block Command
+ */
+message ExecInactiveBlock {
+   required string block_name = 1;
+   repeated InputBinding input = 2;
+   repeated string return_local = 3;
+   repeated ReturnLocalProtoBuf return_protobuf = 4;
+}
+
+message ExecInactiveBlockResponse {
+   repeated Relation return_local = 1;
+   repeated ReturnLocalProtoBufResponse return_protobuf = 2;
+}
+
+message ReturnLocalProtoBuf {
+   required string predicate = 1;
+   required string protocol = 2;
+}
+
+message ReturnLocalProtoBufResponse {
+   optional string predicate = 1;
+   repeated bytes message = 2;
+}
+
+/**
+ * Execute Block Command
+ */
+message ExecBlock {
+   optional string block_name = 1;
+   required bytes logic = 2;
+   optional Language language = 3;
+   repeated InputBinding input = 4;
+   repeated string return_local = 5;
+   repeated ReturnLocalProtoBuf return_protobuf = 6;
+}
+
+message ExecBlockResponse {
+   optional blox.common.protocol.CompilationProblems problems = 1;
+   repeated Relation return_local = 2;
+   repeated ReturnLocalProtoBufResponse return_protobuf = 3;
+}
+
+/**
+ * Query Predicate Command
+ */
+message QueryPredicate {
+  required PredicateName predicate = 1;
+  optional DeltaModifier delta = 2;
+  /* Querying the refmodes of entities can be quite expensive, so allow
+   * the client to turn them off if it knows it won't need them. 
+   */
+  optional bool return_refmodes = 3 [default = true];
+}
+
+message QueryPredicateResponse {
+  required Relation relation = 1;
+}
+
+/**
+ * Update Predicate Command
+ *
+ * When retracting from a predicate, the relation parameter
+ * should contain only keys, rather than keys and values.
+ */
+message UpdatePredicate {
+  required PredicateName predicate = 1;
+  required Relation relation = 2;
+  required DeltaModifier delta = 3;
+  optional EntityMode entity_mode = 4;
+}
+
+message UpdatePredicateResponse {
+}
+
+/**
+ * Get Predicate Info Command
+ */
+message GetPredicateInfo {
+  required PredicateName predicate = 1;
+}
+
+message GetPredicateInfoResponse {
+  required blox.common.protocol.PredicateInfo info = 1;
+}
+
+/**
+ * Bulk Get Predicate Info Command
+ */
+
+message GetPredicateInfoBulk {
+  // 2012.03.14 GAW
+  // Requested predicates. If no predicates specified,
+  // then all predicates in the workspace are returned,
+  // except those specified as omitted.
+  repeated PredicateName predicate = 1;
+  // 2012.03.14 GAW
+  // Predicates not to return. This is merely an optimization
+  // hint and may be ignored.  In the event that a predicate
+  // has been both requested and omitted, it will
+  // be returned.
+  repeated PredicateName omit = 2;
+}
+
+message GetPredicateInfoBulkResponse {
+  repeated blox.common.protocol.PredicateInfo info = 1;
+}
+
+/**
+ * Get Predicate Popcount Command
+ */
+message GetPredicatePopcount {
+  required bool all = 1 [default = true];
+  repeated PredicateName predicate = 2;
+
+  // Starting from LB 4.0 include_regexp and exclude_regexp can be used to
+  // restrict and filter the requested predicates
+  //
+  // Returned are all these predicates that
+  //   match include_regexp (if set), and
+  //   do not match exclude_regexp (if set).
+  //
+  // Regular expressions are in Perl syntax, see
+  // http://www.boost.org/doc/libs/1_53_0/libs/regex/doc/html/boost_regex/syntax/perl_syntax.html
+  // These two options are only considered when all=true.
+  optional string include_regexp = 3;
+  optional string exclude_regexp = 4;
+
+  // We use popcount to implement lb list
+  optional bool only_predicate_names = 5 [default = false];
+
+  // Return estimated versus exact predicate cardinalities.  Estimated
+  // cardinalities are much faster to compute for predicates implemented
+  // in lb-server using write-optimized data structures, where they are a
+  // conservative overestimate of the actual cardinality.  The estimate is
+  // in fact a count of the delta-entries making up a write-optimized data
+  // structure, which is actually a better indicator of its physical size,
+  // speed of access, etc. than is cardinality.
+  optional bool estimated = 6 [default = false];
+
+  // For default-valued predicates, if include_default is false, then we
+  // report only the cardinality of the set of keys having non-default
+  // values.  If include_default is true, then we include keys having default
+  // values as well, in which case the size will just be the size of the
+  // keyspace.
+  optional bool include_default = 7 [default = false];
+}
+
+message GetPredicatePopcountResponse {
+  repeated blox.common.protocol.PredicatePopcount popcount = 1;
+}
+
+/**
+ * Get Protocol Descriptor Command
+ */
+message GetProtocolDescriptors {
+  required bool all = 1;
+  repeated string protocol_name = 2;
+
+  // include_regexp and exclude_regexp can be used to
+  // restrict and filter the requested descriptors
+  //
+  // Returned are all these descripters that
+  //   match include_regexp (if set), and
+  //   do not match exclude_regexp (if set).
+  //
+  // Regular expressions are in Perl syntax, see
+  // http://www.boost.org/doc/libs/1_53_0/libs/regex/doc/html/boost_regex/syntax/perl_syntax.html
+  // These two options are only considered when all=true.
+  optional string include_regexp = 3;
+  optional string exclude_regexp = 4;
+}
+
+message GetProtocolDescriptorsResponse {
+  repeated ProtocolDescriptor protocols = 1;
+}
+
+message ProtocolDescriptor {
+  required string name = 1;
+  required bytes descriptor_data = 2;
+}
+
+/**
+ * Import ProtoBuf command
+ */
+message ImportProtoBuf {
+  required string protocol = 1;
+  required string type_name = 2;
+  required bytes message = 3;
+}
+
+message ImportProtoBufResponse {
+}
+
+/**
+ * Export ProtoBuf command
+ */
+message ExportProtoBuf {
+  required string protocol = 1;
+  required string type_name = 2;
+}
+
+message ExportProtoBufResponse {
+   required bytes message = 1;
+}
+
+/**
+ * Log message command
+ */
+message LogMessage {
+  required string message = 1;
+}
+
+message LogMessageResponse {
+}
+
+/**
+ * Protobuf add specification
+ */
+
+message ProtoAddSpec {
+   required string name = 1;
+   required bytes descriptor_msg = 2;
+}
+
+message ProtoAddSpecResponse {
+}
+
+
+/**
+ * Request to bind an alias to the name of a branch.
+ */
+message BindBranchAlias {
+   required string alias = 1;
+   required string branch_name = 2;
+}
+
+message BindBranchAliasResponse {
+}
+
+/**
+ * Generate full update deltas command
+ */
+message GenerateFullUpdateDeltas {
+  required PredicateName predicate = 1;
+}
+
+message GenerateFullUpdateDeltasResponse {
+}
+
+/**
+ * Execute import script command
+ */
+message ExecuteImportScript {
+   required string script_path = 1;
+   optional bool incremental = 2;
+}
+
+message ExecuteImportScriptResponse {
+   required bool success = 1;
+}
+
+
+/**
+ * Fault injection
+ */
+message FaultInjection {
+   required FaultKind kind = 1;
+   optional uint32 seconds = 2;
+}
+
+enum FaultKind {
+   ABNORMAL_PROGRAM_TERMINATION = 1;
+   SLEEP = 2;
+   HANG = 3;
+}
+
+/**
+ * Misc
+ */
+enum Language {
+  LB = 1;
+  LB0 = 2;
+  MEASURE = 3;
+}
+
+enum DeltaModifier {
+  ASSERTIONS = 1;
+  RETRACTIONS = 2;
+  UPSERT = 3;
+  FULL = 4;
+}
+
+enum EntityMode {
+  // if an entity element does not exist, then skip the fact that is being written.
+  MISSING_SKIP = 1;
+  // if an entity element does not exist, then create it
+  MISSING_CREATE = 2;
+  // if an entity element does not exist, then report an error
+  MISSING_ERROR = 3;
+}
+
+message InputBinding
+{
+   required string name = 1;
+   required Relation relation = 2;
+}
+
+message Relation {
+   optional string name = 1;
+   repeated Column column = 2;
+}
+
+message Column {
+  optional EntityColumn entity_column = 1;
+
+  optional BoolColumn bool_column = 2;
+
+  optional Int64Column int64_column = 4;
+
+  /* Still needed for autonumbered columns? */
+  optional UInt64Column uint64_column = 6;
+
+  optional Float64Column float64_column = 8;
+
+  optional StringColumn string_column = 9;
+
+  // 64-bit Unix time?
+  optional DateTimeColumn datetime_column = 10;
+
+  /* Runtime 4.x implements a fixed decimal type "decimal"
+   * with 13 digits before and 5 digits after the decimal point.
+   * We represent decimals as their digits in int64 form.
+   * That is 123.00430 is represented as the integer 12300430.
+   * Valid int64 values for import are from -999999999999999999L to
+   * +999999999999999999L.
+   *
+   * Conversion integer-digits i <=> decimal d
+   *    d = i / 100_000            i = d * 100_000
+   * Conversion from integer-digits i to decimal string:
+   *    sign  = i < 0 ? "-" : ""
+   *    i_abs = i < 0 ? -i : i
+   *    before_point = i_abs / 100_000
+   *    after_point  = i_abs % 100_000
+   *    d_string = "%s%d.%05d" % (sign, before_point, after_point)
+   */
+  // We on purpose removed the old decimal column type to not silently
+  // break code.
+  // optional DecimalColumn decimal_column = 13;
+
+  // Fixed decimal type
+  optional Decimal128Column decimal128_column = 14;
+
+  optional Int128Column int128_column = 15;
+}
+
+message BoolColumn        { repeated bool   values = 1 [packed = true]; }
+message Int64Column       { repeated int64  values = 1 [packed = true]; }
+message UInt64Column      { repeated uint64 values = 1 [packed = true]; }
+message Float64Column     { repeated double values = 1 [packed = true]; }
+message DateTimeColumn    { repeated int64  values = 1 [packed = true]; }
+message StringColumn      { repeated string values = 1; }
+
+/**
+ * Note: we do not use a signed number for integral because this
+ * introduces problem with -0.1
+ */
+message Decimal128Column  { repeated bool   negative = 1        [packed = true];
+                            repeated uint64 integral_digits = 2 [packed = true];
+                            repeated uint64 fraction_digits = 3 [packed = true];
+                          }
+
+/**
+ * Int128 is represented as a high oct and low oct.
+ */
+message Int128Column      { repeated uint64 high = 1 [packed = true ];
+                            repeated uint64 low  = 2 [packed = true ];
+                          }
+
+// We on purpose removed the old decimal column type to not silently
+// break code.
+// message DecimalColumn     { repeated int64 values = 1 [packed = true]; }
+
+message EntityColumn {
+  optional string name = 1;
+  optional Column index_values = 2;
+  optional Column refmode_values = 3;
+}
+
+message PredicateName {
+  optional LocalPredicateName local_name = 1;
+  optional GlobalPredicateName global_name = 2;
+}
+
+message LocalPredicateName {
+  required string local_name = 1;
+  required string block_name = 2;
+}
+
+message GlobalPredicateName {
+  required string qualified_name = 1;
+}

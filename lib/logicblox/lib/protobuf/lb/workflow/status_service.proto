@@ -1,0 +1,168 @@
+package status_service;
+
+import "blox/options.proto";
+option java_package = "com.logicblox.workflow.status";
+
+
+/*
+ * Message to query information about workflow status.
+ */
+message Request {
+  // parameters to select process instances to return
+
+  // select the workflow
+  optional string workflow_name = 1;       // only instances of the workflow with this name?
+  optional string workflow_root_uid = 2;   // only instances of the workflow rooted in the process with this id?
+
+  // select the processes in the workflow
+  optional string process_name = 3;  // only instaces from the process with this name?
+  optional string process_uid = 4;   // only the instance with this id?
+  repeated string process_uids = 18 [(blox.options.set) = true]; // only the instance with these ids?
+  repeated string task_state = 5 [(blox.options.set) = true];  // only task instances in any of these states?
+  optional bool get_all = 6; // all instances or only started?
+  optional bool get_ancestors = 7; // add the ancestors of all selected processes?
+  optional bool get_active_roots = 14; // get only root processes that started but haven't terminated?
+  optional bool get_inactive_roots = 23; // get only root processes that have terminated?
+  optional bool get_only_roots = 17; // get only root processes? if used with get_active_roots, has no effect.
+
+  // parameters to select what information of the instances to return
+  optional bool get_receptive_actions = 8;
+  optional bool get_io = 9; // inputs and outputs?
+  optional bool get_history = 10; // whole history of transitions?
+  optional bool get_source_ref = 13; // information about the source code where processes come from?
+  optional bool get_instance_vars = 15; // information about the instance variable bindings?
+  optional bool get_root_summary = 22; // information about the workflow instances
+
+  // instead of returning information, return only a count of the number of selected instances
+  // this overrides the other options above (i.e., it has precedence)
+  optional bool get_count = 11;
+
+  // return only the list of available states in every workflow installed;
+  // if this is set, no workflow information will be returned.
+  optional bool list_states = 12;
+  // return only the list of available workflows
+  optional bool list_workflows = 16;
+};
+
+/*
+ * The main response message.
+ */
+message Response {
+  // selected workflows
+  repeated Workflow workflow = 1 [(blox.options.set) = true];
+
+  // response to list_states
+  repeated string state = 2 [(blox.options.set) = true];
+
+  // response to list_workflows
+  repeated string workflow_name = 3 [(blox.options.set) = true];
+}
+
+/**
+ * Represents a installed workflow schema.
+ */
+message Workflow {
+  required string name = 1; // workflow name (may not be unique)
+  required string id = 2;  // workflow internal id (unique in the workspace)
+  required string timestamp = 3; // when the workflow was installed in the workspace
+  repeated WorkflowInstance instance = 4 [(blox.options.set) = true]; // requested workflow instances
+}
+
+/**
+ * An instance of a workflow, with a single root.
+ */
+message WorkflowInstance {
+  required string timestamp = 1; // root creation timestamp
+  required int64 root_id = 2; // the id of the root process
+  repeated ProcessInstance process = 3 [(blox.options.set) = true]; // the selected instances (iif !Request.get_count)
+  optional int64 count = 4; // the number of instances selected (iif Request.get_count)
+  required bool aborted = 5; // if the root of this workflow was aborted
+  required bool paused = 6; // if the root of this workflow is paused
+  optional string global_state = 7; // the global state of the instance
+  optional string duration = 8; // the duration of the workflow instance
+}
+
+/**
+ * An instance of a process in the workflow instance process tree.
+ */
+message ProcessInstance {
+  // basic info
+  required int64 id = 1;
+  required string process_name = 2;
+  required bool root = 3;
+  required string type = 4;
+  optional string state = 5;
+  required string source_ref_description = 15;
+  optional string duration = 18;
+
+  // the children instances of this process
+  repeated ProcessInstanceRef children = 6 [(blox.options.set) = true];
+
+  // timing info
+  optional string begins_timestamp = 7;
+  optional string initialized_timestamp = 8;
+  optional string last_transition_timestamp = 9; // only for tasks
+  optional string terminates_timestamp = 10;
+
+  // io info
+  repeated IO input = 11 [(blox.options.set) = true];
+  repeated IO output = 12 [(blox.options.set) = true];
+
+  // receptive actions (TODO - maybe make this a message and add the target state?)
+  repeated string receptive_action = 13 [(blox.options.set) = true];
+
+  // history of state transitions (only for tasks)
+  repeated Transition history = 14 [(blox.options.set) = true];
+
+  // source reference info
+  optional ProcessSourceReference source_ref = 16;
+
+  // instance variable bindings
+  repeated IO instance_vars = 17 [(blox.options.set) = true];
+}
+
+/*
+ * A reference from a process instance to another.
+ */
+message ProcessInstanceRef {
+  // the id of the refered instance
+  required int64 id = 1;
+  // used if there is some order in the children (e.g. for sequential processes)
+  optional int64 order = 2;
+  // a description of what this process means to the parent
+  // (e.g. "first" or "second" in children of a sequential process)
+  optional string relation_to_parent = 3;
+}
+
+/*
+ * Input or output bindings.
+ */
+message IO {
+  required string key = 1;
+  repeated string value = 2 [(blox.options.set) = true];
+}
+
+/*
+ * Transition history.
+ */
+message Transition {
+  // name of state
+  required string state = 1;
+  // internal time counter (orders transitions)
+  required int64 time = 2;
+  // timestamp when transition occurred
+  required string timestamp = 3;
+}
+
+message ProcessSourceReference {
+  // Name of the workflow declaration in which the process was instantiated.
+  required string workflow = 1;
+  // Full URI of the source (usually a file path) that instantiated this process.
+  required string path = 2;
+  // Line number in the source_uri where this process was instantiated.
+  required int64 line = 3;
+  // Column number in the source_line where this process was instantiated.
+  required int64 column = 4;
+  // A description of the ancestry of this process (e.g. "main > initialize > importData").
+  required string ancestors = 5;
+}

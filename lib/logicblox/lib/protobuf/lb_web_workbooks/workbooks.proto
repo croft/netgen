@@ -1,0 +1,764 @@
+import "blox/options.proto";
+package lb.web.workbooks;
+
+option java_package = "com.logicblox.bloxweb.workbooks";
+
+message Workbook {
+
+  optional string error = 1;
+  optional string error_code = 2;
+
+  // returned by GET, required input for PUT and POST
+  optional string id = 3;
+
+  // workbook name is expected to be unique per "master". But it can change, where as id cannot.
+  optional string name = 4;
+
+  // workspace holding this workbook. always set during creation
+  optional Workspace workspace = 5;
+
+  optional Workspace parent_workbook = 6;
+    // this is unnecessary for error responses, but for all requests and other
+    // responses it should be provided (would probably have been better to
+    // have separate WorkbookRequest and WorkbookResponse messages but that
+    // change is probably a bit complicated)
+
+  optional CheckoutMethod checkout_method = 7;
+
+  // specifying the data included in the workbook.
+  optional DataAccessSpecification data_access = 8;
+
+  // TODO: this should be CommitRefreshGroup refresh_groups
+  repeated CommitRefreshRequest refresh_requests = 9 [(blox.options.set) = true];
+
+  // TODO: this should be CommitRefreshGroup commit_groups
+  repeated CommitRefreshRequest commit_requests = 10 [(blox.options.set) = true];
+
+  // Authorized users, can be added later
+  repeated User users = 11 [(blox.options.set) = true];
+
+  // Set during workbook creation
+  optional string start_build_time = 12;
+  optional string end_build_time = 13;
+
+  /**
+   * OPTIONAL.  Workbooks may be created using the OLAP model.
+   * OLAP model is always translated down to the non-OLAP model.
+   * We store the OLAP model here for informational purposes.
+   * They should never be used for actions such as creation, commit, refresh
+   */
+  optional OLAPModel olap_model = 14;
+
+  // Whether a workbook is deleted. Once deleted, a workbook workspace is gone. But the metadata storing
+  // its definition, start_build and end_build, etc. still hang around.
+  // TODO: change this to optional field : delete_time
+  optional string deleted_on = 15;
+
+  // TODO: refactor this out since it's shared between Workbook and WorkbookTemplate
+  enum CheckoutMethod {
+    CLONE = 1;
+    BRANCH = 2;
+  }
+  // populated for workbooks instantiated from a template
+  optional string template_id = 16;
+  optional string template_name = 17;
+
+  // internal instantiation data
+  repeated FilterSeed filter_seeds = 18 [(blox.options.set) = true];
+
+  optional bool skip_not_derived = 19;
+
+  /**
+   * The method to use for merging this workbook with master. If undefined, use
+   * the method configured for the handler when the workbook is created.
+   */
+  optional MergeMethod merge_method = 20;
+}
+
+/**
+ * The method to use for merging master and workbooks.
+ *
+ * This defines both the semantics as well as implementation variant to be used
+ * for commits (merging workbook data into master) and refreshes (merging master
+ * data into workbooks).
+ */
+enum MergeMethod {
+  /**
+   * Merge by replacing all data in the target with data from the source, for a
+   * given scope. For example, on refresh, this will send all data from the
+   * master to the workbook, but only data related to the workbook's partition.
+   * Any changes in the workbook for data in the partition will be overwritten.
+   * This implementation uses cross-branch rules to perform the merge.
+   */
+  FULL = 1;
+
+  /**
+   * Merge by sending to the target only data that changed in the source since
+   * the last merge, for a given scope. For example, on refresh, this will send
+   * only data (new/removed positions, measures, etc) that changed since the
+   * last commit or refresh between the master and the workbook. Any changes in
+   * the workbook for data that was also changed in the master will be
+   * overwritten, but data that was not changed in the master is kept intact.
+   * This implementation uses cross-branch rules to perform the merge.
+   */
+  DELTA = 2;
+
+  /**
+   * Merge with the semantics of FULL (see above) but using TDX files instead of
+   * cross-branch logic.
+   */
+  FULL_TDX = 3;
+}
+
+message FilterSeed {
+	required string filter = 1;
+	required string seed = 2;
+	optional string predicate = 3;
+}
+message WorkbookList {
+  repeated Workbook workbooks = 1[(blox.options.set) = true];
+  repeated string id = 2[(blox.options.set) = true];
+}
+
+message WorkbookSummary {
+  required string id = 1;
+  optional Workspace workspace = 2;
+  optional string name = 3;
+  optional int64 last_access = 4;
+  optional int64 created = 5;
+  optional int64 deleted = 6;
+}
+
+/**
+ * Used for creating workbooks assuming the existence of an OLAP meta model,
+ * e.g. hierarchies, measures, etc.
+ * The OLAP model provides a shortcut for applications that has it, since
+ * position access specification is a lot simpler than listing out all
+ * levels and level members that need to be included in a workbook.
+ */
+message OLAPModel {
+  optional PositionAccessSpec position_access = 1;
+
+  repeated OLAPCommitRefreshGroup olap_refresh_groups = 3 [(blox.options.set) = true];
+  repeated OLAPCommitRefreshGroup olap_commit_groups = 4 [(blox.options.set) = true];
+  // if no measure_access is defined all measures are included
+  optional MeasureAccess measure_access = 5;
+}
+
+/**
+* Configures which measures are included in a workbook
+*/
+message MeasureAccess {
+  // list of measures to be included/excluded
+  // depending on the exclude boolean
+  // if the list is empty all measures are included/excluded
+  repeated string measures = 1;
+  // toggles the meaning of the list of measures
+  // true:exclude false:include
+  optional bool exclude = 2;
+}
+
+message Workspace {
+  optional string host = 1;
+  required string workspace_name = 2;
+
+  // Effectively the workbook_id
+  optional string branch_name = 3;
+
+  /**
+   * Branch used to create further workbooks from this workspace
+   * The clone_branch contains all the schema and logic, but no data.
+   * Data is later populated based on the specification of the workbook.
+   */
+  optional string clone_branch_name = 4;
+}
+
+/**
+ * Specifies a list of filtered predicates to be included in a workbook
+ */
+message DataAccessSpecification {
+  repeated FilteredPredicate filtered_predicates = 1 [(blox.options.set) = true];
+
+  // Filter definitions that can be referred to by name in filtered_predicates
+  repeated Filter filters = 2 [(blox.options.set) = true];
+}
+
+message FilteredPredicate {
+  required string predicate_name = 1;
+  required string filter_name = 2;
+
+  /**
+   * TODO: I'm wondering if we really need this? Wouldn't a filter itself be updated
+   * when a new value has been created?
+   */
+  optional Access new_value_access = 3;
+}
+
+enum Access {
+  READ = 1;
+  WRITE = 2;
+  NONE = 3;
+}
+
+message Filter {
+  optional string filter_name = 1;
+  required FilterType filter_type = 2;
+
+  optional EnumerationFilter enum_filter = 3;
+  optional ComposedFilter composed_filter = 4;
+  optional AllFilter all_filter = 5;
+  optional ProjectionFilter projection = 6;
+  optional UnionFilter union = 7;
+  optional BackProjectionFilter back_projection = 8;
+
+  enum FilterType {
+    ENUMERATION = 1;
+    COMPOSED = 2;
+    ALL = 3;
+    NONE = 4;
+    PROJECTION = 5;
+    UNION = 6;
+    BACKPROJECTION = 7;
+  }
+}
+
+message EnumerationFilter {
+  repeated AnnotatedTuple tuples = 2;
+}
+
+message ComposedFilter {
+  required Operator operator = 1;
+  repeated string components = 2;
+
+  enum Operator {
+    CROSS = 1;
+    ITERATE = 2;
+  }
+}
+
+message AllFilter {
+  required Access access = 1;
+}
+
+message UnionFilter {
+  repeated string filters = 1 [(blox.options.set) = true];
+}
+
+message AnnotatedTuple {
+  required string value = 1;
+  required Access access = 2;
+}
+
+message ProjectionFilter {
+  // the name of a predicate of signature function[x]=y
+  required string function = 1;
+
+  // the projection filter matches all x such that function[x] is in this filter
+  required string value_filter = 2;
+}
+
+message BackProjectionFilter {
+  // the name of a predicate of signature function[x]=y
+  required string function = 1;
+  // the projection filter matches all y such that there is x such function[x]=y
+  // and x is is in this filter
+  required string key_filter = 2;
+}
+message User {
+  required string user_id = 1;
+  required Role role = 2;
+  required Access access = 3;
+}
+
+enum Role {
+  USER = 1;
+  OWNER = 2;
+}
+
+
+/**
+ * The same message is used for a commit request, and a refresh request
+ * Depending on which URI is being invoked, /commit or /refresh
+ * different actions are performed.
+ */
+message CommitRefreshRequest {
+  repeated string predicates = 1 [(blox.options.set) = true];
+
+  // If set to true, then all predicates are included
+  optional bool include_all_predicates = 2;
+
+  repeated CommitRefreshPolicy policies = 3 [(blox.options.set) = true];
+
+  // the commit/refresh group name
+  optional string name = 4;
+
+  optional string workbook_id = 5;
+
+  optional string post_refresh_inactive_block = 6;
+}
+
+
+message CommitRefreshPolicy {
+  // the predicate this applies to
+  required string predicate = 1;
+
+  // the argument this applies to. all args if missing
+  optional int64 index = 2;
+
+  optional bool add_new_entities = 3;
+
+  // marked optional as we have no way to interpret those
+  optional bool delete_removed_entities = 4;
+
+  optional ConflictPolicy conflict_policy = 5;
+
+  // Conflict is when a parent and child workbook
+  // performed opposite actions on a value: one added it, one deleted it.
+  // OVERRIDE will take the position of the committing workbook
+  enum ConflictPolicy {
+     ABORT = 1;
+     OVERRIDE = 2;
+  }
+}
+
+// TODO: may need some refactoring between ConflictResolutionPolicy and CommitRefreshPolicy
+message ConflictResolutionPolicy {
+  optional string policy_name = 1;
+
+  required bool add_new_entities = 2;
+  optional bool delete_removed_entities = 3;
+  optional ConflictPolicy conflict_policy = 4;
+  // index of the argument this applies to applies to all argument if missing
+  optional int64 index = 5;
+
+  enum ConflictPolicy {
+     ABORT = 1;
+     OVERRIDE = 2;
+  }
+}
+
+message CommitRefreshResponse {
+  required Status status = 1;
+
+  repeated string entity_added = 2;
+  repeated string entity_deleted = 3;
+  repeated string entity_overlap = 4;
+
+  repeated string errors = 5 [(blox.options.set) = true];
+  enum Status {
+    SUCCESS = 1;
+    CONFLICTS = 2;
+  }
+}
+
+// TODO: not implemented. Eventually the idea is to present users with conflicts,
+// and allow them to manually resolve it instead of applying a blanket policy.
+message ConflictResolution {
+  required string entity = 1;
+  required Action action = 2;
+
+  enum Action {
+    ADD = 1;
+    REMOVE = 2;
+    OVERRIDE = 3;
+  }
+}
+
+
+/********************************************************************
+ *
+ * Messages used for OLAP model abstraction
+ *
+ ********************************************************************/
+message PositionAccessSpec {
+  repeated PositionAccess position_access = 1 ;
+  optional PositionAccessCalcMode calcmode= 2 [default = LEAST_RESTRICTIVE];
+}
+
+message PositionAccess {
+  required PositionIdentifier position = 1;
+  optional Access access = 2 [default = WRITE];
+  optional NewPositionMode new_position_mode = 3 [default = INHERIT];
+}
+
+enum NewPositionMode {
+  INHERIT = 1;
+  DENY = 2;
+}
+
+enum PositionAccessCalcMode {
+  LEAST_RESTRICTIVE = 1;
+  MOST_RESTRICTIVE = 2;
+}
+
+message PositionIdentifier {
+  required Level level = 1;
+  optional string value = 2 ;
+  repeated string unfiltered_hierarchies = 3;
+  // populated on output and should not be set on input
+  optional string label_value = 4;
+}
+
+message Level {
+  required Hierarchy hierarchy = 1;
+  required string level = 2;
+  // The predicate for the label attribute of this Level if it exists
+  optional string label_predicate = 3;
+  // The predicate for the entity which implements this level
+  optional string predicate = 4;
+}
+
+message Hierarchy {
+  required string dimension = 1;
+  required string hierarchy = 2;
+}
+
+message OLAPCommitRefreshGroup {
+  optional string name = 1;
+
+  optional bool include_all_levels = 2;
+  repeated Level levels = 3;
+
+  optional bool include_all_level_maps = 4;
+  repeated string level_maps = 5;
+
+  repeated string measures = 6;
+
+  repeated LevelPolicy level_policy = 7;
+
+  repeated DimensionPolicy dimension_policy = 8;
+
+  optional EntityPolicy policy = 9;
+
+  optional string post_refresh_inactive_block = 10;
+
+  repeated string omitted_predicates = 11[(blox.options.set) = true];
+
+  optional bool exclude_measures = 12;
+}
+
+message EntityPolicy {
+  optional string name = 1;
+  optional bool add_new_entity = 2;
+  optional bool delete_entity = 3;
+}
+
+message LevelPolicy {
+  required Level level =  1;
+  optional string policy_name = 2;
+  optional EntityPolicy policy = 3;
+}
+
+message DimensionPolicy {
+  required string dimension_name = 1;
+  optional string policy_name = 2;
+  optional EntityPolicy policy = 3;
+}
+
+// TODO Not used yet. For when users having access to a workbook but
+// does not have the same access to all data in the workbook
+message UserDataAccess {
+  required string user_id = 1;
+  required DataAccessSpecification data_access = 2;
+}
+
+message WorkbookTemplateList {
+   repeated WorkbookTemplate templates = 1[(blox.options.set) = true];
+}
+message WorkbookTemplate {
+  // Set during creation
+  optional string id = 1;
+
+  // Passed in as argument for creation. Can change later.
+  optional string name = 2;
+
+  // Specifying position access at the level granularity
+  // Instantiating a template will pass in the specific members for these levels
+  required PositionAccessSpecTemplate position_access_templates = 3;
+
+  repeated OLAPCommitRefreshGroup refresh_groups = 4;
+
+  repeated OLAPCommitRefreshGroup commit_groups = 5;
+
+  //required SharingMode sharing_mode = 6;
+
+  // TODO: why should there be a workspace for a template?
+  optional Workspace workspace = 7; // should always be set during creation
+
+  required Workspace parent_workbook = 8;
+
+  optional Workbook.CheckoutMethod checkout_method = 9;
+
+  optional bool skip_not_derived = 10;
+
+  optional MeasureAccess measure_access = 11;
+
+  /**
+   * The method to use for merging workbooks based on this template with master.
+   * If undefined, use the method configured for the handler at the moment the
+   * template is installed. This value will be applied to all workbooks created
+   * off this template.
+   */
+  optional MergeMethod merge_method = 20;
+}
+
+message PositionAccessSpecTemplate {
+  repeated PositionAccessTemplate position_access = 1;
+  optional PositionAccessCalcMode calcmode = 2 [default = LEAST_RESTRICTIVE];
+}
+
+message PositionAccessTemplate {
+  required Level level = 1;
+  optional Access access = 2 [default = WRITE];
+  optional NewPositionMode new_position_mode = 3 [default = INHERIT];
+  repeated string unfiltered_hierarchies = 4;
+}
+
+
+
+message TemplateInstantiation {
+
+  optional string template_name = 1;
+  optional string template_id = 5;
+
+  repeated PositionIdentifier values = 2;
+
+
+  // Workbook ID created as a result of instantiation.
+  optional string id = 4;
+
+  optional string workbook_name = 6;
+}
+
+message BatchRequest {
+  required string template_id = 1;
+  optional bool execute = 2 [default=false];
+}
+
+message BatchResponse {
+	repeated Workbook workbooks = 1;
+}
+
+// message used to return the name of the entities involved in a Template
+message TemplateEntitiesQuery {
+  required string template_id =1;
+}
+
+message TemplateEntitiesList {
+  repeated string entity_names = 1;
+}
+
+// Request for granting a user permission to a workbook.
+message AddUsersRequest {
+  optional string workbook_id = 1;
+  optional string workbook_name = 3;
+  repeated string user_id = 2;
+}
+
+// TODO: need exception message for when user's not found or workbook's not found.
+message UsersManagementResponse {
+  repeated string unknown_workbooks = 1[(blox.options.set) = true];
+  repeated string unknown_users = 2[(blox.options.set) = true];
+  repeated string already_authorized_users = 3[(blox.options.set) = true];
+  repeated string already_unauthorized_users = 4[(blox.options.set) = true];
+}
+
+// Request for setting list of users
+// This adds new users and removes old users not included in the request
+message SetUsersRequest {
+  optional string workbook_id = 1;
+  repeated string user_id = 2;
+
+}
+
+
+// Request for granting a user permission to a workbook.
+// TODO: need to change this to allow adding user with a certain role.
+message DeleteUsersRequest {
+  required string workbook_id = 1;
+  repeated string user_id = 2[(blox.options.set) = true];
+}
+
+message BulkUsersRequest {
+  repeated AddUsersRequest add = 1;
+  repeated DeleteUsersRequest delete = 2;
+  repeated SetUsersRequest set = 3;
+}
+
+message BulkUsersResponse {
+  repeated UsersManagementResponse add = 1;
+  repeated UsersManagementResponse delete = 2;
+  repeated UsersManagementResponse set = 3;
+}
+message DeleteWorkbooksResponse {
+	 repeated string deleted = 1[(blox.options.set) = true];
+	 repeated string not_found = 2[(blox.options.set) = true];
+	 repeated string already_deleted = 3[(blox.options.set) = true];
+}
+
+// a default Response message
+message Response {
+   repeated string message   = 1[(blox.options.set) = true];
+}
+
+// a default Query message
+message Query {
+   optional string content =1;
+}
+
+
+
+// TODO: Refactor into workbooks-internal.proto
+// internals
+
+message CommitRefreshSignal {
+	required string id =1;
+}
+
+message CRImplementationList {
+  repeated CRImplementation cri = 1[(blox.options.set) = true];
+}
+
+message CRImplementation {
+  required string name = 1;
+  repeated BundleImplementation bundles = 2;
+  required string id = 3;
+  required string parentId = 4;
+	repeated string logic = 5;
+	required bool commit = 6;
+  optional string template_id =7;
+  optional string post_refresh_inactive_block = 8;
+  optional bool skip_not_derived = 9;
+}
+
+message BundleImplementation {
+  required string name = 1;
+  // name of the disjunction predicate
+  optional string disjunction = 2;
+  // name of the block
+  required string block = 3;
+  // generated filebinding as json string
+  optional FileBinding export_binding = 4;
+	optional FileBinding import_binding = 5;
+	repeated string logic = 6;
+}
+
+message FileBinding
+{
+  required FileDefinition file = 2;
+
+  repeated PredicateBinding binding = 3;
+  optional string entity_creation = 4;
+  repeated DefaultValue default_value = 5;
+  optional bool ignore_idb_on_import = 6 [default = false];
+}
+
+message DefaultValue
+{
+  required string header = 1;
+  optional string import_default_value = 2;
+  optional string export_default_value = 3;
+}
+
+message FileDefinition
+{
+  required string delimiter = 2;
+  required string column_headers = 3;
+  required string column_formats = 4;
+
+  optional string file_columns_required = 5;
+  optional string file_columns_optional = 6;
+  optional string file_columns_can_be_absent = 7;
+
+}
+
+message PredicateBinding
+{
+  required string predicate_name = 1;
+  required string predicate_binding_columns = 2;
+  repeated ColumnBinding column = 3;
+
+  optional bool export = 4 [default = true];
+  optional bool filter = 5 [default = false];
+  optional bool negated = 7 [default = false];
+
+  optional PluginLogic plugin_logic = 8;
+  optional string entity_creation = 9;
+  optional bool no_retraction_on_post = 11 [default = false];
+
+}
+
+message ColumnBinding
+{
+  required int64 index = 1;
+
+  optional string entity_creation = 2;
+
+  optional string import_function = 4;
+  optional string import_function_inverse = 5;
+  optional string export_function = 6;
+  optional string export_function_inverse = 7;
+}
+
+
+message PluginLogic {
+
+  required string name = 1;
+  required string plugin_name = 2;
+  repeated Param param = 3 [(blox.options.set) = true];
+  repeated ParamRename rename_param = 4 [(blox.options.set) = true];
+  repeated string allow_override = 5 [(blox.options.set) = true];
+  repeated string allow_accumulate = 6 [(blox.options.set) = true];
+}
+
+  message Param {
+    required string key =1;
+    required string value = 2;
+  }
+  message ParamRename {
+    required string original_name = 1;
+    required string renamed_name = 2;
+  }
+
+message AbortMessage {
+   optional string http_status_code = 1;
+   optional string message = 2;
+}
+
+// workbooks/util
+
+message TemplateInstantiationRequest {
+  optional string template_name = 1;
+  repeated PositionIdentifier with_positions = 2 [(blox.options.set) = true];
+  optional string tag = 3;
+}
+
+message TemplateInstantiationResponse {
+  repeated TemplateInstantiationRef template_instantiation = 1 [(blox.options.set) = true];
+}
+
+message TemplateInstantiationPositionRequest {
+  // id of the TemplateInstantiation for which we request position
+  required string template_instantiation_id = 1;
+}
+
+message TemplateInstantiationPositionResponse {
+  repeated PositionIdentifier position = 2 [(blox.options.set) = true];
+}
+
+message TemplateInstantiationPermissionRequest {
+  // id of the TemplateInstantiation for which we request permission
+  required string template_instantiation_id = 1;
+}
+
+message TemplateInstantiationPermissionResponse {
+  repeated string user_id = 1 [(blox.options.set) = true];
+}
+
+message TemplateInstantiationRef {
+  required string id = 1;
+  required string workbook_name = 2;
+  required string template_name = 3;
+  repeated string workbook_id = 4 [(blox.options.set) = true];
+  repeated string tag = 5 [(blox.options.set) = true];
+}

@@ -1,0 +1,253 @@
+
+/*
+ * LB fonts
+ */
+@font-face {
+  font-family: "AvenirLT-Roman";
+  src: url("fonts/26E552_1_0.eot?#iefix") format("embedded-opentype"), url("fonts/26E552_1_0.woff") format("woff"), url("fonts/26E552_1_0.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "AvenirLT-Roman";
+  src: url("fonts/26E552_2_0.eot?#iefix") format("embedded-opentype"), url("fonts/26E552_2_0.woff") format("woff"), url("fonts/26E552_2_0.ttf") format("truetype");
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "AvenirLT-Roman";
+  src: url("fonts/26E552_3_0.eot?#iefix") format("embedded-opentype"), url("fonts/26E552_3_0.woff") format("woff"), url("fonts/26E552_3_0.ttf") format("truetype");
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: "AvenirLT-Roman";
+  src: url("fonts/26E552_4_0.eot?#iefix") format("embedded-opentype"), url("fonts/26E552_4_0.woff") format("woff"), url("fonts/26E552_4_0.ttf") format("truetype");
+  font-weight: bold;
+  font-style: italic;
+}
+
+/*
+ * Header image and title
+ */
+
+.header {
+  border-bottom-color: #EEF3F5;
+  border-bottom-style: solid;
+}
+
+.header img {
+  height: 48px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  line-height: 40px;
+  height: 48px;
+  font-size: 35px;
+  color: #ACC6CA;
+  white-space: nowrap;
+  font-weight: bold;
+  text-rendering: optimizelegibility;
+  font-family: AvenirLT-Roman;
+}
+
+
+/*
+ * Navigation panel
+ */
+
+.sidebar li {
+  color: #5E7775;
+  font-family: AvenirLT-Roman;
+  margin-top: 20px;
+}
+
+/* Give some extra space on the right for the sidebar */
+div .sidebar {
+  padding-right: 0px;
+}
+
+.sidebar-group-header ul {
+  margin-top: 10px;
+}
+
+.sidebar-group li {
+  margin-top: 0px;
+}
+
+/* Make nav 1s level bold, but 2nd level normal */
+.sidebar-group-header {
+  font-weight: bold;
+}
+.sidebar-group {
+  font-weight: normal;
+}
+
+/* Force color and padding on nav links */
+.nav > li > a {
+  color: #5E7775;
+  padding: 2px 0px 2px 10px;
+  /* truncate with an ellipsis if too long */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+  -moz-binding: url('assets/xml/ellipsis.xml#ellipsis');
+}
+
+/* Force position on 1st level nav with links */
+.nav > li.sidebar-group-header > a {
+  padding: 0px;
+}
+
+/* The navigation item for the current page has a different background */
+.nav .sidebar-group > .current {
+  background-color: #EEF3F5;
+}
+
+/*
+ * Contents
+ */
+
+.lb-workflow-title {
+  font-size: 26px;
+  color: #ACC6CA;
+  white-space: nowrap;
+  font-weight: bold;
+  text-rendering: optimizelegibility;
+  padding-bottom: 10px;
+}
+
+.lb-workflow-comment-title {
+  font-size: 18px;
+  color: #ACC6CA;
+  white-space: nowrap;
+  font-weight: bold;
+  text-rendering: optimizelegibility;
+  padding-bottom: 10px;
+}
+
+.lb-workflow-title .popover {
+  color: #333;
+}
+
+/* Add some empty space to the bottom of the page so that the last code can be read */
+.contents-container {
+  margin-bottom: 100px;
+}
+
+.contents {
+  font-family: AvenirLT-Roman;
+  margin-top: 20px; 
+}
+
+div.lb-workflow-block {
+  display: block;
+  padding: 9.5px 9.5px 0px 9.5px;
+  margin: 0px 0px 20px;
+  color: #333;
+  border: 1px solid #CCC;
+  border-radius: 4px;
+}
+
+.contents pre {
+  display: block;
+  padding: 0px;
+  margin: 0px;
+  font-size: 13px;
+  line-height: 1.42857;
+  color: #333;
+  word-break: break-all;
+  word-wrap: break-word;
+  background-color: #FFFFFF;
+  border: 0px;
+  border-radius: 0px;
+}
+
+.contents pre > code {
+  display: block;
+  padding: 9.5px;
+  margin: 0px 0px 10px;
+  font-size: 13px;
+  line-height: 1.42857;
+  color: #333;
+  word-break: break-all;
+  word-wrap: break-word;
+  background-color: #F5F5F5;
+  border: 1px solid #CCC;
+  border-radius: 4px;
+}
+
+/*
+ * Helper to frame objects in a margin and padding.
+ */
+.contents .framed {
+  border: 1px solid #CCC; 
+  padding: 5px;
+}
+
+/*
+ * import, workflow, etc
+ */
+.contents .keyword {
+  color: #FF0808;
+}
+
+/*
+ * ||, ;, forall, <~, etc
+ */
+.contents .operator {
+  color: #23527C;
+  font-weight: bold;
+}
+
+/*
+ * , and []
+ */
+.contents .separator {
+  color: #FF0808;
+  font-weight: bold;
+}
+
+.contents .string {
+  color: #036A07;
+}
+
+/* force color even in links */
+.contents .string a {
+  color: #036A07;
+}
+
+.contents .task {
+  color: #23527C;
+  font-weight: bold;
+}
+
+.contents .task a {
+  color: #23527C;
+  font-weight: bold;
+}
+
+.contents .message-type {
+  color: #66D9EF;
+  font-weight: bold;
+}
+
+.contents .number {
+  color: #0000CD;
+}
+
+.contents .boolean {
+  color: #0000CD;
+}
+
+.contents .varref {
+  color: #D65E0D;
+  font-weight: normal;
+}
+
+.contents .predicate {
+  color: #333;
+  font-weight: bold;
+}

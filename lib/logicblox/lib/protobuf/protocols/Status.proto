@@ -1,0 +1,21 @@
+package bloxweb.status;
+
+option java_package = "com.logicblox.bloxweb.status";
+
+message MessageStatus {
+   required string tenant = 1;
+   
+   // refers to the unique key that identifies the receival of a message
+   // typically the hash + time of receival
+   required string message_key = 2;
+
+   // TODO: there appears to be a problem with protobuf import and enums.
+   // Need to reproduce when I have more time.  Some enum values are not getting
+   // properly puled with deltas
+   // For now use string
+   // required BODStatus status = 3;
+   required string status = 3;
+
+   required string update_time = 4;
+   optional string exception_msg = 5;
+}

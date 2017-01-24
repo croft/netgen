@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+PID=$$
+
+#########################################################
+
+function fatal {
+  echo "$1" > /dev/stderr
+  exit 1
+}
+
+#q########################################################
+
+function split_args {
+
+  java_args=""
+  cmd_args=""
+
+  local state="java"
+
+  for arg in "$@" ; do
+
+    case $state in
+       "java")
+
+          if [[ $arg == -* ]] ; then
+             java_args="$java_args $arg"
+          else
+             cmd_args="$arg"
+             state="cmd"
+          fi
+       ;;
+
+       "cmd")
+          cmd_args="$cmd_args $arg"
+       ;;
+    esac
+  done
+
+  java_args="$java_args -cp $CLASSPATH"
+}
+
+#########################################################
+
+if [[ -z ${LAYERBLOX_HOME+x} ]] ; then
+  LAYERBLOX_HOME=$(cd $(dirname $BASH_SOURCE)/.. ; pwd -P)
+fi
+
+if [[ x$LAYERBLOX_HOME == "x" ]] ; then
+  fatal "LAYERBLOX_HOME is set to empty. Please set it correctly."
+
+elif [[ ! -d $LAYERBLOX_HOME ]] ; then
+  fatal "Location $LAYERBLOX_HOME does not exist. Please set LAYERBLOX_HOME correctly."
+fi
+
+DEPS="commons-io-2.4.jar cup-0.11a.jar guava-18.0.jar protobuf-java-2.6.1.jar"
+LAYERBLOX_JAR=$(ls $LAYERBLOX_HOME/lib/java/layerblox*.jar)
+
+if [[ x$LAYERBLOX_JAR == x ]] ; then
+  fatal "Could not find jar file $LAYERBLOX_JAR"
+fi
+
+CLASSPATH="$LAYERBLOX_JAR"
+for JAR in $DEPS; do
+   CLASSPATH=$LAYERBLOX_HOME/lib/$JAR:$CLASSPATH
+done
+
+split_args "$@"
+
+java $java_args com.logicblox.nlayerblox.cmd.LayerBlox $cmd_args
+
+

@@ -1,0 +1,15 @@
+package lb.web.user;
+
+option java_package = "com.logicblox.bloxweb.authentication";
+
+message CurrentUserRequest
+{
+}
+
+message CurrentUserResponse
+{
+  optional string username = 1;
+
+  optional string error = 2;
+  optional string error_code = 3;
+}

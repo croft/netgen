@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The lb-workflow Samples Directory</title>
+
+    <link href="lb-favicon.png"    rel="shortcut icon" type="image/x-icon" />
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="lb-workflow.css"   rel="stylesheet">    
+  </head>
+  <body>
+    <div class="container header-container">
+      <div class="row header">
+        <div class="col-lg-2">
+          <a href="http://logicblox.com"><img src="lblogo.png" alt="LogicBlox, Inc."></a>
+        </div>
+        <div class="col-lg-10">
+          <a href="index.html"><h1 class="text-center">The lb-workflow Samples Directory</h1></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container contents-container">
+      <div class="row">
+        <div class="col-lg-2 sidebar">
+          <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm">
+            <ul class="nav">
+              <li class="sidebar-group-header">Tasks
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="#2090058549" title="lb.log.Notify">lb.log.Notify</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Standard Library
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="control_1096407654.html" title="control.wf">control.wf</a></li>
+                    <li class="other"><a href="jobs_2064022591.html" title="jobs.wf">jobs.wf</a></li>
+                    <li class="current"><a href="log_1948900833.html" title="log.wf">log.wf</a></li>
+                    <li class="other"><a href="stdlib_623000472.html" title="stdlib.wf">stdlib.wf</a></li>
+                    <li class="other"><a href="string_1421446234.html" title="string.wf">string.wf</a></li>
+                    <li class="other"><a href="tasks_1083303394.html" title="tasks.wf">tasks.wf</a></li>
+                    <li class="other"><a href="tdx_1729519909.html" title="tdx.wf">tdx.wf</a></li>
+                    <li class="other"><a href="testing-tasks_1856821761.html" title="testing-tasks.wf">testing-tasks.wf</a></li>
+                    <li class="other"><a href="workbooks_290480778.html" title="workbooks.wf">workbooks.wf</a></li>
+                </ul>
+              </li>
+              <li class="sidebar-group-header">Additional Resources
+                <ul class="nav sidebar-group">
+                    <li class="other"><a href="index.html" title="Index">Index</a></li>
+                    <li class="other"><a href="backup_1332419570.html" title="backup/wf/backup.wf">backup/wf/backup.wf</a></li>
+                    <li class="other"><a href="load_2058935082.html" title="backup/wf/load.wf">backup/wf/load.wf</a></li>
+                    <li class="other"><a href="restore_1204968188.html" title="backup/wf/restore.wf">backup/wf/restore.wf</a></li>
+                    <li class="other"><a href="exec_logiql_1742551485.html" title="connectblox/wf/exec_logiql.wf">connectblox/wf/exec_logiql.wf</a></li>
+                    <li class="other"><a href="main_633623232.html" title="param/wf/main.wf">param/wf/main.wf</a></li>
+                    <li class="other"><a href="partition_1866736532.html" title="partition/wf/partition.wf">partition/wf/partition.wf</a></li>
+                    <li class="other"><a href="bar_840371832.html" title="purge/bar.wf">purge/bar.wf</a></li>
+                    <li class="other"><a href="fail_1033209759.html" title="purge/fail.wf">purge/fail.wf</a></li>
+                    <li class="other"><a href="foo_713015307.html" title="purge/foo.wf">purge/foo.wf</a></li>
+                    <li class="other"><a href="url_1270117002.html" title="string/wf/url.wf">string/wf/url.wf</a></li>
+                    <li class="other"><a href="export_961675574.html" title="tdx/wf/export.wf">tdx/wf/export.wf</a></li>
+                    <li class="other"><a href="import_1592603335.html" title="tdx/wf/import.wf">tdx/wf/import.wf</a></li>
+                    <li class="other"><a href="create_873980314.html" title="workbookutil/wf/create.wf">workbookutil/wf/create.wf</a></li>
+                    <li class="other"><a href="create2_1323635598.html" title="workbookutil/wf/create2.wf">workbookutil/wf/create2.wf</a></li>
+                    <li class="other"><a href="create3_1323665389.html" title="workbookutil/wf/create3.wf">workbookutil/wf/create3.wf</a></li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="col-lg-10 contents">
+          <div class="lb-workflow-block">
+<h3>Log Tasks</h3><p>Tasks related to logging workflow activity, both in the internal log as well as using the notification mechanisms for external tools, such as Amazon SNS.</p>          </div>
+          <div class="lb-workflow-block" id="2090058549">
+<p>Create an event and submit it using notifiers.</p><p>The event is created according to the <code>Event</code> message protocol (see <code>task_config.proto</code>) and sent to all configured notifiers. The message optionally contains information about this task, such as <code>id</code> and <code>workspace</code> (see the <code>TaskEvent</code> message).</p>
+<hr/><p>@param <code>event</code> a string describing the event. This will be set on the  <em>required</em> <code>event</code> field of the <code>Event</code> message.</p><p>@param <code>notifiers</code> the names of <code>notifier</code> sections in  <code>lb-workflow-driver.config</code> that configure notification mechanisms to  deliver the event.</p><p>@param <code>details</code> optional details to add to the corresponding message field.</p><p>@param <code>add_task_info</code> if true, include a <code>TaskEvent</code> field in the <code>Event</code>  message that identifies this task.</p><pre><code class="lb-workflow"><span class="keyword">task</span> <span class="task">lb.log.Notify</span>(
+    event<span class="separator">,</span>
+    notifiers<span class="keyword">*</span><span class="separator">,</span>
+    details<span class="keyword">?</span><span class="separator">,</span>
+    add_task_info = <span class="boolean">true</span><span class="separator">,</span>
+    driver_meta<span class="keyword">?</span>
+  ) <span class="keyword">extends</span> <span class="task"><a href="stdlib_623000472.html#296300033">AsyncTask</a></span>(
+    driver_meta = <span class="varref">$driver_meta</span><span class="separator">,</span>
+    task_implementation_class = <span class="string">"com.logicblox.workflow.task.log.Notify"</span>
+  )
+</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="jquery.min.js"></script>
+    <script src="jquery.hoverIntent.minified.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('[data-toggle="popover"]').popover();   
+    });
+    $(".modal-hook").hoverIntent({
+      over: function () {
+        var target = $(this).attr("data-target");
+        $(target).modal("show");
+      },
+      interval: 700
+    });
+    </script>
+  </body>
+</html>

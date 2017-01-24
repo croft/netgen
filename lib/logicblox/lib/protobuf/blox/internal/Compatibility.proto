@@ -1,0 +1,16 @@
+package blox.internal;
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.FileOptions {
+
+   // When the runtime loads descriptors containing
+   //   useLegacyNaming = true
+   // it assumes predicate names have form pkg:msg:field.
+   // Files with
+   //   useLegacyNaming = false
+   // have the same meaning as files in which there is no
+   // useLegacyNaming annotation.
+   optional bool useLegacyNaming = 50000;
+}
+

@@ -1,0 +1,347 @@
+package lb.web.batch;
+
+option java_package = "com.logicblox.bloxweb.batch";
+
+/****************************************************
+ * Batch
+ ****************************************************/
+
+message Spec
+{
+  optional BatchConfig config = 1;
+  required Stm stm = 2;
+}
+
+message BatchConfig
+{
+  // Directory containing S3 encryption keys.
+  // Mandatory for statements that use S3.
+  optional string keydir = 1;
+  // Default name of the encryption key to use with S3.
+  optional string keyname = 2;
+  // Size of chunks of data when using S3.
+  // Defaults to s3_chunk_size in lb-web-client.config.
+  optional int64 chunksize = 3;
+
+  // Max number of concurrent statements to execute.
+  // Defaults to batch_max_concurrent in lb-web-client.config.
+  optional int64 max_concurrent = 4;
+  // Max number of concurrent S3 uploads/downloads to execute.
+  // Defaults to s3_max_concurrent in lb-web-client.config.
+  optional int64 max_concurrent_s3 = 5;
+
+  // Max number of threads to use for TCP transports.
+  // This limits the number of TCP connections that can be open concurrently.
+  optional int64 tcp_client_threads = 6;
+  // Default max number of connections to a certain host.
+  // This limits the number of TCP connections targetting a certain host.
+  optional int64 tcp_max_connections_per_address = 7 [default = 100];
+}
+
+/****************************************************
+ * Statements
+ ****************************************************/
+
+message Stm
+{
+  optional StmSeq seq = 1;
+  optional StmTxn transaction = 2;
+  optional StmPar parallel = 3;
+  optional StmSimple simple = 4;
+  optional StmTryCatch try_catch = 5;
+
+  // Result (exception and end_time are only set if status is set)
+  optional Status status = 6;
+  optional string exception = 7;
+  optional string end_time = 8;
+
+  // Optional field to describe the purpose of a Stm
+  optional string description = 9;
+
+  // Result
+  optional string start_time = 10;
+}
+
+message StmSeq
+{
+  repeated Stm stm = 1;
+}
+
+message StmTxn
+{
+  required string service = 1;
+
+  // config is deprecated, use config in the transport message
+  optional string config = 2;
+  optional TransportConfig transport = 5;
+
+  repeated Stm stm = 3;
+
+  // Result
+  optional string transaction_id = 4;
+
+  // configure signature-based authentication
+  optional SignatureAuth signature = 6;
+}
+
+message StmPar
+{
+  optional int64 max = 1;
+  repeated Stm stm = 2;
+}
+
+message StmTryCatch
+{
+  required Stm try = 1;
+  required Stm catch = 2;
+}
+
+message StmSimple
+{
+  optional Echo echo = 1;
+  optional Fail fail = 2;
+
+  optional ImportDelim import_delim = 3;
+  optional ExportDelim export_delim = 4;
+
+  optional S3Upload s3_upload = 5;
+  optional S3Download s3_download = 6;
+
+  optional CallProto call_proto = 7;
+
+  optional Noop noop = 10;
+
+  optional Exec exec_stm = 11;
+
+  // number of ftimes to retry this statement if it fails
+  optional int64 retry = 100;
+}
+
+/****************************************************
+ * Simple statements
+ ****************************************************/
+
+message Noop
+{
+}
+
+message Fail
+{
+  required string text = 1;
+}
+
+message Echo
+{
+  required string text = 1;
+}
+
+message ImportDelim
+{
+  required string service = 1;
+
+  // Either data_file or data_url is required
+  optional string data_file = 2;
+  optional string data_url = 3;
+  optional Input input = 8;
+
+  // Config is deprecated, use config in Transport
+  optional string config = 4;
+  optional TransportConfig transport = 6;
+
+  // Compress the file with gzip before sending, decompress in the server
+  optional bool gzip = 5;
+
+  // Default value for full is false, which means POST. Setting full
+  // to true will use the PUT method.
+  optional bool full = 7;
+
+  // How to return the error records, if desired
+  optional string out_file = 9;
+  optional string out_url = 10;
+
+  // encryption key to use for out file
+  optional string key = 11;
+
+  // whether or not a bad record should abort the transaction
+  optional bool abort_on_error = 12;
+
+  // configure signature-based authentication
+  optional SignatureAuth signature = 13;
+
+  // whether the tdx import errors flag should be printed to stderr when there are errors
+  optional bool print_tdx_import_errors = 14;
+
+  // only actually write to the error file if there's an error (defaults to false for
+  // backwards compatibility)
+  optional bool error_file_only_on_error = 15 [default = false];
+}
+
+message ExportDelim
+{
+  required string service = 1;
+  optional string data_file = 2;
+  optional string data_url = 3;
+
+  // encryption key to use for exported file
+  optional string key = 4;
+
+  // Config is deprecated, use config in Transport
+  optional string config = 5;
+  optional TransportConfig transport = 7;
+
+  // Compress the file with gzip in the server, decompress in the client
+  optional bool gzip = 6;
+
+  // configure signature-based authentication
+  optional SignatureAuth signature = 8;
+}
+
+message S3Upload
+{
+  required string file = 1;
+  required string url = 2;
+  optional string key = 3;
+  optional string config = 4;
+}
+
+message S3Download
+{
+  required string file = 1;
+  required string url = 2;
+  optional string config = 3;
+}
+
+message CallProto
+{
+  required string service = 1;
+
+  // config is deprecated, use config in Transport
+  optional string config = 2;
+  optional TransportConfig transport = 7;
+
+  required ProtoBufEncoding encoding = 3;
+  optional bool gzip = 4;
+  optional Input input = 5;
+  optional string output_file = 6;
+
+  // do a best attempt to format the output for human consumption
+  optional bool format = 8;
+
+  // the HTTP method to use in the call
+  optional HttpMethod method = 9 [default = POST];
+
+  // configure signature-based authentication
+  optional SignatureAuth signature = 10;
+}
+
+message Exec
+{
+  repeated string command = 1; // command and its arguments
+  required int64 timeout = 2; // use -1 to ignore timeout
+  optional bool destroy_on_timeout = 3;
+
+  // by default, stdout and stderr will be ignored
+  // the following pipe parameters accept a file name,
+  // '-' for stdout, and 'logger' to use default logger
+  optional string pipe_stdout_to = 4;
+  optional string pipe_stderr_to = 5;
+}
+
+/**
+ * Support for RSA-SHA-based stateless authentication.
+ */
+message SignatureAuth
+{
+  // the name of the user making the request
+  required string username = 1;
+  // the name (alias) of the private key used to sign the request
+  required string keyname = 2;
+  // optionally configure the directory that contains the keys; defaults to BatchConfig.keydir
+  optional string keydir = 3;
+}
+
+
+message Input
+{
+  optional bytes binary = 1;
+  optional string text = 2;
+  optional string file = 3;
+  optional string url = 4;
+}
+
+enum ProtoBufEncoding
+{
+  JSON = 1;
+  BINARY = 2;
+}
+
+enum HttpMethod
+{
+  GET = 1;
+  POST = 2;
+  PUT = 3;
+  DELETE = 4;
+  HEAD = 5;
+}
+
+/****************************************************
+ * Transport
+ ****************************************************/
+
+message TransportConfig
+{
+  optional string config = 1;
+  optional TCPTransportConfig tcp = 3;
+}
+
+message TCPTransportConfig
+{
+  optional SSLConfig ssl = 1;
+
+  // Max time the whole exchange can take (in ms).
+  optional int64 timeout = 2 [default = 600000];
+
+  // Max time to wait when establishing a connection to the server (in ms).
+  optional int64 connect_timeout = 3 [default = 75000];
+
+  // Max time in a connection without processing anything (in ms).
+  // Processing is defined to be "parsing or generating".
+  optional int64 idle_timeout = 4 [default = 20000];
+
+  // Default = BatchConfig.tcp_max_connections_per_address.
+  optional int64 max_connections_per_address = 5;
+}
+
+message SSLConfig
+{
+  optional string keyManagerAlgorithm = 1;
+  optional string keyManagerPassword = 2;
+  optional string keyStoreLocation = 3;
+  optional string keyStorePassword = 4;
+  optional string keyStoreType = 5;
+  optional string secureRandomAlgorithm = 6;
+  optional string trustManagerAlgorithm = 7;
+  optional string trustStoreLocation = 8;
+  optional string trustStorePassword = 9;
+  optional string trustStoreType = 10;
+}
+
+message AWSCredentials
+{
+  optional string access_key = 1;
+  optional string secret_key = 2;
+  optional string iam_role = 3;
+  optional string env = 4;
+}
+
+/****************************************************
+ * Result
+ ****************************************************/
+
+enum Status
+{
+  SUCCESS = 1;
+  ERROR = 2;
+  ERROR_PARTIAL = 3;
+  DNS = 4;
+}
